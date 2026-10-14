@@ -1,0 +1,28 @@
+{
+  "id": "m1_monitor",
+  "name": "情报监测",
+  "owner": "成员A",
+  "enabled": true,
+  "entry": "api.py",
+  "backend_dirs": ["backend"],
+  "web": ["web/panel.js", "web/daily.js", "web/daily.css"],
+  "routes": [
+    "GET /api/live",
+    "GET /api/sources",
+    "GET /api/refresh",
+    "POST /api/refresh",
+    "POST /api/m1/submit_article",
+    "GET /api/daily_reports",
+    "GET /api/daily_report",
+    "POST /api/daily_report/generate",
+    "POST /api/daily_report/cleanup",
+    "GET /api/trend_stats",
+    "GET /api/source_health",
+    "GET /api/coverage_gaps",
+    "GET /api/standards",
+    "POST /api/standards/refresh"
+  ],
+  "docs": "docs",
+  "tests": "backend",
+  "notes": "7×24 盯梢抓漏洞：快车道实时监测（live.py，15s 轮询 · 38 个博客/公告源，配 AISEC_PROXY 再放开 6 个需翻墙的源）、定时增量同步（默认每 6 小时一轮，config.json 的 auto_refresh_hours 可调）、多源采集与语料构建（monitor/harvest_*/merge_*/build_data）、归档体量统计。"
+}

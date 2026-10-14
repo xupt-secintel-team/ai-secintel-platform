@@ -1,0 +1,278 @@
+{
+ "base": "http://127.0.0.1:8940",
+ "updated": "2026-10-08T10:11:32.585363",
+ "results": {
+  "模板模式(no_llm)": [
+   {
+    "type": "A·双实体比较",
+    "q": "CVE-2024-37032 和 CVE-2025-15063 哪个 CVSS 评分更高？高多少？",
+    "pass": true,
+    "fails": [],
+    "latency": 27.3,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值：CVE-2024-37032=8.8, CVE-2025-15063=9.8"
+   },
+   {
+    "type": "A·双实体比较",
+    "q": "CVE-2024-39720 和 CVE-2024-37032 影响的是同一个组件吗？是哪个组件？",
+    "pass": true,
+    "fails": [],
+    "latency": 3.1,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值：共同组件=['ollama']"
+   },
+   {
+    "type": "B·条件链",
+    "q": "已被在野利用（KEV）且 CVSS 恰好 10 分的漏洞有哪些？",
+    "pass": true,
+    "fails": [],
+    "latency": 9.0,
+    "used_llm": false,
+    "agent": null,
+    "note": "判据：答案提到的每个 CVE 都经 /api/detail 验证 exploited+score==10.0"
+   },
+   {
+    "type": "B·条件链",
+    "q": "有公开 POC 且 CVSS≥9 的 XenForo 漏洞有哪些？",
+    "pass": true,
+    "fails": [],
+    "latency": 15.2,
+    "used_llm": false,
+    "agent": null,
+    "note": "判据：逐条 /api/detail 验证 poc_count>0 + score≥9 + 标题含 xenforo"
+   },
+   {
+    "type": "C·归因跳",
+    "q": "CVE-2025-15063 的弱点类型（CWE）是什么？语料中还有哪些 Ollama 漏洞属于同一 CWE？",
+    "pass": true,
+    "fails": [],
+    "latency": 6.5,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值 CWE=['CWE-78']"
+   },
+   {
+    "type": "C·归因跳",
+    "q": "CVE-2026-64849（MLflow）的 CWE 是什么？还有别的 MLflow 漏洞吗？",
+    "pass": true,
+    "fails": [],
+    "latency": 10.4,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值 CWE=['CWE-918']"
+   },
+   {
+    "type": "D·影响面跳",
+    "q": "CVE-2024-37032 影响 Ollama 的哪些版本？",
+    "pass": true,
+    "fails": [],
+    "latency": 6.1,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值版本区间：['<0.1.34']"
+   },
+   {
+    "type": "E·跨源验证",
+    "q": "CVE-2026-64849 是否已被在野利用？CVSS 评分多少？影响什么产品？",
+    "pass": true,
+    "fails": [],
+    "latency": 7.3,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值：exploited=None, cvss=9.3"
+   },
+   {
+    "type": "E·跨源验证",
+    "q": "GitLab 相关的、已被在野利用的漏洞有哪些？",
+    "pass": false,
+    "fails": [
+     "答出不满足条件的CVE: ['CVE-2019-5464', 'CVE-2025-9222', 'CVE-2026-10053']"
+    ],
+    "latency": 8.6,
+    "used_llm": false,
+    "agent": null,
+    "note": "判据：逐条 /api/detail 验证 exploited + 标题/产品含 gitlab"
+   },
+   {
+    "type": "F·论文关联",
+    "q": "CVE-2026-94627（vLLM）有哪些关联的研究论文？",
+    "pass": true,
+    "fails": [],
+    "latency": 6.5,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值论文：['Measuring the Serving Stack Instead of the Model: ', 'Antiproof: Synthesizing Vulnerability Detectors an', 'ShadowProbe: Language-Extensible Detection of Hidd']"
+   },
+   {
+    "type": "H·聚合极值",
+    "q": "vLLM 的漏洞里 CVSS 评分最高的是哪一个？多少分？",
+    "pass": true,
+    "fails": [],
+    "latency": 7.6,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值：检索前60条最大分 10.0，并列 ['CVE-2024-21576', 'CVE-2024-21577', 'CVE-2024-2912', 'CVE-2024-42479', 'CVE-2025-15036', 'CVE-2025-15379', 'CVE-2025-32444', 'CVE-2026-54745', 'CVE-2026-61732']"
+   },
+   {
+    "type": "I·聚合统计",
+    "q": "ollama 有多少个高危漏洞（CVSS≥7）？",
+    "pass": true,
+    "fails": [],
+    "latency": 5.5,
+    "used_llm": false,
+    "agent": null,
+    "note": "真值：/api/search?q=ollama cvss>=7 的 total=282"
+   },
+   {
+    "type": "G·多轮指代",
+    "q": "Ollama 有哪些高危漏洞（CVSS≥7）？ → 第一个漏洞的 CVSS 评分和 CWE 弱点类型分别是什么？",
+    "pass": true,
+    "fails": [],
+    "latency": 10.5,
+    "used_llm": false,
+    "note": "第二轮答案须含第一轮出现过的某个 CVE 编号 + 任一 CWE- 编号"
+   }
+  ],
+  "LLM/Agent模式": [
+   {
+    "type": "A·双实体比较",
+    "q": "CVE-2024-37032 和 CVE-2025-15063 哪个 CVSS 评分更高？高多少？",
+    "pass": true,
+    "fails": [],
+    "latency": 10.2,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值：CVE-2024-37032=8.8, CVE-2025-15063=9.8"
+   },
+   {
+    "type": "A·双实体比较",
+    "q": "CVE-2024-39720 和 CVE-2024-37032 影响的是同一个组件吗？是哪个组件？",
+    "pass": true,
+    "fails": [],
+    "latency": 13.3,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值：共同组件=['ollama']"
+   },
+   {
+    "type": "B·条件链",
+    "q": "已被在野利用（KEV）且 CVSS 恰好 10 分的漏洞有哪些？",
+    "pass": false,
+    "fails": [
+     "答出不满足条件的CVE: ['CVE-2026-102489', 'CVE-2026-104286', 'CVE-2026-64849', 'CVE-2026-76504']"
+    ],
+    "latency": 29.4,
+    "used_llm": true,
+    "agent": "tool-calling(round-limit)",
+    "note": "判据：答案提到的每个 CVE 都经 /api/detail 验证 exploited+score==10.0"
+   },
+   {
+    "type": "B·条件链",
+    "q": "有公开 POC 且 CVSS≥9 的 XenForo 漏洞有哪些？",
+    "pass": true,
+    "fails": [],
+    "latency": 14.4,
+    "used_llm": true,
+    "agent": "tool-calling(round-limit)",
+    "note": "判据：逐条 /api/detail 验证 poc_count>0 + score≥9 + 标题含 xenforo"
+   },
+   {
+    "type": "C·归因跳",
+    "q": "CVE-2025-15063 的弱点类型（CWE）是什么？语料中还有哪些 Ollama 漏洞属于同一 CWE？",
+    "pass": true,
+    "fails": [],
+    "latency": 18.0,
+    "used_llm": true,
+    "agent": "tool-calling(round-limit)",
+    "note": "真值 CWE=['CWE-78']"
+   },
+   {
+    "type": "C·归因跳",
+    "q": "CVE-2026-64849（MLflow）的 CWE 是什么？还有别的 MLflow 漏洞吗？",
+    "pass": true,
+    "fails": [],
+    "latency": 10.4,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值 CWE=['CWE-918']"
+   },
+   {
+    "type": "D·影响面跳",
+    "q": "CVE-2024-37032 影响 Ollama 的哪些版本？",
+    "pass": true,
+    "fails": [],
+    "latency": 5.5,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值版本区间：['<0.1.34']"
+   },
+   {
+    "type": "E·跨源验证",
+    "q": "CVE-2026-64849 是否已被在野利用？CVSS 评分多少？影响什么产品？",
+    "pass": true,
+    "fails": [],
+    "latency": 5.7,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值：exploited=None, cvss=9.3"
+   },
+   {
+    "type": "E·跨源验证",
+    "q": "GitLab 相关的、已被在野利用的漏洞有哪些？",
+    "pass": false,
+    "fails": [
+     "答出不满足条件的CVE: ['CVE-2026-10053', 'CVE-2026-15217', 'CVE-2026-19478']"
+    ],
+    "latency": 11.1,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "判据：逐条 /api/detail 验证 exploited + 标题/产品含 gitlab"
+   },
+   {
+    "type": "F·论文关联",
+    "q": "CVE-2026-94627（vLLM）有哪些关联的研究论文？",
+    "pass": false,
+    "fails": [
+     "缺任一关键词: ['algorithmic', 'antiproof', 'complexity', 'confounds']"
+    ],
+    "latency": 4.6,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值论文：['Measuring the Serving Stack Instead of the Model: ', 'Antiproof: Synthesizing Vulnerability Detectors an', 'ShadowProbe: Language-Extensible Detection of Hidd']"
+   },
+   {
+    "type": "H·聚合极值",
+    "q": "vLLM 的漏洞里 CVSS 评分最高的是哪一个？多少分？",
+    "pass": true,
+    "fails": [],
+    "latency": 14.2,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值：检索前60条最大分 10.0，并列 ['CVE-2024-21576', 'CVE-2024-21577', 'CVE-2024-2912', 'CVE-2024-42479', 'CVE-2025-15036', 'CVE-2025-15379', 'CVE-2025-32444', 'CVE-2026-54745', 'CVE-2026-61732']"
+   },
+   {
+    "type": "I·聚合统计",
+    "q": "ollama 有多少个高危漏洞（CVSS≥7）？",
+    "pass": false,
+    "fails": [
+     "缺事实: 282"
+    ],
+    "latency": 19.6,
+    "used_llm": true,
+    "agent": "tool-calling",
+    "note": "真值：/api/search?q=ollama cvss>=7 的 total=282"
+   },
+   {
+    "type": "G·多轮指代",
+    "q": "Ollama 有哪些高危漏洞（CVSS≥7）？ → 第一个漏洞的 CVSS 评分和 CWE 弱点类型分别是什么？",
+    "pass": true,
+    "fails": [],
+    "latency": 22.8,
+    "used_llm": true,
+    "note": "第二轮答案须含第一轮出现过的某个 CVE 编号 + 任一 CWE- 编号"
+   }
+  ]
+ }
+}

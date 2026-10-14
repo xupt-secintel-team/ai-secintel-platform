@@ -1,0 +1,24 @@
+{
+  "id": "m0_ops",
+  "name": "智能编排",
+  "owner": "组长",
+  "enabled": true,
+  "entry": "api.py",
+  "backend_dirs": ["backend"],
+  "web": ["web/ops.js", "web/ops.css"],
+  "routes": [
+    "GET /api/ops/status",
+    "GET /api/ops/events",
+    "GET /api/ops/briefs",
+    "POST /api/ops/scan_now",
+    "GET /api/ops/trace",
+    "GET /api/ops/decisions",
+    "POST /api/ops/decide_now",
+    "POST /api/ops/disposition",
+    "GET /api/ops/disposition",
+    "GET /api/ops/disposition/stats"
+  ],
+  "docs": "docs",
+  "tests": "backend",
+  "notes": "事件驱动的五智能体编排 + 处置闭环自我进化（v2.5 升级）：感知→编排→富化执行→研判→决策五智能体串联，决策智能体综合五维信号产出 P0/P1/P2 可执行处置决策卡（含显式推理链 reasoning 供 XAI 展示）。v2.5 新增「处置闭环回填」：disposition.py 记忆库（data/dispositions.json），处置结果（已修复/已验证/误报/已接受风险）回填后，同 CVE 再出现秒判复用结论、同组件新漏洞自动带出参照——把静态系统变成「越用越聪明」。前端决策卡新增「查看推理依据」（XAI 推理链：哪条规则→什么结论）与「已修复/已验证/误报」回填按钮 + 回填记忆库统计。硬约束：单轮≤3 事件、去重、失败隔离。config.json 的 ops_enabled/ops_interval_sec/ops_max_per_cycle 可调。"
+}

@@ -1,0 +1,92 @@
+{
+ "generated_at": "2026-10-08T11:46:30",
+ "gold_version": "v1",
+ "gold_fingerprint": "de9f2e37807a5997",
+ "gold_provenance": {
+  "cvss_cwe_desc": {
+   "source": "NVD 官方 API 原始响应缓存",
+   "file": "data/nvd_cache.json",
+   "pool_size": 45530,
+   "field_map": {
+    "cvss.score": "metrics.cvssMetricV*.cvssData.baseScore（取 Primary）",
+    "cvss.severity": "metrics.cvssMetricV*.cvssData.baseSeverity",
+    "cwe": "weaknesses[].description[].value（剔除 NVD-CWE-noinfo）",
+    "products": "configurations[].nodes[].cpeMatch[].criteria 的 vendor:product",
+    "desc_en": "descriptions[lang=en].value",
+    "published": "published"
+   }
+  },
+  "kev": {
+   "source": "CISA KEV 官方 JSON（本项目落盘副本）",
+   "file": "data/kev_cache.json",
+   "kev_size": 1734,
+   "independence": "弱于 NVD：内容源自 CISA 官方，但文件是本项目解析后的中间格式，与生产链路共用同一套解析代码。故 KEV 维度结论应表述为「与官方清单一致率」，不宜表述为「独立第三方验证」。"
+  }
+ },
+ "sampling": {
+  "method": "分层过采样（保证稀有正例类有足够样本量）",
+  "strata": {
+   "kev_positive": 50,
+   "cvss_ge9": 75
+  },
+  "caveat": "过采样后各维度指标是**条件准确率**（该类内正确率），不能当作全库准确率；报告须按维度分别陈述样本量。"
+ },
+ "thresholds": {
+  "enrich_acc": 0.85,
+  "recall_at10": 0.8,
+  "qa_p95_sec": 5.0
+ },
+ "results": [
+  {
+   "metric": "富化准确率",
+   "value": 0.9878,
+   "threshold": 0.85,
+   "cmp": ">=",
+   "n": 900,
+   "pass": true,
+   "verdict": "达标",
+   "note": "字段级：CVSS 289/300 · CWE 300/300 · KEV 300/300"
+  },
+  {
+   "metric": "检索召回@10",
+   "value": 1.0,
+   "threshold": 0.8,
+   "cmp": ">=",
+   "n": 80,
+   "pass": true,
+   "verdict": "达标",
+   "note": "按 CVE 编号直查，命中即算召回"
+  },
+  {
+   "metric": "检索时延P95(秒)",
+   "value": 0.001,
+   "threshold": 5.0,
+   "cmp": "<=",
+   "n": 80,
+   "pass": true,
+   "verdict": "达标",
+   "note": "P50=0.000s · P95=0.001s · max=0.028s"
+  },
+  {
+   "metric": "标注覆盖率",
+   "value": 1.0,
+   "threshold": 0.0,
+   "cmp": ">=",
+   "n": 300,
+   "pass": true,
+   "verdict": "达标",
+   "note": "标注 CVE 未进语料 0 条（未进则不参与字段比对，会拉高分数）"
+  }
+ ],
+ "mismatch_samples": [
+  "CVE-2018-19641 CVSS 语料=6.1 真值=9.8",
+  "CVE-2022-0902 CVSS 语料=8.1 真值=9.8",
+  "CVE-2022-24830 CVSS 语料=6.5 真值=9.8",
+  "CVE-2022-2750 CVSS 语料=6.3 真值=9.8",
+  "CVE-2023-51412 CVSS 语料=9.0 真值=9.8",
+  "CVE-2024-13777 CVSS 语料=8.1 真值=9.8",
+  "CVE-2024-27133 CVSS 语料=7.5 真值=9.6",
+  "CVE-2024-49035 CVSS 语料=8.7 真值=9.8"
+ ],
+ "exit_code": 0
+}

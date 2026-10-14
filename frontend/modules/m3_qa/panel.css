@@ -1,0 +1,454 @@
+/* web/panel.css
+   ⚠ 自动生成，请勿直接改本文件 —— 源文件在 modules/m3_qa/web/panel.css
+   改完跑一次： py -3 tools/组装前端.py */
+/* ============================================================
+   m3_qa · 情报问答 面板样式（模块自带，主体不用改）
+   视觉与主体一致：近黑表面 + 发丝描边 + 单一强调色（靛紫）；
+   颜色一律走主体 styles.css 的变量（带兜底值，模块单独打开也能看）。
+   类名统一 qa- 前缀，避免与主体样式冲突。
+   ============================================================ */
+#qapanel { margin: 14px 0 4px; }
+
+.qa-card {
+  border: 1px solid var(--line-2, rgba(255, 255, 255, .10));
+  border-radius: var(--r-lg, 14px);
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  overflow: hidden;
+  transition: border-color .2s var(--ease, ease);
+}
+.qa-card:hover { border-color: var(--line-3, rgba(255, 255, 255, .16)); }
+
+.qa-hd {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3);
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, .06));
+  font-size: var(--fs-sm); font-weight: 510; color: var(--txt);
+}
+.qa-ic { font-size: var(--fs-body); opacity: .9; }
+.qa-sub { font-size: var(--fs-micro); color: var(--txt-4); }
+.qa-stat { font-size: var(--fs-micro); color: var(--txt-4); font-family: var(--mono, monospace); }
+.qa-stat.run { color: var(--warn); }
+.qa-stat.ok { color: var(--ok); }
+.qa-stat.err { color: var(--danger); }
+.qa-stat.warn { color: var(--warn); }
+.qa-sp { flex: 1; }
+
+.qa-mini {
+  font-size: var(--fs-xs); padding: var(--sp-1) var(--sp-3); cursor: pointer; font-family: var(--sans, sans-serif);
+  color: var(--txt-2); background: var(--surface-2, rgba(255, 255, 255, .036));
+  border: 1px solid var(--line-2, rgba(255, 255, 255, .10)); border-radius: var(--r-sm, 6px);
+  transition: all .15s var(--ease, ease);
+}
+.qa-mini:hover {
+  color: var(--txt); background: var(--surface-4, rgba(255, 255, 255, .08));
+  border-color: var(--line-3, rgba(255, 255, 255, .16));
+}
+
+.qa-cfg { display: none; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3); border-bottom: 1px solid var(--line, rgba(255, 255, 255, .06)); }
+.qa-cfg.on { display: flex; flex-wrap: wrap; }
+.qa-cfg input {
+  flex: 1 1 180px; padding: var(--sp-2) var(--sp-2); font-size: var(--fs-xs); color: var(--txt);
+  background: var(--bg-2); border: 1px solid var(--line-2, rgba(255, 255, 255, .10));
+  border-radius: var(--r-sm, 6px); font-family: var(--mono, monospace);
+}
+.qa-cfg input:focus { outline: none; border-color: var(--accent-line, rgba(227,176,75, .38)); }
+
+.qa-msgs {
+  max-height: 46vh; overflow-y: auto; padding: var(--sp-3);
+  display: flex; flex-direction: column; gap: var(--sp-3);
+}
+.qa-empty { font-size: var(--fs-sm); line-height: 1.95; color: var(--txt-3); padding: var(--sp-2) 2px; }
+.qa-msg { display: flex; flex-direction: column; gap: var(--sp-1); animation: rise .28s var(--ease, ease) both; }
+.qa-msg.me { align-items: flex-end; }
+.qa-who { font-size: var(--fs-micro); color: var(--txt-4); letter-spacing: .3px; }
+.qa-body {
+  max-width: 92%; font-size: var(--fs-sm); line-height: 1.85; color: var(--txt-2);
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md, 10px);
+  background: var(--surface-2, rgba(255, 255, 255, .036));
+  border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  word-break: break-word; white-space: normal;
+}
+.qa-msg.me .qa-body {
+  background: var(--accent-soft, rgba(227,176,75, .14));
+  border-color: var(--accent-line, rgba(227,176,75, .38));
+  color: var(--txt);
+}
+.qa-body h5 { margin: 8px 0 4px; font-size: var(--fs-sm); font-weight: 510; color: var(--accent-3); }
+.qa-body ul { margin: 4px 0 4px 18px; }
+.qa-body li { margin: 2px 0; }
+.qa-body code { font-family: var(--mono, monospace); font-size: var(--fs-xs); color: var(--txt); }
+.qa-code {
+  margin: 6px 0; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); overflow-x: auto;
+  font-family: var(--mono, monospace); color: var(--txt-2);
+  background: rgba(4, 5, 6, .75); border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  border-radius: var(--r-sm, 6px);
+}
+.qa-srcs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin-top: 3px; }
+.qa-slab { font-size: var(--fs-micro); color: var(--txt-4); }
+.qa-src { cursor: pointer; }
+
+.qa-quick { display: flex; flex-wrap: wrap; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-2); }
+.qa-q {
+  font-size: var(--fs-xs); padding: var(--sp-1) var(--sp-3); cursor: pointer;
+  color: var(--txt-3); background: var(--surface-1, rgba(255, 255, 255, .022));
+  border: 1px solid var(--line, rgba(255, 255, 255, .06)); border-radius: 999px;
+  transition: all .15s var(--ease, ease);
+}
+.qa-q:hover {
+  color: var(--txt); border-color: var(--accent-line, rgba(227,176,75, .38));
+  background: var(--accent-soft, rgba(227,176,75, .14));
+}
+
+.qa-input { display: flex; gap: var(--sp-2); padding: 0 var(--sp-3) var(--sp-3); align-items: flex-end; }
+.qa-input textarea {
+  flex: 1; resize: none; min-height: 38px; max-height: 120px;
+  padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); line-height: 1.6; color: var(--txt);
+  background: var(--bg-2); border: 1px solid var(--line-2, rgba(255, 255, 255, .10));
+  border-radius: var(--r-sm, 6px); font-family: inherit; transition: border-color .18s var(--ease, ease);
+}
+.qa-input textarea:focus { outline: none; border-color: var(--accent-line, rgba(227,176,75, .38)); }
+.qa-input .qa-mini { height: 34px; }
+
+/* ① 语义索引状态条（本地免费嵌入模型；未建库时给一个「建索引」按钮） */
+.qa-vec {
+  display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+  margin: 0 13px 9px; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); color: var(--txt-3);
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  border: 1px solid var(--line, rgba(255, 255, 255, .06)); border-radius: var(--r-sm, 6px);
+  font-family: var(--mono, monospace);
+}
+.qa-vec.ok { color: var(--ok); border-color: rgba(74,204,138, .28); background: rgba(74,204,138, .06); }
+.qa-vec.run { color: var(--warn); border-color: rgba(245, 165, 36, .28); background: rgba(245, 165, 36, .06); }
+.qa-vec.warn { color: var(--danger); border-color: rgba(255,90,82, .28); background: rgba(255,90,82, .06); }
+.qa-vecdot { width: 6px; height: 6px; border-radius: 50%; background: var(--txt-4); display: inline-block; }
+.qa-vecdot.on { background: var(--ok); box-shadow: 0 0 6px rgba(74,204,138, .7); }
+.qa-vec .qa-mini { margin-left: auto; }
+
+/* ============================================================
+   ② 结论块 + 原始详细资料（v2.4）
+   答案不再是一段"证据流水账"：结论独立成块置顶（带字数徽标），
+   原始资料折叠在下面，点一条就地展开完整字段。
+   ============================================================ */
+.qa-body { max-width: 100%; padding: 0; background: none; border: none; }
+
+.qa-concl {
+  border: 1px solid var(--accent-line, rgba(227,176,75, .38));
+  background: var(--accent-soft, rgba(227,176,75, .10));
+  border-radius: var(--r-md, 10px); overflow: hidden;
+  contain: content;   /* 问题三：独立渲染层，缩小流式重绘面积 */
+}
+.qa-concl-hd {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--line, rgba(255, 255, 255, .06));
+  background: rgba(255, 255, 255, .022);
+}
+.qa-tag {
+  font-size: var(--fs-micro); font-weight: 600; letter-spacing: .5px; padding: 2px var(--sp-2); border-radius: 999px;
+  color: var(--txt-on-solid); background: var(--accent);
+}
+.qa-tag.ghost {
+  color: var(--txt-2); background: var(--surface-3, rgba(255, 255, 255, .06));
+  border: 1px solid var(--line-2, rgba(255, 255, 255, .10));
+}
+.qa-cnt { font-size: var(--fs-micro); color: var(--txt-4); font-family: var(--mono, monospace); }
+.qa-cnt.hit { color: var(--warn); }
+.qa-concl-bd {
+  padding: var(--sp-2) var(--sp-3) var(--sp-3); font-size: var(--fs-sm); line-height: 1.85;
+  color: var(--txt); max-height: 46vh; overflow-y: auto;
+  min-height: 200px;   /* 问题三：预留高度，流式内容增长时不跳版 */
+  will-change: contents;   /* 问题三：内容增量变化时提示浏览器独立合成，缩小重绘面积 */
+}
+.qa-stream { white-space: pre-wrap; }   /* 流式纯文本：保留换行（\n 断行），增量 append 只动这一个文本节点 */
+.qa-concl-bd h5 { margin: 6px 0 4px; font-size: var(--fs-sm); font-weight: 600; color: var(--accent-3); }
+.qa-concl-bd ul { margin: 4px 0 4px 18px; }
+.qa-concl-bd li { margin: 2px 0; }
+.qa-concl-bd p { margin: 0 0 4px; }
+.qa-concl-bd a { color: var(--accent-3); text-decoration: none; }
+.qa-concl-bd a:hover { text-decoration: underline; }
+
+/* 内容要点：有序列表（1. **要点标题** + 缩进正文行），编号着色、行距放宽 */
+.qa-concl-bd ol { margin: 4px 0 6px 22px; padding: 0; }
+.qa-concl-bd ol > li { margin: 5px 0; padding-left: 2px; }
+.qa-concl-bd ol > li::marker { color: var(--accent-3); font-weight: 600; }
+
+/* 结论正文里的漏洞编号：可点，点了直接看详情 */
+.qa-cve {
+  font-family: var(--mono, monospace); font-size: var(--fs-xs); cursor: pointer;
+  padding: 1px var(--sp-1); margin: 0 1px; border-radius: 4px;
+  color: var(--accent-3); background: rgba(227,176,75, .12);
+  border: 1px solid rgba(227,176,75, .30); transition: all .15s var(--ease, ease);
+}
+.qa-cve:hover { background: rgba(227,176,75, .26); color: var(--txt); }
+
+.qa-ev { margin-top: 9px; }
+.qa-ev-hd {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); color: var(--txt-2);
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  border-radius: var(--r-sm, 6px);
+}
+.qa-ev-hd b { color: var(--txt); font-family: var(--mono, monospace); }
+.qa-hint { font-size: var(--fs-micro); color: var(--txt-4); }
+
+.qa-ev-list { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 6px; }
+.qa-ev-item {
+  border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  border-radius: var(--r-sm, 6px); overflow: hidden;
+  transition: border-color .15s var(--ease, ease);
+}
+.qa-ev-item:hover { border-color: var(--line-3, rgba(255, 255, 255, .16)); }
+.qa-ev-item.on { border-color: var(--accent-line, rgba(227,176,75, .38)); }
+
+.qa-ev-line {
+  display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+  padding: var(--sp-2) var(--sp-3); cursor: pointer; font-size: var(--fs-xs);
+}
+.qa-ev-line:hover { background: var(--surface-2, rgba(255, 255, 255, .04)); }
+.qa-ev-id { font-family: var(--mono, monospace); font-size: var(--fs-xs); color: var(--txt); }
+.qa-ev-title {
+  flex: 1 1 220px; min-width: 120px; color: var(--txt-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qa-ev-date { font-family: var(--mono, monospace); font-size: var(--fs-micro); color: var(--txt-4); }
+.qa-ev-go { font-size: var(--fs-micro); color: var(--accent-3); }
+
+.qa-sev, .qa-flag {
+  font-size: var(--fs-micro); padding: 1px var(--sp-2); border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; font-family: var(--mono, monospace);
+}
+.qa-sev.critical { color: var(--danger); background: rgba(255,90,82, .14); border-color: rgba(255,90,82, .34); }
+.qa-sev.high     { color: var(--warn); background: rgba(245, 165, 36, .14); border-color: rgba(245, 165, 36, .34); }
+.qa-sev.medium   { color: var(--accent); background: rgba(77, 124, 254, .14); border-color: rgba(77, 124, 254, .34); }
+.qa-sev.low      { color: var(--ok); background: rgba(74,204,138, .14); border-color: rgba(74,204,138, .34); }
+.qa-sev.unknown  { color: var(--txt-3); background: rgba(138, 143, 152, .12); border-color: rgba(138, 143, 152, .30); }
+.qa-flag { color: var(--txt-3); background: var(--surface-2, rgba(255, 255, 255, .04)); border-color: var(--line-2, rgba(255, 255, 255, .10)); }
+.qa-flag.alert { color: var(--danger); background: rgba(255,90,82, .12); border-color: rgba(255,90,82, .30); }
+
+.qa-ev-sum {
+  padding: 0 var(--sp-3) var(--sp-2); font-size: var(--fs-xs); line-height: 1.7; color: var(--txt-4);
+}
+.qa-ev-detail {
+  padding: 0 var(--sp-3) var(--sp-3); border-top: 1px solid var(--line, rgba(255, 255, 255, .06));
+}
+.qa-ev-kvs {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-2) 0 var(--sp-1);
+}
+.qa-kv { display: flex; gap: var(--sp-2); font-size: var(--fs-xs); line-height: 1.6; }
+.qa-kv span { color: var(--txt-4); flex: 0 0 66px; }
+.qa-kv b { color: var(--txt-2); font-weight: 500; word-break: break-word; }
+
+.qa-ev-desc {
+  margin: 6px 0 0; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); line-height: 1.8;
+  color: var(--txt-2); background: rgba(4, 5, 6, .55);
+  border: 1px solid var(--line, rgba(255, 255, 255, .06)); border-radius: var(--r-sm, 6px);
+  max-height: 190px; overflow-y: auto;
+}
+.qa-ev-note { margin-top: 6px; font-size: var(--fs-xs); line-height: 1.7; color: var(--txt-4); }
+.qa-ev-note.alert { color: var(--danger); }
+.qa-ev-steps { margin: 4px 0 0 18px; font-size: var(--fs-xs); line-height: 1.75; color: var(--txt-3); }
+.qa-ev-paper { font-size: var(--fs-xs); line-height: 1.7; color: var(--txt-3); margin-top: 3px; }
+.qa-ev-paper a { color: var(--accent-3); text-decoration: none; }
+.qa-ev-load { padding: var(--sp-2) 0 2px; font-size: var(--fs-xs); color: var(--txt-4); }
+
+.qa-ev-links { display: flex; flex-direction: column; gap: 3px; margin-top: 7px; }
+.qa-ev-links a {
+  font-size: var(--fs-xs); color: var(--txt-3); text-decoration: none;
+  font-family: var(--mono, monospace); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qa-ev-links a:hover { color: var(--accent-3); }
+.qa-ev-links a i {
+  font-style: normal; font-family: var(--sans, sans-serif); margin-right: 5px;
+  padding: 0 var(--sp-1); border-radius: 3px; background: var(--surface-3, rgba(255, 255, 255, .07));
+}
+.qa-ev-open { margin-top: 8px; }
+
+/* ── 个性化推荐（related）：基于本次问题组件/弱点的关联情报 ── */
+.qa-rel { margin-top: 9px; }
+.qa-tag.info {
+  color: var(--txt); background: var(--accent-2);
+}
+.qa-rel-list { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: 6px; }
+.qa-rel-item {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2);
+  width: 100%; text-align: left; cursor: pointer;
+  padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); color: var(--txt);
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  border-radius: var(--r-sm, 6px);
+  transition: border-color .15s var(--ease, ease), background .15s var(--ease, ease);
+}
+.qa-rel-item:hover { border-color: var(--accent-line, rgba(227,176,75, .38)); background: var(--surface-3, rgba(255, 255, 255, .06)); }
+.qa-rel-id { font-family: var(--mono, monospace); font-size: var(--fs-xs); color: var(--accent-3); }
+.qa-rel-cvss { font-family: var(--mono, monospace); font-size: var(--fs-xs); color: var(--txt-2); }
+.qa-rel-kev {
+  font-size: var(--fs-micro); font-weight: 600; padding: 1px var(--sp-1); border-radius: 3px;
+  color: var(--txt-on-solid); background: var(--danger);
+}
+.qa-rel-title { color: var(--txt-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.qa-rel-reason { margin-left: auto; font-size: var(--fs-micro); color: var(--txt-4); white-space: nowrap; }
+
+/* ── 推理链（2026-10-06）────────────────────────────────────────
+   多跳检索的可解释视图：逐跳列出「检索式 / 派生依据 / 命中数 / 耗时」。
+   配色沿用面板既有变量（近黑表面 + 靛紫强调），不引入新的色板。 */
+.qa-chain {
+  margin: 8px 0 2px;
+  border: 1px solid var(--line, rgba(255, 255, 255, .06));
+  border-radius: var(--r-sm, 6px);
+  background: var(--surface-1, rgba(255, 255, 255, .022));
+  overflow: hidden;
+}
+.qa-chain > summary {
+  display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+  padding: var(--sp-2) var(--sp-3); cursor: pointer; list-style: none;
+  font-size: var(--fs-xs); color: var(--txt-4);
+  user-select: none;
+}
+.qa-chain > summary::-webkit-details-marker { display: none; }
+.qa-chain > summary::before {
+  content: '▸'; font-size: var(--fs-micro); color: var(--txt-4);
+  transition: transform .18s var(--ease, ease);
+}
+.qa-chain[open] > summary::before { transform: rotate(90deg); }
+.qa-chain > summary:hover { color: var(--txt-2); }
+
+.qa-chain-list { padding: 2px var(--sp-3) var(--sp-2); display: flex; flex-direction: column; gap: var(--sp-2); }
+.qa-hop {
+  display: flex; gap: var(--sp-2); align-items: flex-start;
+  padding: var(--sp-2) var(--sp-2); border-radius: var(--r-sm, 6px);
+  background: var(--surface-2, rgba(255, 255, 255, .035));
+  border-left: 2px solid var(--accent-line, rgba(227,176,75, .38));
+}
+.qa-hop.stop {
+  border-left-color: var(--line-3, rgba(255, 255, 255, .16));
+  opacity: .82;
+}
+.qa-hop-no {
+  flex: 0 0 auto; min-width: 30px;
+  font-family: var(--mono, monospace); font-size: var(--fs-micro); font-weight: 600;
+  color: var(--accent-3); padding-top: 1px;
+}
+.qa-hop.stop .qa-hop-no { color: var(--txt-4); }
+.qa-hop-main { min-width: 0; flex: 1 1 auto; }
+.qa-hop-q {
+  font-family: var(--mono, monospace); font-size: var(--fs-xs);
+  color: var(--txt); word-break: break-all; line-height: 1.5;
+}
+.qa-hop-meta { font-size: var(--fs-micro); color: var(--txt-4); margin-top: 2px; }
+.qa-hop-meta b { color: var(--txt-2); font-family: var(--mono, monospace); }
+.qa-hop-basis { font-size: var(--fs-micro); color: var(--txt-4); margin-top: 3px; line-height: 1.5; }
+.qa-hop-ent { font-size: var(--fs-micro); color: var(--ok); margin-top: 3px; word-break: break-all; }
+.qa-hop.stop .qa-hop-basis { margin-top: 0; }
+
+/* ============================================================
+   人眼友好 · 字体放大加粗（2026-10-07 用户反馈"字太小太淡"）
+   原字号普遍 10.5~13px、字重偏轻、辅色用最弱的 --txt-4 ——
+   在 1080p 以上屏读着吃力。这里系统性放大 1~2px、正文加粗到 500+，
+   并把弱色正文从 --txt-4 提到 --txt-3（≤13px 的字不能再配最弱色）。
+   ============================================================ */
+.qa-hd { font-size: var(--fs-body); font-weight: 600; }
+.qa-hd b { font-size: var(--fs-body); font-weight: 650; }
+.qa-sub { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-stat { font-size: var(--fs-xs); }
+.qa-mini { font-size: var(--fs-sm); font-weight: 550; padding: var(--sp-1) var(--sp-3); }
+.qa-cfg input { font-size: var(--fs-sm); padding: var(--sp-2) var(--sp-3); }
+.qa-empty { font-size: var(--fs-body); color: var(--txt-3); }
+.qa-who { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-body { font-size: var(--fs-body); line-height: 1.9; color: var(--txt-2); }
+.qa-body h5 { font-size: var(--fs-body); font-weight: 600; }
+.qa-body code { font-size: var(--fs-sm); }
+.qa-code { font-size: var(--fs-sm); }
+.qa-slab { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-quick { gap: var(--sp-2); }
+.qa-q { font-size: var(--fs-sm); font-weight: 500; padding: var(--sp-1) var(--sp-3); }
+.qa-input textarea { font-size: var(--fs-body); line-height: 1.7; padding: var(--sp-3) var(--sp-3); }
+.qa-vec { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-tag { font-size: var(--fs-xs); font-weight: 650; }
+.qa-cnt { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-concl-bd { font-size: var(--fs-body); line-height: 1.95; }
+.qa-concl-bd h5 { font-size: var(--fs-body); font-weight: 650; }
+.qa-concl-bd ol > li { font-size: var(--fs-body); }
+.qa-concl-bd ul > li { font-size: var(--fs-body); }
+.qa-cve { font-size: var(--fs-sm); font-weight: 550; }
+.qa-ev-hd { font-size: var(--fs-sm); }
+.qa-ev-hd b { font-size: var(--fs-sm); font-weight: 600; }
+.qa-hint { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-ev-line { font-size: var(--fs-sm); }
+.qa-ev-id { font-size: var(--fs-sm); font-weight: 550; }
+.qa-ev-title { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-ev-date { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-ev-go { font-size: var(--fs-xs); }
+.qa-sev, .qa-flag { font-size: var(--fs-xs); font-weight: 550; }
+.qa-ev-sum { font-size: var(--fs-sm); line-height: 1.8; color: var(--txt-3); }
+.qa-kv { font-size: var(--fs-sm); }
+.qa-kv span { color: var(--txt-3); }
+.qa-kv b { font-size: var(--fs-sm); font-weight: 550; color: var(--txt); }
+.qa-ev-desc { font-size: var(--fs-body); line-height: 1.9; color: var(--txt-2); }
+.qa-ev-note { font-size: var(--fs-sm); color: var(--txt-3); }
+.qa-ev-steps { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-ev-paper { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-ev-load { font-size: var(--fs-sm); color: var(--txt-3); }
+.qa-ev-links a { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-rel-item { font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); }
+.qa-rel-id { font-size: var(--fs-sm); font-weight: 550; }
+.qa-rel-cvss { font-size: var(--fs-xs); }
+.qa-rel-title { font-size: var(--fs-sm); color: var(--txt-2); }
+.qa-rel-reason { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-chain > summary { font-size: var(--fs-sm); color: var(--txt-3); }
+.qa-hop-no { font-size: var(--fs-xs); font-weight: 650; }
+.qa-hop-q { font-size: var(--fs-sm); }
+.qa-hop-meta { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-hop-basis { font-size: var(--fs-xs); color: var(--txt-3); }
+.qa-hop-ent { font-size: var(--fs-xs); }
+
+
+/* ── 流式问答（2026-10-08）：打字光标 ─────────────────────────── */
+.qa-caret {
+  display: inline-block; width: 7px; height: 14px;
+  margin-left: 2px; vertical-align: -2px;
+  background: var(--accent);
+  animation: qa-blink 0.9s steps(2, start) infinite;
+}
+@keyframes qa-blink { to { visibility: hidden; } }
+
+/* ============================================================
+   v5 视觉对齐（2026-10-09）
+   只统一「质感层」：圆角 / 表面渐变 / 发丝描边 / 顶部高光 / 悬停微抬。
+   类名、布局、字号、语义配色一律不动。
+   ============================================================ */
+.qa-card{
+  border-radius:var(--r-lg,16px);
+  background:linear-gradient(180deg,var(--surface-2,rgba(255,255,255,.048)),var(--surface-1,rgba(255,255,255,.026)));
+  box-shadow:var(--sh-lip,inset 0 1px 0 rgba(255,255,255,.05));
+}
+.qa-concl,.qa-chain,.qa-code,.qa-ev-hd,.qa-ev-desc{border-radius:var(--r-md,12px);box-shadow:var(--sh-lip,inset 0 1px 0 rgba(255,255,255,.05))}
+.qa-ev-item,.qa-rel-item{
+  border-radius:var(--r-md,12px);
+  background:linear-gradient(180deg,var(--surface-2,rgba(255,255,255,.048)),var(--surface-1,rgba(255,255,255,.026)));
+  box-shadow:var(--sh-lip,inset 0 1px 0 rgba(255,255,255,.05));
+  transition:border-color .18s var(--ease,ease),background .18s var(--ease,ease),transform .24s var(--ease-out,ease);
+}
+.qa-ev-item:hover,.qa-rel-item:hover{transform:translateY(-1px)}
+.qa-mini,.qa-input textarea,.qa-cfg input,.qa-cve{border-radius:var(--r-sm,8px)}
+.qa-input textarea,.qa-cfg input{transition:border-color .18s var(--ease,ease),box-shadow .2s var(--ease,ease)}
+.qa-input textarea:focus,.qa-cfg input:focus{box-shadow:0 0 0 3px var(--accent-soft,rgba(91,140,255,.14))}
+
+/* ==========================================================================
+   v11 纪律层（模块侧）
+   --------------------------------------------------------------------------
+   ① :active —— 本模块此前 **0 条按压反馈**：按钮点下去毫无动静，用户会以为
+      "没点上"而重复点。这里统一补 transform 按压（只动合成层，零重排）。
+   ② 入场编排 —— 复用外壳的 viewIn 关键帧，面板切进来时与检索视图同一节奏，
+      不再"切到富化台/监测台就很平"。
+   ③ 触屏目标 —— 无 hover 的设备上行高抬到 44px（手指点得中）。
+   颜色已全部改走核心令牌（v11 颜色收敛），模块不再自带灰阶。
+   ========================================================================== */
+.qa-mini,.qa-src,.qa-q,.qa-cve,.qa-ev-line,.qa-rel-item,.qa-chain>summary:active{transform:scale(.975)}
+.qa-src,.qa-q,.qa-rel-item,.qa-chain>summary{transition:transform .18s var(--spring,cubic-bezier(.34,1.56,.64,1)),background .16s ease,color .16s ease,border-color .16s ease}
+.qa-card,.qa-msg,.qa-ev,.qa-rel-item{animation:viewIn .5s var(--ease-out) both}
+.qa-src{animation:viewIn .5s var(--ease-out) both}
+@media (hover:none){
+  .qa-rel-item,.qa-src,.qa-mini{min-height:44px}
+}

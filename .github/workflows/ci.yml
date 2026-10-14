@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # 与 Dockerfile（python:3.13-slim）保持一致：
+          # 版本不一致会让 CI 通过、容器里失败的"两套标准"。
+          python-version: '3.13'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: |
+          # openpyxl / markdown 属「报告导出」档 —— 缺它们不是优雅降级而是直接报错
+          # （.xlsx 台账导不出来），而 tools/_test_ticket_xlsx.py 真的要用 openpyxl。
+          # 2026-10-06 前这里只装 4 个包，CI 一跑到该测试就红。
+          pip install requests urllib3 beautifulsoup4 numpy openpyxl markdown
+
+      - name: Dependency tier self-check
+        run: |
+          # 依赖分档自检：确认「核心/报告导出」两档齐备（缺了会报错的那两档）
+          python tools/检查依赖.py
+
+      - name: Backend tests (offline)
+        run: |
+          for t in tools/_test_*.py; do
+            echo "== $t =="; python "$t" || exit 1
+          done
+
+      - name: Orchestrator tests
+        run: |
+          # 编排器测试放在 modules/ 下，不在 tools/_test_*.py 的 glob 里，
+          # 以前 CI 完全没跑过多 Agent 编排的断言。
+          python modules/m0_ops/backend/test_orchestrator.py
+
+      - name: Frontend stub tests
+        run: |
+          for t in tools/_test_*.js; do
+            echo "== $t =="; node "$t" || exit 1
+          done
+
+      - name: Frontend assembly check
+        run: |
+          python tools/组装前端.py --check
+
+      - name: Syntax / import sanity
+        run: |
+          python -m compileall -q core modules && echo "compileall OK"
+
+      - name: Loopback proxy-bypass self-check
+        run: |
+          # 本机评测必须能绕过系统代理。CI 环境通常没设 HTTP_PROXY，
+          # 所以这里显式造一个"指向死端口的代理"来复现真实故障场景：
+          # 设了代理的机器上，urlopen("http://127.0.0.1:PORT") 会被发给代理 → 502，
+          # 症状像"服务坏了"，实际上服务好好的。
+          # 顺带验证 /proc/self/stat 解析（Linux 才有，Windows 走 kernel32）。
+          HTTP_PROXY=http://127.0.0.1:9 http_proxy=http://127.0.0.1:9 \
+            python tools/_test_ops_observability.py

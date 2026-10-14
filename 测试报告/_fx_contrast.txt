@@ -1,0 +1,134 @@
+﻿  ok   鍙栧埌鏆楄壊涓婚鍙橀噺
+  ok   鍙栧埌浜壊涓婚鍙橀噺锛堥€夋嫨鍣ㄨ鍖归厤 styles.css 鐨勫疄闄呭啓娉曪級
+  ok   涓や釜涓婚鐨?--bg 纭疄涓嶅悓锛堝惁鍒欒鏄庡彧璇诲埌涓€浠斤級
+
+[1] 鍏抽敭鍙橀噺鐨勬槑搴︽瀬鎬э紙鍐冲畾瀹冭兘涓嶈兘褰撳簳鑹诧級
+
+  涓婚锛氭殫鑹? --bg=(11, 10, 8)
+    --accent-3     #f6e3ae            vs bg ratio=15.57
+    --accent-ink   #1a1305            vs bg ratio=1.07
+    --txt          #f6f2e7            vs bg ratio=17.69
+    --txt-2        #c9c3b4            vs bg ratio=11.26
+    --txt-3        #9a927e            vs bg ratio=6.40
+    --txt-4        #877f6d            vs bg ratio=4.98
+    --surface-1    rgba(255,236,198,. vs bg ratio=1.14
+    鐧藉瓧鍘?accent-3 ratio=14.50 鈫?accent-3 鐨勬纭敤娉曪細鏂囧瓧鑹诧紙鍙綋 fg锛?
+    surface-1 鍙?accent-3 ratio=1.01 鈫?surface-1 鍙兘鍋氬簳鑹插眰锛屼笉鑳藉綋寮鸿皟鑹蹭笂鐨勬枃瀛楄壊
+  ok   鏆楄壊: surface-1 涓嶈褰撲綔 accent 涓婄殑鏂囧瓧鑹诧紙瑙勫垯鑷煡锛?
+
+  涓婚锛氫寒鑹? --bg=(246, 243, 235)
+    --accent-3     #7a5810            vs bg ratio=5.86
+    --accent-ink   #ffffff            vs bg ratio=1.11
+    --txt          #1c1608            vs bg ratio=16.22
+    --txt-2        #4a4232            vs bg ratio=8.95
+    --txt-3        #605843            vs bg ratio=6.37
+    --txt-4        #6f6752            vs bg ratio=5.07
+    --surface-1    rgba(60,45,18,.030 vs bg ratio=1.05
+    鐧藉瓧鍘?accent-3 ratio=6.50 鈫?accent-3 鐨勬纭敤娉曪細鏂囧瓧鑹诧紙鍙綋 fg锛?
+    surface-1 鍙?accent-3 ratio=1.02 鈫?surface-1 鍙兘鍋氬簳鑹插眰锛屼笉鑳藉綋寮鸿皟鑹蹭笂鐨勬枃瀛楄壊
+  ok   浜壊: surface-1 涓嶈褰撲綔 accent 涓婄殑鏂囧瓧鑹诧紙瑙勫垯鑷煡锛?
+
+[2] daily.css 涓?mo-dg-* 鐨勫疄闄呴厤鑹?
+
+  .mo-dg-head>b
+    [鏆楄壊] fg=var(--txt)       bg=None                   ratio=17.69 OK
+    [浜壊] fg=var(--txt)       bg=None                   ratio=16.22 OK
+
+  .mo-dg-acts button,.mo-dg-acts2 button
+    [鏆楄壊] fg=var(--txt-2)     bg=var(--surface-3)       ratio=7.47 OK
+    [浜壊] fg=var(--txt-2)     bg=var(--surface-3)       ratio=7.61 OK
+
+  .mo-dg-acts button:hover:not(:disabled)
+    [鏆楄壊] fg=var(--accent-3)  bg=None                   ratio=15.57 OK
+    [浜壊] fg=var(--accent-3)  bg=None                   ratio=5.86 OK
+
+  .mo-dg-note
+    [鏆楄壊] fg=var(--txt-2)     bg=var(--surface-2)       ratio=8.73 OK
+    [浜壊] fg=var(--txt-2)     bg=var(--surface-2)       ratio=8.07 OK
+
+  .mo-dg-note>b
+    [鏆楄壊] fg=var(--txt)       bg=None                   ratio=17.69 OK
+    [浜壊] fg=var(--txt)       bg=None                   ratio=16.22 OK
+
+  .mo-dg-note em
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-card h4
+    [鏆楄壊] fg=var(--accent-3)  bg=None                   ratio=15.57 OK
+    [浜壊] fg=var(--accent-3)  bg=None                   ratio=5.86 OK
+
+  .mo-dg-card p
+    [鏆楄壊] fg=var(--txt-2)     bg=None                   ratio=11.26 OK
+    [浜壊] fg=var(--txt-2)     bg=None                   ratio=8.95 OK
+
+  .mo-dg-tag
+    [鏆楄壊] fg=var(--txt-2)     bg=var(--surface-3)       ratio=7.47 OK
+    [浜壊] fg=var(--txt-2)     bg=var(--surface-3)       ratio=7.61 OK
+
+  .mo-dg-tag b
+    [鏆楄壊] fg=var(--txt)       bg=None                   ratio=17.69 OK
+    [浜壊] fg=var(--txt)       bg=None                   ratio=16.22 OK
+
+  .mo-dg-m
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-m b
+    [鏆楄壊] fg=var(--txt)       bg=None                   ratio=17.69 OK
+    [浜壊] fg=var(--txt)       bg=None                   ratio=16.22 OK
+
+  .mo-dg-acts2 button
+    [鏆楄壊] fg=var(--txt-2)     bg=var(--surface-4)       ratio=6.09 OK
+    [浜壊] fg=var(--txt-2)     bg=var(--surface-4)       ratio=7.09 OK
+
+  .mo-dg-acts2 button:hover:not(:disabled)
+    [鏆楄壊] fg=var(--accent-3)  bg=var(--accent-soft)     ratio=11.95 OK
+    [浜壊] fg=var(--accent-3)  bg=var(--accent-soft)     ratio=5.16 OK
+
+  .mo-dg-nodl
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-na
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-hint
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-card.on .mo-dg-hint
+    [鏆楄壊] fg=var(--accent-3)  bg=None                   ratio=15.57 OK
+    [浜壊] fg=var(--accent-3)  bg=None                   ratio=5.86 OK
+
+  .mo-dg-daytag
+    [鏆楄壊] fg=var(--txt)       bg=var(--surface-4)       ratio=9.56 OK
+    [浜壊] fg=var(--txt)       bg=var(--surface-4)       ratio=12.85 OK
+
+  .mo-dg-dayn
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+  .mo-dg-bulk button
+    [鏆楄壊] fg=var(--accent-ink bg=color-mix(in srgb,var( ratio=7.31 OK
+    [浜壊] fg=var(--accent-ink bg=color-mix(in srgb,var( ratio=4.28 澶у瓧/鍥炬爣
+
+  .mo-dg-bulk-tip
+    [鏆楄壊] fg=var(--txt-3)     bg=None                   ratio=6.40 OK
+    [浜壊] fg=var(--txt-3)     bg=None                   ratio=6.37 OK
+
+[3] 鍙橀噺瀛樺湪鎬э紙鐢ㄤ簡涓嶅瓨鍦ㄧ殑鍙橀噺 = 娴忚鍣ㄥ洖钀藉埌缁ф壙鑹?= 鐪嬩笉娓咃級
+  ok   daily.css 娌℃湁寮曠敤鏈畾涔夌殑鍙橀噺
+
+[4] 鍏ㄧ珯鍙橀噺瀛樺湪鎬э紙styles.css 閫愭潯瑙勫垯锛?
+  ok   styles.css 娌℃湁寮曠敤鏈畾涔夌殑鍙橀噺锛?6 涓彉閲忓凡瀹氫箟锛?
+
+[5] 璇戞枃鍧?.trl 鐨勫疄闄呴厤鑹诧紙鍔ㄦ€佹彃鍏ワ紝蹇呴』涓や富棰橀兘杩囧叧锛?
+  ok   鎵惧緱鍒?.trl 鐨勬牱寮忚鍒?
+    .trl               [鏆楄壊] ratio=8.64 OK
+    .trl               [浜壊] ratio=7.88 OK
+
+==============================================================
+閫氳繃 9 / 澶辫触 0 / 璀﹀憡 0
+

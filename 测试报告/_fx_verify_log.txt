@@ -1,0 +1,20 @@
+﻿[0] #fxgl 鐢诲竷瀛樺湪: True
+[1] 妫€绱㈣鍥?frames: 70 -> 117  (澧為暱 OK)
+[2] 鍒囩洃娴嬪彴+8s 鍚?frames: 218 -> 245  (澧為暱 OK)  stats={"frames":245,"degraded":2,"ema":38.9}
+[3] 鐩戞祴鍙板抚鑰楅噰鏍? {"avg":37,"p95":39,"n":139}
+[4] 娴呰壊涓婚 #fxgl opacity: 0.9
+    娴呰壊鐩戞祴鍙版埅鍥? 1074383
+    娣辫壊鐩戞祴鍙版埅鍥? 1204967
+[5] 椤舵爮 kv 涓績鍋忓樊(px): [{"label":"璇枡鎬婚噺","dev":0},{"label":"鎯呮姤鏉＄洰","dev":0.5},{"label":"鍦ㄩ噹鍒╃敤","dev":0.5}]
+
+鎺у埗鍙?error 鏁? 7
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+    LOG Failed to load resource: the server responded with a status of 404 (File not found)
+
+鎬讳綋: PASS
+

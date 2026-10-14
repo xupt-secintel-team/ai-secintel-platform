@@ -1,0 +1,41 @@
+# AI-SecIntel（aisec-D）编排文件
+# =====================================================================
+#   docker compose up -d --build      # 构建并启动
+#   docker compose ps                 # 健康状态（healthy / unhealthy）
+#   docker compose logs -f aisec      # 跟踪日志（已配置轮转）
+#   docker compose restart aisec      # 重启
+#   docker compose down               # 停止（数据卷不受影响）
+#
+# 自动运维：unhealthy 时由 restart 策略 + HEALTHCHECK 自动拉起；
+# 日志按 10MB×5 个文件轮转，不会撑爆磁盘；
+# 密钥走 secrets.env（env_file 注入，不进镜像、不进 git）。
+# =====================================================================
+services:
+  aisec:
+    build: .
+    image: aisec-d:2.3
+    container_name: aisec-d
+    ports:
+      - "8848:8848"
+    volumes:
+      # 情报库 / 索引缓存 / 采集缓存 —— 持久化到宿主机，升级镜像不丢数据
+      - ./data:/app/data
+      # 可选：语义模型缓存（存在才生效）
+      - ./data/models:/app/data/models
+    env_file:
+      # 密钥与第三方 Key（GitHub Token / LLM / 测绘 / TAXII / Webhook）
+      # 文件不存在时注释掉本行，服务以「无 Key 降级模式」照常运行
+      - secrets.env
+    restart: unless-stopped          # 挂了自动拉起（自动运维）
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:8848/api/health', timeout=4); sys.exit(0 if r.status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 90s              # 首次加载 267MB 语料 + 索引，给足冷启动时间
+      retries: 3
+    logging:
+      driver: json-file              # 日志轮转：单文件 10MB，最多 5 个
+      options:
+        max-size: "10m"
+        max-file: "5"
+    stop_grace_period: 15s

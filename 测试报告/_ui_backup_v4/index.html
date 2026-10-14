@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0b0c">
+<meta name="description" content="AI-SecIntel · 智能体驱动的全领域安全知识情报系统：实时监测 / 情报富化 / 情报问答">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0b0c'/%3E%3Cpath d='M16 6l8 3.4v6.8c0 4.5-3.4 8-8 10-4.6-2-8-5.5-8-10V9.4L16 6z' fill='none' stroke='%234d7cfe' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 15.6l2.6 2.6L20 12.6' fill='none' stroke='%236b93ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>AI-SecIntel · 全领域网络安全知识情报控制台</title>
+<!-- 前端根目录就是 frontend/：外壳 = index.html + styles.css + app.js；
+     模块面板在 frontend/modules/<id>/，由 tools/组装前端.py 从 modules/<id>/web/ 同步进来。
+     骨架：左侧图标导航栏(rail) + 顶部命令栏(cmdbar) + 三视图工作区(检索/监测/富化) + 右侧情报检查器。
+     设计说明与借鉴来源见 frontend/DESIGN.md。 -->
+<script>
+/* 首屏定色：在样式表加载前决定主题，避免深色用户看到一帧白屏 */
+(function () {
+  try {
+    var t = localStorage.getItem('asi-theme');
+    var m = localStorage.getItem('asi-theme-mode') || t || 'dark';
+    if (m === 'auto') m = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', m);
+  } catch (e) { /* 无痕模式忽略 */ }
+})();
+</script>
+<link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body>
+
+<!-- 背衬：极细网格 + 顶部单色微光（纯渐变，无 blur 滤镜，零常驻 GPU 开销） -->
+<div class="backdrop" aria-hidden="true"><i></i></div>
+
+<div class="app">
+
+  <!-- ① 图标导航栏 -->
+  <nav class="rail" aria-label="主导航">
+    <div class="rail-brand" title="AI-SecIntel">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z"></path><path d="M8.6 12.2l2.2 2.2 4.6-4.8"></path>
+      </svg>
+    </div>
+    <div class="rail-nav" id="railnav">
+      <button class="rail-item on" data-view="search" data-label="检索工作区" data-sub="自然语言检索 · 证据可回溯">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path></svg>
+        <span>检索</span>
+      </button>
+      <button class="rail-item" data-view="monitor" data-label="实时监测台" data-sub="快车道增量 · 八源情报流">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.2-6 3.2 12 2.4-8 1.8 4h4.4"></path></svg>
+        <span>监测</span>
+      </button>
+      <button class="rail-item" data-view="enrich" data-label="情报富化台" data-sub="资产风险体检 · 测绘实查 · 预警订阅 · 智能编排 · STIX 导出">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg>
+        <span>富化</span>
+      </button>
+      <button class="rail-item" data-view="ask" data-label="情报问答" data-sub="RAG 多跳 · 引用可回溯">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a7.5 7.5 0 01-10.9 6.7L4 20l1.3-4.1A7.5 7.5 0 1120 12z"></path><path d="M9.4 10.6a2.6 2.6 0 115.2.4c0 1.7-2.6 1.9-2.6 3.4"></path><path d="M12 17.2h.01"></path></svg>
+        <span>问答</span>
+      </button>
+      <i class="rail-pill" id="railpill" aria-hidden="true"></i>
+    </div>
+    <div class="rail-foot">
+      <button class="rail-btn" id="palettebtn2" title="命令面板　⌘K / Ctrl+K" aria-label="命令面板">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13"></path></svg>
+      </button>
+      <button class="rail-btn" id="themebtn" title="明暗主题" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M20.5 14.3A8.5 8.5 0 019.7 3.5a8.5 8.5 0 1010.8 10.8z"></path></svg>
+      </button>
+      <button class="rail-btn" id="helpbtn" title="键盘快捷键" aria-label="快捷键">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M9.6 9.4a2.5 2.5 0 114.6 1.4c-.6 1-2.2 1.1-2.2 2.4"></path><path d="M12 16.6h.01"></path></svg>
+      </button>
+      <button class="rail-btn" id="inspbtn" title="情报检查器　]" aria-label="情报检查器">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"></rect><path d="M14.5 4.5v15"></path></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="shell">
+
+    <!-- ② 顶部命令栏 -->
+    <header class="cmdbar" id="cmdbar">
+      <div class="cmd-left">
+        <div class="brandline">
+          <b>AI-SecIntel</b>
+          <small>AN · SECURITY INTELLIGENCE</small>
+        </div>
+        <span class="cmd-div" aria-hidden="true"></span>
+        <div class="crumbs">
+          <span class="crumb" id="crumb">检索工作区</span>
+          <span class="crumb-sub" id="crumbsub">自然语言检索 · 证据可回溯</span>
+        </div>
+      </div>
+
+      <button class="palette-trigger" id="palettebtn" title="命令面板：检索 / 跳转 / 操作">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M19.5 19.5l-3.4-3.4"></path></svg>
+        <span class="ptxt" id="ptxt">检索情报，或执行命令…</span>
+        <kbd>⌘K</kbd>
+      </button>
+
+      <div class="cmd-right">
+        <div class="livewrap" id="livewrap" title="快车道实时监测：NVD / CISA KEV / arXiv / 厂商公告 / 安全博客 / 安全社区，默认 15s 一轮（config.json 的 fast_interval 可调），新信息公开后约 1 分钟内可见">
+          <span class="livedot" id="livedot"></span>
+          <span class="livetxt" id="livestat">实时监测连接中…</span>
+        </div>
+        <div class="refwrap">
+          <span class="refstat" id="refstat"></span>
+          <button class="refbtn" id="refbtn" title="深度增量同步：NVD / CISA KEV / arXiv / GitHub Advisory / GitHub 仓库 / CSDN 等，分钟级全量对账，不重启热切换">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+            深度同步
+          </button>
+        </div>
+        <div class="top-stat" id="topstat"></div>
+        <button class="trbtn" id="trtgl" title="AI 辅助翻译（英文情报 → 中文）">译</button>
+        <div class="zoomctl" id="modectl" title="浏览方式（⌘/Ctrl+M 切换）">
+          <button id="z1" class="on" title="速览：条目紧凑、摘要两行截断，一屏尽量多看">速览</button><button id="z2" title="精读：大字距宽行距、摘要全文展开、正文栏限宽">精读</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ③ 舞台：工作区 + 情报检查器 -->
+    <div class="stage" id="stage">
+
+      <main class="workspace" id="workspace">
+
+        <!-- ── 视图一：检索工作区 ────────────────────────────────── -->
+        <section class="view on" data-view="search">
+          <aside class="sidepanel" id="sidepanel">
+            <div class="sp-head">
+              <span class="sp-title">筛选与语境</span>
+              <button class="sp-collapse" id="spcollapse" title="收起筛选栏">⟨</button>
+            </div>
+            <!-- 主体渲染的筛选卡 + 模块侧栏卡（AISEC.sideSections）统一挂在这里 -->
+            <div class="side" id="side"></div>
+          </aside>
+          <button class="sp-open" id="spopen" title="展开筛选栏">⟩</button>
+
+          <div class="main">
+            <section class="searchbox">
+              <div class="searchbar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path>
+                </svg>
+                <input id="q" type="text" autocomplete="off" spellcheck="false"
+                       placeholder="用自然语言提问：Ollama 有哪些远程代码执行漏洞？ / 提示词注入怎么防（按 / 聚焦）">
+                <label class="extgl" title="同义词/缩写字典双向扩展（如 sqli→sql injection→SQL注入），关闭后按字面精确匹配">
+                  <input type="checkbox" id="expcbx" checked><span>同义词扩展</span>
+                </label>
+                <button class="btn primary" id="go">检索 <kbd>↵</kbd></button>
+              </div>
+              <div class="hints" id="hints"></div>
+              <div class="qparse" id="qparse"></div>
+              <div id="sug" class="sugcard" style="display:none"></div>
+            </section>
+
+            <section id="answer"></section>
+
+            <div class="resbar" id="resbar">
+              <span class="count" id="count">—</span>
+              <span class="spacer"></span>
+              <button class="btn ghost sm" id="expbtn" title="把当前检索结果导出为 Markdown 情报报告（含可信度、证据链、处置路径）">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10m0 0l-4-4m4 4l4-4"></path><path d="M5 19h14"></path></svg>
+                导出报告
+              </button>
+              <div class="seg" id="density" title="结果密度">
+                <i class="seg-thumb"></i>
+                <button data-d="cozy" class="on">舒适</button><button data-d="list">紧凑</button>
+              </div>
+              <div class="seg" id="sortseg">
+                <i class="seg-thumb"></i>
+                <button data-sort="relevance" class="on">相关性</button>
+                <button data-sort="risk">风险</button>
+                <button data-sort="trust">可信度</button>
+                <button data-sort="recent">最新</button>
+              </div>
+            </div>
+
+            <div id="results"></div>
+            <div class="pager" id="pager"></div>
+          </div>
+        </section>
+
+        <!-- ── 视图二：实时监测台 ────────────────────────────────── -->
+        <section class="view" data-view="monitor">
+          <div class="main wide">
+            <div class="viewhead">
+              <div>
+                <h2>实时监测台</h2>
+                <p>多源快车道秒级轮询增量采集 → 落盘 → 热切换索引，新信息公开后约 1 分钟内进入检索；「已同步」显示的是最近一次深度增量同步时间。</p>
+              </div>
+              <button class="btn ghost sm" id="monrefresh">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+                刷新视图
+              </button>
+            </div>
+            <div id="monboard"><div class="skboard"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div>
+          </div>
+        </section>
+
+        <!-- ── 视图三：情报富化台 ────────────────────────────────── -->
+        <section class="view" data-view="enrich">
+          <div class="main wide">
+            <div class="viewhead">
+              <div>
+                <h2>情报富化台</h2>
+                <p>上传公司互联网资产清单（Word / Excel / TXT）→ 自动比对检测模块 1 情报库；输入 CVE 实查 FOFA/Shodan 全网暴露量与国家分布；订阅产品/厂商/CVE，新情报命中自动推送到通知栏与 Webhook；漏洞详情内一键生成升级路径 + 配置加固的修复方案。</p>
+              </div>
+              <div class="seg" id="enfilt">
+                <i class="seg-thumb"></i>
+                <button data-f="exploited" class="on">在野利用</button>
+                <button data-f="poc">含 POC</button>
+                <button data-f="critical">严重/高危</button>
+              </div>
+            </div>
+            <div id="enrichboard"><div class="skboard"><div class="sk"></div><div class="sk"></div></div></div>
+          </div>
+        </section>
+
+        <!-- ── 视图四：情报问答（模块 3 面板会被外壳搬进来） ──────── -->
+        <section class="view" data-view="ask">
+          <div class="main wide">
+            <div class="viewhead">
+              <div>
+                <h2>情报问答</h2>
+                <p>多跳检索 → 证据汇总 → 生成回答；每个结论都带引用来源，可点开检查器核对原文。</p>
+              </div>
+              <span class="tagline" id="asktag">问答面板由情报问答模块提供</span>
+            </div>
+            <div class="askdock" id="askdock"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ④ 右侧情报检查器（≥1280px 内联；更窄时变浮层抽屉） -->
+      <aside class="inspector" id="inspector" aria-label="情报检查器">
+        <div class="insp-head" id="dh"></div>
+        <div class="insp-body" id="db"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- 浮层：检查器遮罩（窄屏）、命令面板、快捷键、提示 -->
+<div class="mask" id="mask"></div>
+
+<div class="palette-wrap" id="palettewrap" role="dialog" aria-modal="true" aria-label="命令面板">
+  <div class="palette" id="palette">
+    <div class="pal-top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M19.5 19.5l-3.4-3.4"></path></svg>
+      <input id="palinput" type="text" placeholder="输入检索词、CVE 编号，或直接执行命令…" autocomplete="off" spellcheck="false">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="pal-body" id="palbody"></div>
+    <div class="pal-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span><span><kbd>↵</kbd> 执行</span><span><kbd>⌘K</kbd> 开关</span>
+      <span class="pal-brand">AI-SecIntel · 命令面板</span>
+    </div>
+  </div>
+</div>
+
+<div class="help-wrap" id="helpwrap" role="dialog" aria-modal="true" aria-label="键盘快捷键">
+  <div class="help">
+    <h4>键盘快捷键</h4>
+    <div class="help-grid" id="helpgrid"></div>
+    <button class="btn ghost sm" id="helpclose">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 说明：本系统不使用任何第三方云 SDK，也不引入任何外部 CDN 脚本。
+     翻译能力由本机后端 /api/qa/translate 提供（模型跑在本机，正文不出本机、离线可用）。
+     历史上这里曾挂 @tencent-ai/workbuddy-cloud-sdk，已移除——安全情报正文外发不可接受。 -->
+<script src="app.js?v=15"></script>
+<!--@modules-->
+
+</body>
+</html>

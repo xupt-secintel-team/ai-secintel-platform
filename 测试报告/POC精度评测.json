@@ -1,0 +1,314 @@
+{
+  "at": "2026-10-08 08:45:33",
+  "quick": true,
+  "summary": {
+    "cves": 6,
+    "with_results": 3,
+    "before": {
+      "@3": 100.0,
+      "@5": 100.0,
+      "@10": 100.0
+    },
+    "raw": {
+      "@3": 100.0,
+      "@5": 100.0,
+      "@10": 100.0
+    },
+    "after": {
+      "@3": 100.0,
+      "@5": 100.0,
+      "@10": 100.0
+    },
+    "total_results": 12,
+    "total_relevant": 12
+  },
+  "rows": [
+    {
+      "cve": "CVE-2024-37032",
+      "products": [
+        "ollama"
+      ],
+      "n": 2,
+      "tiers": {
+        "A": 2
+      },
+      "before": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "raw": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "after": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "before_order": [
+        "Ollama Model Registry Path Traversal RCE",
+        "Ollama - Remote Code Execution (critical)"
+      ],
+      "after_order": [
+        "Ollama Model Registry Path Traversal RCE",
+        "Ollama - Remote Code Execution (critical)"
+      ],
+      "relevant_total": 2,
+      "records": [
+        {
+          "id": "metasploit-f54a2601a9be3d56",
+          "title": "Ollama Model Registry Path Traversal RCE",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 2,
+          "rel": 10.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "nuclei-templates-9bc62253502c6604",
+          "title": "Ollama - Remote Code Execution (critical)",
+          "source": "nuclei-templates",
+          "tier": "A",
+          "raw_rank": 1,
+          "rel": 10.0,
+          "score": 0.67,
+          "stars": 0,
+          "relevant": true
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2021-44228",
+      "products": [
+        "6bk1602-0aa12-0tp0_firmware",
+        "6bk1602-0aa22-0tp0_firmware",
+        "6bk1602-0aa32-0tp0_firmware",
+        "6bk1602-0aa42-0tp0_firmware",
+        "6bk1602-0aa52-0tp0_firmware",
+        "active_iq_unified_manager",
+        "advanced_malware_protection_virtual_private_cloud_appliance",
+        "automated_subsea_tuning",
+        "broadworks",
+        "brocade_san_navigator",
+        "business_process_automation",
+        "capital"
+      ],
+      "n": 9,
+      "tiers": {
+        "A": 9
+      },
+      "before": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "raw": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "after": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "before_order": [
+        "MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "Log4Shell HTTP Header Injection",
+        "UniFi Network Application Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "Apache Log4j2 Remote Code Injection (critical)",
+        "Log4Shell HTTP Scanner",
+        "Apache Log4j 2 - Remote Code Execution (RCE)",
+        "Apache Log4j2 2.14.1 - Information Disclosure",
+        "AD Manager Plus 7122 - Remote Code Execution (RCE)"
+      ],
+      "after_order": [
+        "MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "Log4Shell HTTP Header Injection",
+        "UniFi Network Application Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shell)",
+        "Apache Log4j2 Remote Code Injection (critical)",
+        "Log4Shell HTTP Scanner",
+        "Apache Log4j 2 - Remote Code Execution (RCE)",
+        "Apache Log4j2 2.14.1 - Information Disclosure",
+        "AD Manager Plus 7122 - Remote Code Execution (RCE)"
+      ],
+      "relevant_total": 9,
+      "records": [
+        {
+          "id": "metasploit-2bc94850e18038bb",
+          "title": "MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 6,
+          "rel": 10.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "metasploit-100dcc8523635624",
+          "title": "Log4Shell HTTP Header Injection",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 7,
+          "rel": 10.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "metasploit-b407423660d4aa55",
+          "title": "UniFi Network Application Unauthenticated JNDI Injection RCE (via Log4Shell)",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 8,
+          "rel": 10.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "metasploit-3fb34c1b2e63a303",
+          "title": "VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shell)",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 9,
+          "rel": 10.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "nuclei-templates-749cf928013a1c96",
+          "title": "Apache Log4j2 Remote Code Injection (critical)",
+          "source": "nuclei-templates",
+          "tier": "A",
+          "raw_rank": 4,
+          "rel": 10.0,
+          "score": 0.67,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "metasploit-e70feab4dcc8f0f6",
+          "title": "Log4Shell HTTP Scanner",
+          "source": "metasploit",
+          "tier": "A",
+          "raw_rank": 5,
+          "rel": 10.0,
+          "score": 0.67,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "exploit-db-e8d8f702a113f426",
+          "title": "Apache Log4j 2 - Remote Code Execution (RCE)",
+          "source": "exploit-db",
+          "tier": "A",
+          "raw_rank": 2,
+          "rel": 7.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "exploit-db-f592a39d0c1f0ebd",
+          "title": "Apache Log4j2 2.14.1 - Information Disclosure",
+          "source": "exploit-db",
+          "tier": "A",
+          "raw_rank": 3,
+          "rel": 7.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "exploit-db-4d0da94ada2a8dbb",
+          "title": "AD Manager Plus 7122 - Remote Code Execution (RCE)",
+          "source": "exploit-db",
+          "tier": "A",
+          "raw_rank": 1,
+          "rel": 2.0,
+          "score": 0.85,
+          "stars": 0,
+          "relevant": true
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2025-15063",
+      "n": 0,
+      "error": null,
+      "products": [
+        "ollama"
+      ]
+    },
+    {
+      "cve": "CVE-2026-26190",
+      "products": [
+        "milvus"
+      ],
+      "n": 1,
+      "tiers": {
+        "A": 1
+      },
+      "before": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "raw": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "after": {
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "before_order": [
+        "Milvus - Unauthenticated Metrics API Access (critical)"
+      ],
+      "after_order": [
+        "Milvus - Unauthenticated Metrics API Access (critical)"
+      ],
+      "relevant_total": 1,
+      "records": [
+        {
+          "id": "nuclei-templates-faf56a2afc7170f4",
+          "title": "Milvus - Unauthenticated Metrics API Access (critical)",
+          "source": "nuclei-templates",
+          "tier": "A",
+          "raw_rank": 1,
+          "rel": 10.0,
+          "score": 0.67,
+          "stars": 0,
+          "relevant": true
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2026-81265",
+      "n": 0,
+      "error": null,
+      "products": [
+        "langflow"
+      ]
+    },
+    {
+      "cve": "CVE-2026-41486",
+      "n": 0,
+      "error": null,
+      "products": [
+        "ray"
+      ]
+    }
+  ]
+}

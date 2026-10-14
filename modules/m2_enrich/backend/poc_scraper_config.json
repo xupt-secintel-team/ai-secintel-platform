@@ -1,0 +1,14 @@
+{
+  "github_token": "",
+  "timeout": 15,
+  "max_results": 25,
+  "verify_ssl": false,
+  "deepseek_api_key": "",
+  "deepseek_base_url": "https://api.deepseek.com",
+  "deepseek_model": "deepseek-chat",
+  "github_per_query": 15,
+  "similarity_threshold": 0.8,
+  "max_code_files": 5,
+  "max_code_file_kb": 50,
+  "deep_process_cap": 50
+}

@@ -1,0 +1,9 @@
+﻿14676  cmd.exe  10/10/2026 12:17:07  C:\WINDOWS\system32\cmd.exe /c ""C:\Users\丁\Desktop\aisec-D_2.0\启动服务.bat" "
+9896  py.exe  10/10/2026 12:17:09  py  -u core\server.py 
+1332  python.exe  10/10/2026 12:17:09  C:\Users\丁\AppData\Local\Programs\Python\Python313\python.exe  -u core\server.py 
+31964  cmd.exe  10/10/2026 12:37:57  C:\WINDOWS\system32\cmd.exe /d /s /c "C:\Users\丁\.workbuddy\plugins\cache\workbuddy-builtin\weixinpay\1.6.109/bin/run-node.cmd C:\Users\丁\.workbuddy\p
+38576  cmd.exe  10/10/2026 13:40:46  C:\WINDOWS\system32\cmd.exe /c ""C:\Users\丁\Desktop\aisec-D_2.0\运行CI.bat""
+48232  python.exe  10/10/2026 14:13:25  .venv\Scripts\python.exe  tools\_test_qa_round7.py  
+46004  python.exe  10/10/2026 14:13:26  .venv\Scripts\python.exe  tools\_test_qa_round7.py  
+48624  python.exe  10/10/2026 14:13:26  C:\Users\丁\Desktop\aisec-D_2.0\.venv\Scripts\python.exe C:\Users\丁\Desktop\aisec-D_2.0\core\server.py --port 9051
+48456  python.exe  10/10/2026 14:13:26  C:\Users\丁\Desktop\aisec-D_2.0\.venv\Scripts\python.exe C:\Users\丁\Desktop\aisec-D_2.0\core\server.py --port 9051

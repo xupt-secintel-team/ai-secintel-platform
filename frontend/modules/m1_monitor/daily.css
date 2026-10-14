@@ -1,0 +1,372 @@
+/* web/daily.css
+   ⚠ 自动生成，请勿直接改本文件 —— 源文件在 modules/m1_monitor/web/daily.css
+   改完跑一次： py -3 tools/组装前端.py */
+/* ============================================================
+   m1_monitor · 每日按类情报报告面板样式
+   ------------------------------------------------------------
+   全部走 styles.css 的既有 CSS 变量（--bg / --line / --txt-* /
+   --crit / --high / --med / --low / --info / --accent …），
+   亮色主题自动跟随，不在这里写死任何颜色值。
+   ============================================================ */
+
+/* 区块外壳：由主体 append 到监测台 board 末尾 */
+.mo-sec{margin-top:12px}
+.mo-daily .mo-daily-acts{
+  display:flex;align-items:center;gap:var(--sp-2);margin-left:auto;flex-shrink:0;
+}
+/* header 里的 .ph-sub 已经 margin-left:auto，acts 紧跟其后才不会挤在一起 */
+.mo-daily .mo-daily-sel{
+  font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt);
+  background:var(--surface-3);border:1px solid var(--line-3);
+  border-radius:var(--r-xs);padding:3px var(--sp-2);max-width:130px;cursor:pointer;
+}
+.mo-daily .mo-daily-sel:hover{border-color:var(--accent-line)}
+.mo-daily .mo-daily-acts button{
+  /* 10.5px 在 1080p 屏上偏小，用户反馈"看不清"。11px + --txt-2
+     （ratio 6.3~8.4）是这个尺寸下的稳妥组合。 */
+  font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.03em;
+  color:var(--txt-2);background:var(--surface-3);
+  border:1px solid var(--line-2);border-radius:var(--r-xs);
+  padding:var(--sp-1) var(--sp-2);cursor:pointer;transition:var(--ease);
+}
+.mo-daily .mo-daily-acts button:hover:not(:disabled){
+  color:var(--accent-3);border-color:var(--accent-line);
+  background:var(--accent-soft);
+}
+.mo-daily .mo-daily-acts button:disabled{opacity:.42;cursor:not-allowed}
+.mo-daily .mo-daily-acts button:focus-visible{outline:none;box-shadow:var(--ring)}
+
+/* 左右分栏：左边日期列表（窄），右边当日分类明细（宽） */
+.mo-split{display:grid;grid-template-columns:186px 1fr;gap:var(--sp-4);align-items:start}
+@media (max-width:1100px){.mo-split{grid-template-columns:1fr}}
+
+/* ---- 日期列表 ---- */
+.mo-daylist{display:flex;flex-direction:column;gap:var(--sp-1);margin-top:9px}
+.mo-daybtn{
+  display:flex;flex-direction:column;gap:2px;align-items:flex-start;
+  padding:var(--sp-2) var(--sp-2);text-align:left;cursor:pointer;
+  background:var(--surface-1);border:1px solid var(--line);
+  border-radius:var(--r-sm);color:var(--txt-2);transition:var(--ease);
+}
+.mo-daybtn:hover{border-color:var(--line-3);background:var(--surface-2)}
+.mo-daybtn.on{
+  border-color:var(--accent-line);background:var(--accent-soft);
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+.mo-daybtn b{font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt)}
+.mo-daybtn.on b{color:var(--accent-3)}
+.mo-daybtn>span{font-size:var(--fs-micro);color:var(--txt-3);font-family:var(--mono)}
+.mo-daychips{display:flex;gap:var(--sp-1);flex-wrap:wrap;margin-top:2px}
+.mo-daychips:empty{display:none}
+
+/* ---- 概览条 ---- */
+.mo-sum{
+  display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:baseline;
+  padding:var(--sp-2) var(--sp-3);margin-bottom:11px;
+  background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-sm);
+}
+.mo-sum-i{font-size:var(--fs-xs);color:var(--txt-3);font-family:var(--mono)}
+/* 概览条是 flex 行（6 个计数指标 + 右对齐的生成时间）。译文块插进来后必须
+   独占整行，否则会被当成又一个 flex item 参与横向排布，把计数挤变形。
+   flex-basis:100% + order 让它始终排在最后一行。 */
+.mo-sum>.trl{flex:0 0 100%;order:9;margin:4px 0 0;padding:var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-6);font-size:var(--fs-xs);line-height:1.6}
+/* 只调位置，不调字号 —— "AI译" 角标继承 .trl::before 的 9.5px，
+   在这里再压到 9px 就成了全站最小字（看不清）。 */
+.mo-sum>.trl::before{left:6px;top:5px}
+.mo-sum-i b{font-size:var(--fs-h3);color:var(--txt);margin-right:3px;font-weight:600}
+.mo-sum-i.crit b{color:var(--crit)}
+.mo-sum-i.high b{color:var(--high)}
+.mo-sum-i.alert b{color:var(--danger)}
+.mo-sum-i.gen{margin-left:auto;font-size:var(--fs-micro);color:var(--txt-3)}
+
+/* ---- 分类块 ---- */
+.mo-cat{margin-bottom:9px;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.mo-cat-h{
+  display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+  padding:var(--sp-2) var(--sp-3);cursor:pointer;
+  background:var(--surface-1);transition:var(--ease);
+}
+.mo-cat-h:hover{background:var(--surface-2)}
+.mo-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.mo-cat-h b{font-size:var(--fs-sm);color:var(--txt);font-weight:600}
+.mo-cat-n{
+  font-family:var(--mono);font-size:var(--fs-micro);color:var(--accent-3);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-radius:9px;padding:1px var(--sp-2);
+}
+.mo-cat-s{font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-3)}
+.mo-tog{
+  margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);
+  color:var(--txt-3);border:1px solid var(--line-2);
+  border-radius:var(--r-xs);padding:1px var(--sp-2);
+}
+.mo-cat-h:hover .mo-tog{color:var(--txt-2)}
+.mo-cat-d{
+  padding:var(--sp-1) var(--sp-3) var(--sp-2);font-size:var(--fs-micro);color:var(--txt-3);
+  border-top:1px solid var(--line);background:var(--surface-1);
+}
+
+/* ---- 条目 ---- */
+.mo-items{max-height:340px;overflow-y:auto;padding:2px 0}
+.mo-item{
+  display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+  padding:var(--sp-1) var(--sp-3);border-top:1px solid var(--line);
+  font-size:var(--fs-xs);transition:var(--ease);
+  /* 条目可点开看全文 → 光标给指针；没有 data-id 的（理论上不会有）不假装可点 */
+  cursor:pointer;
+}
+.mo-item:not([data-id]){cursor:default}
+.mo-item:hover{background:var(--surface-1)}
+.mo-item:first-child{border-top:none}
+/* 左侧色条：一眼看出这条属于哪个严重度 */
+.mo-item{border-left:2px solid transparent}
+.mo-item.sev-crit{border-left-color:var(--crit)}
+.mo-item.sev-high{border-left-color:var(--high)}
+.mo-item.sev-med{border-left-color:var(--med)}
+.mo-item.sev-low{border-left-color:var(--low)}
+.mo-item.sev-info{border-left-color:var(--info);opacity:.88}
+/* 标题给足宽度：旧样式 min-width:180px + 前端 slice(0,96) 双重截断，
+   一屏只能看到 "Johnson Controls EasyIO N…"，点开才知道是什么。 */
+.mo-item-t{
+  flex:1;min-width:260px;color:var(--txt);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.mo-item:hover .mo-item-t{color:var(--accent-3)}
+.mo-item-s{font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-3);white-space:nowrap}
+.mo-item-l{
+  font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-3);
+  text-decoration:none;border-bottom:1px dotted var(--line-3);white-space:nowrap;
+}
+.mo-item-l:hover{color:var(--accent-3);border-bottom-color:var(--accent-line)}
+
+/* 严重度徽章复用主体 .badge，色彩走 --crit/--high/--med/--low/--info */
+.mo-daily .badge.crit{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 34%,transparent);background:color-mix(in srgb,var(--crit) 11%,transparent)}
+.mo-daily .badge.high{color:var(--high);border-color:color-mix(in srgb,var(--high) 34%,transparent);background:color-mix(in srgb,var(--high) 11%,transparent)}
+.mo-daily .badge.med{color:var(--med);border-color:color-mix(in srgb,var(--med) 34%,transparent);background:color-mix(in srgb,var(--med) 11%,transparent)}
+.mo-daily .badge.low{color:var(--low);border-color:color-mix(in srgb,var(--low) 34%,transparent);background:color-mix(in srgb,var(--low) 11%,transparent)}
+.mo-daily .badge.info{color:var(--info);border-color:color-mix(in srgb,var(--info) 30%,transparent);background:color-mix(in srgb,var(--info) 9%,transparent)}
+
+/* 滚动条（分类内条目多时） */
+.mo-items::-webkit-scrollbar{width:7px;height:7px}
+.mo-items::-webkit-scrollbar-track{background:transparent}
+.mo-items::-webkit-scrollbar-thumb{background:var(--surface-4);border-radius:4px}
+.mo-items::-webkit-scrollbar-thumb:hover{background:var(--line-3)}
+/* ==================================================================
+   每日报告（core/daily_digest.py → /api/daily_digest）
+   AI 安全四方向主卡 + 四模块产出台账（折叠）。与上面的 m1 按类日报
+   是两套东西，样式独立命名（mo-dg-*）避免串味。
+   ================================================================== */
+.mo-digest{
+  border-top:1px solid var(--line-3);
+  margin-top:6px;padding:var(--sp-3) 2px 2px;
+}
+.mo-dg-head{
+  display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:8px;
+}
+.mo-dg-head>b{font-size:var(--fs-sm);color:var(--txt)}
+.mo-dg-acts{display:flex;gap:var(--sp-2);margin-left:auto;flex-wrap:wrap}
+.mo-dg-acts button,.mo-dg-acts2 button{
+  font:inherit;font-size:var(--fs-xs);padding:3px var(--sp-2);border-radius:5px;cursor:pointer;
+  background:var(--surface-3);color:var(--txt-2);border:1px solid var(--line-3);
+}
+.mo-dg-acts button:hover:not(:disabled){color:var(--accent-3);border-color:var(--accent-line)}
+.mo-dg-acts button:disabled,.mo-dg-acts2 button:disabled{opacity:.42;cursor:not-allowed}
+
+.mo-dg-notes{margin:0 0 8px}
+.mo-dg-note{
+  display:flex;gap:var(--sp-2);align-items:baseline;flex-wrap:wrap;
+  padding:var(--sp-1) var(--sp-2);margin-bottom:4px;border-radius:6px;
+  background:var(--surface-2);border-left:2px solid var(--accent-line);
+  font-size:var(--fs-xs);color:var(--txt-2);
+}
+.mo-dg-note>b{color:var(--txt);font-size:var(--fs-xs)}
+.mo-dg-note em{margin-left:auto;font-style:normal;font-family:var(--mono);
+  font-size:var(--fs-micro);color:var(--txt-3)}
+
+.mo-dg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:var(--sp-2)}
+.mo-dg-card{
+  border:1px solid var(--line-3);border-radius:8px;padding:var(--sp-2) var(--sp-3);
+  background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s;
+}
+.mo-dg-card:hover{border-color:var(--accent-line)}
+.mo-dg-card.on{border-color:var(--accent-line);background:var(--surface-3)}
+.mo-dg-card h4{
+  margin:0 0 5px;font-size:var(--fs-sm);color:var(--accent-3);font-weight:600;
+}
+.mo-dg-card p{
+  margin:0 0 7px;font-size:var(--fs-xs);line-height:1.55;color:var(--txt-2);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.mo-dg-card.on p{-webkit-line-clamp:unset}
+.mo-dg-metrics{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+/* 指标小标签：10px + --txt-4(ratio 2.4~2.9) 基本读不出来，
+   这是卡��上最影响可读性的元素之一。提到 --txt-3(4.26/4.80)。 */
+.mo-dg-tag{
+  font-size:var(--fs-micro);color:var(--txt-2);background:var(--surface-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:1.5px var(--sp-2);
+}
+.mo-dg-tag b{color:var(--txt);font-family:var(--mono);margin-left:3px}
+.mo-dg-detail{margin-top:8px;border-top:1px dashed var(--line-3);padding-top:var(--sp-2)}
+.mo-dg-m{display:flex;justify-content:space-between;gap:var(--sp-3);font-size:var(--fs-xs);
+  padding:2px 0;color:var(--txt-3)}
+.mo-dg-m b{color:var(--txt);font-family:var(--mono);font-weight:600;flex-shrink:0}
+.mo-dg-acts2{display:flex;gap:var(--sp-2);margin-top:8px}
+
+/* ---------- 四模块日报：下载可见性 + 视觉层次（2026-10-07 补） ----------
+   问题：下载按钮原先只在卡片展开时才渲染，用户看到的是一排纯文字卡片，
+   不知道"能下载、要先点一下" —— 于是问"每日报告怎么下载"。
+   改法：MD/JSON **常驻卡片底部**，展开只负责看更多指标。 */
+.mo-dg-acts2{display:flex;gap:var(--sp-2);margin-top:9px;padding-top:var(--sp-2);
+  border-top:1px dashed var(--line-3)}
+.mo-dg-card:not(.on) .mo-dg-acts2{opacity:.92}
+.mo-dg-card:not(.on):hover .mo-dg-acts2{opacity:1}
+.mo-dg-acts2 button{
+  font:inherit;font-size:var(--fs-xs);font-weight:600;padding:var(--sp-1) var(--sp-3);border-radius:5px;
+  cursor:pointer;background:var(--surface-4);color:var(--txt-2);
+  border:1px solid var(--line-3);transition:all .14s;
+}
+.mo-dg-acts2 button:hover:not(:disabled){
+  color:var(--accent-3);border-color:var(--accent-line);
+  background:var(--accent-soft);
+}
+.mo-dg-acts2 button:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+.mo-dg-nodl{font-size:var(--fs-xs);color:var(--txt-3);padding:var(--sp-1) 0}
+.mo-dg-na{font-size:var(--fs-xs);color:var(--txt-3);padding:var(--sp-2) 0 2px;font-style:italic}
+
+/* 卡片标题右侧的「点此展开」提示：让"可展开"这件事显式可见 */
+.mo-dg-hint{
+  float:right;font-size:var(--fs-micro);font-weight:400;color:var(--txt-3);
+  border:1px solid var(--line-2);border-radius:3px;padding:0 var(--sp-1);
+  letter-spacing:.02em;
+}
+.mo-dg-card.on .mo-dg-hint{color:var(--accent-3);border-color:var(--accent-line)}
+
+/* 日期行：一眼知道看的是哪天、有几份 */
+.mo-dg-dayline{display:flex;align-items:center;gap:var(--sp-2);margin:2px 0 7px}
+.mo-dg-daytag{
+  font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt);
+  background:var(--surface-4);border:1px solid var(--line-3);
+  border-radius:4px;padding:1px var(--sp-2);
+}
+.mo-dg-dayn{font-size:var(--fs-xs);color:var(--txt-3)}
+
+/* 打包下载条：主操作，做成整条醒目按钮而不是角落里的小字 */
+.mo-dg-bulk{
+  display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;
+  margin:0 0 9px;padding:var(--sp-2) var(--sp-3);border-radius:7px;
+  background:var(--accent-soft);
+  border:1px solid var(--accent-line);
+}
+/* ★ 底色用 --accent 而**不是 --accent-3**，文字用 --accent-ink（#fff）。
+   实测踩过：--accent-3 在两主题里明度差 3 倍
+   （暗色 var(--accent-3) ratio 9.36 / 亮色 var(--iris) ratio 6.34），
+   它是**文字色**不是底色 —— 拿它当背景时，白字在亮色主题下
+   ratio 只有 2.11，文字基本看不见。
+   --accent（暗色 var(--accent) / 亮色 var(--iris)）两主题都够暗。
+   暗色下白字压 var(--accent) 是 3.73（12px 粗体可读），这里再压深一档
+   提到 5.3+，小字也稳。混 82% accent + 18% 黑，亮色主题下几乎不变。 */
+.mo-dg-bulk button{
+  font:inherit;font-size:var(--fs-xs);font-weight:600;padding:var(--sp-1) var(--sp-4);border-radius:6px;
+  cursor:pointer;color:var(--accent-ink);
+  /* 混 88% accent + 12% 主题底色：暗色主题底色近黑 → 压深提对比；
+     亮色主题底色近白 → 提亮，白字反而更清楚。两边都不用写死色值。 */
+  background:color-mix(in srgb,var(--accent) 88%,var(--bg));
+  border:1px solid color-mix(in srgb,var(--accent) 88%,var(--bg));
+}
+.mo-dg-bulk button:hover{
+  background:color-mix(in srgb,var(--accent) 80%,var(--bg));
+  border-color:color-mix(in srgb,var(--accent) 80%,var(--bg));
+}
+.mo-dg-bulk button:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.mo-dg-bulk-tip{font-size:var(--fs-micro);color:var(--txt-3)}
+
+/* 展开区指标改成网格，卡片高度不再被拉得很长 */
+.mo-dg-detail{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:2px var(--sp-3);
+}
+.mo-dg-detail .mo-dg-m{
+  display:flex;justify-content:space-between;gap:var(--sp-2);
+  padding:2px 0;border-bottom:1px dotted var(--line-3);
+}
+
+/* ── 高频漏洞周期统计（2026-10-08 新增，侧栏卡片） ────────────────── */
+.tr-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 8px; flex-wrap: wrap; }
+.tr-tabs { display: flex; gap: 3px; }
+.tr-tab {
+  font-size: var(--fs-xs); padding: 2px var(--sp-2); border: 1px solid var(--line);
+  border-radius: 5px; background: transparent; color: var(--txt-3); cursor: pointer;
+}
+.tr-tab.on { color: var(--txt); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.tr-range { font-size: var(--fs-xs); color: var(--txt-4); }
+.tr-chart { margin: 8px 0; }
+.tr-chart-ttl { font-size: var(--fs-xs); color: var(--txt-3); margin-bottom: 4px; }
+.tr-segbar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; }
+.tr-seg { display: block; height: 100%; }
+.tr-legwrap { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 5px; }
+.tr-leg { font-size: var(--fs-micro); color: var(--txt-3); display: inline-flex; align-items: center; gap: 3px; }
+.tr-leg i { display: inline-block; width: 7px; height: 7px; border-radius: 2px; }
+.tr-list { margin-top: 6px; }
+.tr-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) 0; border-top: 1px solid var(--line); font-size: var(--fs-xs); }
+.tr-no { color: var(--txt-4); width: 16px; text-align: right; flex: 0 0 auto; }
+.tr-id { font-weight: 600; cursor: pointer; color: var(--accent); flex: 0 0 auto; }
+.tr-id:hover { text-decoration: underline; }
+.tr-cnt { color: var(--txt-3); flex: 0 0 auto; }
+.tr-cvss { flex: 0 0 auto; color: var(--txt-2); }
+.tr-cvss.hot { color: var(--danger); }
+.tr-ttl { color: var(--txt-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
+
+/* ===== 高频漏洞横向条形图（监测台主区宽卡，2026-10-08 改版） ===== */
+.mo-trend .mo-trend-acts { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.mo-trend .tr-tab { font-size: var(--fs-xs); padding: 3px var(--sp-3); }
+.mo-trend .mo-dl { margin-left: 4px; }
+.mo-trend .tr-range { display: block; margin: 2px 0 10px; }
+.tr-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+.tr-hbar { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 7px; cursor: default; }
+.tr-hbar[data-id] { cursor: pointer; }
+.tr-lbl { flex: none; width: 110px; font-size: var(--fs-xs); color: var(--txt-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: var(--sp-1); }
+.tr-hbar[data-id] .tr-lbl { color: var(--accent); font-weight: 600; }
+.tr-bar { flex: 1; height: 15px; border-radius: var(--r-xs, 4px); background: var(--surface-2); overflow: hidden; position: relative; }
+.tr-fill { display: block; height: 100%; width: 0; border-radius: var(--r-xs, 4px); background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .9s var(--ease-out, cubic-bezier(.2,.8,.2,1)); }
+.tr-fill-cve { background: linear-gradient(90deg, var(--danger), var(--warn)); }
+.tr-val { flex: none; width: 42px; text-align: right; font-family: var(--mono, ui-monospace, monospace); font-size: var(--fs-xs); color: var(--txt-2); font-variant-numeric: tabular-nums; }
+.tr-cvss { width: 42px; color: var(--txt-2); }
+.tr-kev { display: inline-block; font-size: var(--fs-micro); font-weight: 700; color: var(--accent-ink); background: var(--danger); border-radius: 4px; padding: 0 var(--sp-1); line-height: 15px; }
+@media (max-width: 1080px) { .tr-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ============================================================
+   v5 视觉对齐（2026-10-09）
+   只统一「质感层」：圆角 / 表面渐变 / 发丝描边 / 顶部高光 / 悬停微抬。
+   类名、布局、字号、语义配色一律不动。
+   ============================================================ */
+.mo-sum,.mo-cat,.mo-dg-card{
+  border-radius:var(--r-md,12px);
+  background:linear-gradient(180deg,var(--surface-2,rgba(255,255,255,.048)),var(--surface-1,rgba(255,255,255,.026)));
+  border-color:var(--line,rgba(255,255,255,.076));
+  box-shadow:var(--sh-lip,inset 0 1px 0 rgba(255,255,255,.05));
+}
+.mo-cat{transition:border-color .2s var(--ease,ease),box-shadow .26s var(--ease,ease)}
+.mo-cat:hover{border-color:var(--line-2,rgba(255,255,255,.122))}
+.mo-daybtn,.mo-dg-tag,.mo-dg-daytag,.mo-dg-bulk,.mo-dg-note{border-radius:var(--r-sm,8px)}
+.mo-daybtn{transition:background .16s var(--ease,ease),border-color .16s var(--ease,ease),color .16s var(--ease,ease)}
+.tr-tab,.tr-segbar{border-radius:var(--r-sm,8px)}
+.tr-tab{transition:color .16s var(--ease,ease),background .16s var(--ease,ease),border-color .16s var(--ease,ease)}
+.tr-bar,.tr-fill{border-radius:999px}
+
+/* ==========================================================================
+   v11 纪律层（模块侧）
+   --------------------------------------------------------------------------
+   ① :active —— 本模块此前 **0 条按压反馈**：按钮点下去毫无动静，用户会以为
+      "没点上"而重复点。这里统一补 transform 按压（只动合成层，零重排）。
+   ② 入场编排 —— 复用外壳的 viewIn 关键帧，面板切进来时与检索视图同一节奏，
+      不再"切到富化台/监测台就很平"。
+   ③ 触屏目标 —— 无 hover 的设备上行高抬到 44px（手指点得中）。
+   颜色已全部改走核心令牌（v11 颜色收敛），模块不再自带灰阶。
+   ========================================================================== */
+.mo-daily-sel,.mo-daybtn,.mo-cat-h,.mo-item,.mo-dg-card,.tr-tab,.tr-id,.tr-hbar[data-id],.mo-daily-acts button,.mo-dg-acts button,.mo-dg-acts2 button:active{transform:scale(.975)}
+.mo-daybtn,.mo-cat-h,.mo-item,.tr-tab,.tr-hbar[data-id]{transition:transform .18s var(--spring,cubic-bezier(.34,1.56,.64,1)),background .16s ease,color .16s ease,border-color .16s ease}
+.mo-day,.mo-dg-card,.mo-item{animation:viewIn .5s var(--ease-out) both}
+.mo-dg-card,.mo-dg-acts{animation:viewIn .5s var(--ease-out) both}
+@media (hover:none){
+  .mo-item,.tr-tab,.mo-daybtn,.mo-cat-h{min-height:44px}
+}

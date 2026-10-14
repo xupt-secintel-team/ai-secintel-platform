@@ -1,0 +1,2464 @@
+/* ============================================================================
+   AI-SecIntel 控制台 · 设计系统 v8 · 配色「黑曜石 & 香槟金」—— frontend/styles.css
+   ----------------------------------------------------------------------------
+   v8 只做一件事：**换掉整套色彩**。v5~v7 的蓝紫青（电光蓝 + 赛博青 + iris 紫）
+   是典型的"AI 生成感"配色；v8 改为黑金 —— 近黑暖调底色 + 香槟金主色，
+   实时语义改用「青玉」（金玉并置），背景三色极光收敛为两层金/玉光。
+   令牌名一字未改（--accent* / --line* / --surface* / --txt* 是模块公共 API），
+   浅色主题同步换为「象牙白 + 深金」。语义色与图表色整组改为暖金主导。
+
+   v7 在 v6 之上做「材质与光」的第二跃迁（见第 22 节）：
+     · 光源：身体加"顶光 + 右下冷反光"两层环境渐变，屏幕有了被照亮的方向；
+     · 体积：卡片顶边高光提到 .20、下坠阴影拉到 56px，内容真正"浮"在画布上；
+     · 英雄区：页头从"一行字"升级为带光晕的独立面板，标题成为每屏的第一眼；
+     · 色彩：六张 KPI 顶边各用一个数据色，连成一条可读的刻度带；
+     · 信号：主按钮改三段渐变 + 实心外辉光，搜索聚焦辉光扩到 90px。
+   v6 在 v5 之上做「视觉跃迁」——把界面从"深色工具面板"推成"深空指挥舱"：
+     · 色彩：底色改深空蓝黑（带明确色相），主色电光蓝提饱和，新增赛博青(--cyan)作第二记忆点；
+     · 尺度：display 27→42 / h1 20→34，KPI 大数字 26→34，建立真正的视觉焦点与尺度对比；
+     · 留白：主区 22/28 → 34/44，结果卡 14/18 → 21/24，间距基准整体放大一档；
+     · 层次：表面亮度堆叠提一档 + 发丝描边提亮，让内容"浮"在底上；桌面端左筛选栏改独立浮卡；
+     · 质感：卡片顶边高光 + 极淡内描边、答卡三色签名线、KPI 顶边亮线、页头渐变分隔线；
+     · 动效：入场 18px/.72s 错峰编排、rail 激活项左侧发光柱、搜索框聚焦辉光。
+   改动只涉及颜色 / 尺寸 / 阴影 / 渐变，以及 index.html 的骨架装饰；类名、id、
+   CSS 变量名（模块公共 API）一字未动，JS 逻辑零改动。详见第 21 节「v6 增强层」。
+
+   v5 是一次「视觉质量」重写：v4 的骨架（图标栏 / 命令栏 / 四视图 / 检查器）
+   与全部类名、id、CSS 变量名（模块公共 API）一字未改，改的是——
+      · 排版：建立 display/h1/h2/body/micro 五级尺度与字距纪律，数字一律等宽；
+      · 留白：4px 基准的间距体系，主区 20/28、卡片 14/16、行距分档；
+      · 层次：卡片改「顶部高光 + 亮度渐变 + 双层阴影」；画布加冷调纵深；
+      · 色彩：电光蓝单一信号色，语义色降饱和提亮，新增 iris 仅用于智能语义；
+      · 动效：统一曲线与时长；入场做 stagger 编排；hover 增「光扫」微交互；
+      · 响应式：六档断点，逐个宽度都保证「主动减项」而不是裁切。
+
+   性能纪律（与 v4 相同，不放松）：
+     · 动效只动 transform / opacity；不用大面积 filter:blur（柔和感交给渐变）；
+     · 结果卡用 contain:content 做隔离。★ 第五轮起不再用 content-visibility
+       —— 一页仅 12 条时它带来的"跳过渲染"收益极小，却会因估计高度与实际高度
+       不符而触发滚动锚定补偿，表现为滚动顿挫；
+     · 全部动效受 prefers-reduced-motion 总开关约束。
+
+   布局硬约束（改前必读，详见 frontend/DESIGN.md 第 6 节）：
+     · .app 不能加 z-index（否则窄屏检查器浮层被遮罩盖住）；
+     · .shell/.stage/.workspace/.view/.main 的 minmax(0,1fr) 与 min-height:0 一个都不能少；
+     · 任何 flex 纵向滚动容器的子项要 flex:0 0 auto（否则卡片被压扁裁掉）。
+   ============================================================================ */
+
+/* ============================ 0. 设计令牌 ============================ */
+:root{
+  color-scheme: dark;
+
+  /* —— 画布：黑曜石（近黑、极弱暖调）。不用蓝——蓝紫渐变是最典型的"AI 生成感"，
+        换成暖黑之后，金色主色与语义色之间的对比才干净 —— */
+  --bg:#0b0a08; --bg-2:#16130f; --elev-1:#1d1913; --elev-2:#282218;
+  /* —— 亮度堆叠：表面统一用暖白叠加（黑曜石上叠暖光）——
+        "内容比底亮"是深色界面唯一的层次来源 —— */
+  --surface-1:rgba(255,236,198,.072); --surface-2:rgba(255,236,198,.118);
+  --surface-3:rgba(255,236,198,.168); --surface-4:rgba(255,236,198,.228);
+  /* —— 发丝描边：暖金灰，卡片边缘才"切得出来" —— */
+  --line:rgba(255,231,186,.145); --line-2:rgba(255,231,186,.245); --line-3:rgba(255,231,186,.40);
+  /* —— 文本四级（对 --bg 全部 ≥ WCAG AA；暖白而非冷白，与金色同族） —— */
+  --txt:#f6f2e7; --txt-2:#c9c3b4; --txt-3:#9a927e; --txt-4:#877f6d;
+  /* —— 主交互色：香槟金。金是"权威 / 贵重 / 指挥台"的语汇，且远离蓝紫 —— */
+  --accent:#e3b04b; --accent-2:#f0cd7a; --accent-3:#f6e3ae;
+  --accent-soft:rgba(227,176,75,.16); --accent-line:rgba(227,176,75,.44);
+  --accent-ink:#1a1305; --accent-glow:rgba(227,176,75,.48);
+  /* —— 次交互色：青玉。只用于"实时 / 在线 / 活数据"——
+        金玉并置是传统高级配色，与蓝紫无关，是黑金里唯一的冷色锚点 —— */
+  --cyan:#2fbf9e; --cyan-2:#5edcbb; --cyan-soft:rgba(47,191,158,.13); --cyan-line:rgba(47,191,158,.36);
+  /* —— iris：只用于「智能体/AI 推理」这一种语义，出现得越少越有力（古铜金） —— */
+  --iris:#b8823a; --iris-soft:rgba(184,130,58,.15); --iris-line:rgba(184,130,58,.36);
+  /* —— 语义色（严重度）：v11 起必须与品牌金**可区分**。
+        v10 及以前 `--med:#f2c94c` 与 `--accent:#e3b04b` 色相 45°/40°、明度 62%/59%
+        —— 两色视觉几乎重合，中危徽章被读成"品牌色"，**严重度语义整体失效**。
+        现在语义梯度：红 → 橙红 → 橙 → 绿，全部退出金-黄色相带；
+        金色只出现在「主动作 / 高亮」，不再兼任任何严重度。 —— */
+  --ok:#4acc8a; --warn:#f0a12e; --danger:#ff5a52;
+  --crit:#ff5a52; --high:#ff7a3d; --med:#f08320; --low:#4acc8a; --info:#9b8f7a;
+  /* —— 数据可视化专用色（只在图表里出现，界面不使用）；整组暖金主导。
+        v11：--viz-1 不再与 --accent 同值（图表色与 UI 品牌色打架） —— */
+  --viz-1:#dda649; --viz-2:#2fbf9e; --viz-3:#e8913c; --viz-4:#f0a12e; --viz-5:#b8603c;
+  --viz-6:#ff5a52; --viz-7:#b9a284;
+  /* —— 字体：系统栈，零外部请求（离线演示首屏直出） —— */
+  --sans:system-ui,-apple-system,"Segoe UI Variable Text","Segoe UI","PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SFMono-Regular",Menlo,monospace;
+  /* —— 圆角：整体再大一号，面板更像"卡片"而不是"方块" —— */
+  --r-xs:6px; --r-sm:10px; --r-md:15px; --r-lg:20px; --r-xl:28px;
+  /* —— 阴影：更深更长，配合更暗的底 —— */
+  --sh-1:0 1px 2px rgba(0,0,0,.5);
+  --sh-2:0 2px 8px -2px rgba(0,0,0,.55),0 18px 42px -18px rgba(0,0,0,.85);
+  --sh-3:0 10px 30px -12px rgba(0,0,0,.65),0 48px 120px -36px rgba(0,0,0,.95);
+  --sh-lip:inset 0 1px 0 rgba(255,236,196,.20),inset 0 0 0 1px rgba(255,236,196,.024);   /* 卡片顶边高光 + 极淡内描边 */
+  /* —— 缓动 —— */
+  --ease:cubic-bezier(.32,.72,0,1);          /* 出场：快起慢收 */
+  --ease-out:cubic-bezier(.16,1,.3,1);       /* 位移：丝滑收尾 */
+  --spring:cubic-bezier(.34,1.56,.64,1);     /* 弹性回弹：按压 / 弹出 */
+  --ring:0 0 0 1px var(--accent-line),0 0 0 5px rgba(227,176,75,.18);
+  /* —— 排版尺度（v11）：全站**只有这 8 档**。
+        v10 及以前代码里散落 28 个裸字号（8.5→40 近乎连续），"尺度感"因此消失；
+        v11 把所有 font-size 吸附到下面 8 档，任何新写的裸 px 都算破坏纪律。
+        层级分工：micro 徽章/眉题 · xs 元信息 · sm 次要正文 · body 正文 ·
+                  h3 面板/卡片标题 · h2 区块标题与大数字 · h1 视图标题 · display 装饰大字。 —— */
+  --fs-display:44px; --fs-h1:29px; --fs-h2:20px; --fs-h3:16px;
+  --fs-body:14px; --fs-sm:13px; --fs-xs:12px; --fs-micro:11.5px;
+  --lh-tight:1.22; --lh-body:1.62; --lh-loose:1.85;
+  --tk-tight:-.55px; --tk-normal:-.008em; --tk-caps:.13em;
+  /* —— 间距基准（4px 网格）：v11 起全站 padding / gap 只允许引用这 8 档，
+        另有 0~3px 的"微调档"（徽章内边距一类）不走令牌。 —— */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:22px; --sp-6:32px;
+  --sp-7:48px; --sp-8:64px;
+  /* —— 内容宽度上限：命令栏与主区**共用同一个上限**，超宽屏两侧留白才一致 —— */
+  --maxw:1560px;
+  /* —— 实心色块上的文字（金底用 --accent-ink 深墨，红底一类仍用白） —— */
+  --txt-on-solid:#fff;
+  /* —— 轨道宽度（在 .stage.insp / 窄屏里改写） —— */
+  --inspw:0px; --railw:64px;
+}
+
+/* —— 浅色主题：同一套令牌，只换值。底色是冷调雾白，与深色的"夜空"互为镜像 —— */
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#f6f3eb; --bg-2:#ffffff; --elev-1:#ffffff; --elev-2:#ffffff;
+  --surface-1:rgba(60,45,18,.030); --surface-2:rgba(60,45,18,.058);
+  --surface-3:rgba(60,45,18,.090); --surface-4:rgba(60,45,18,.128);
+  --line:rgba(60,45,18,.12); --line-2:rgba(60,45,18,.185); --line-3:rgba(60,45,18,.28);
+  --txt:#1c1608; --txt-2:#4a4232; --txt-3:#605843; --txt-4:#6f6752;
+  --accent:#8a6410; --accent-2:#a3760f; --accent-3:#7a5810;
+  --accent-soft:rgba(138,100,16,.10); --accent-line:rgba(138,100,16,.34);
+  --accent-ink:#ffffff; --accent-glow:rgba(138,100,16,.22);
+  --cyan:#0d7a62; --cyan-2:#0a6653; --cyan-soft:rgba(13,122,98,.10); --cyan-line:rgba(13,122,98,.32);
+  --iris:#8a5c1c; --iris-soft:rgba(138,92,28,.10); --iris-line:rgba(138,92,28,.32);
+  --ok:#167a4a; --warn:#9a5f00; --danger:#c02b26;
+  --crit:#c02b26; --high:#a84e0c; --med:#a8560a; --low:#167a4a; --info:#6b6250;
+  --viz-1:#8a6410; --viz-2:#0d7a62; --viz-3:#a8520c; --viz-4:#9a5f00;
+  --viz-5:#8a3a1a; --viz-6:#c02b26; --viz-7:#6b5a3a;
+  --sh-1:0 1px 2px rgba(18,24,38,.07);
+  --sh-2:0 2px 8px -2px rgba(18,24,38,.10),0 18px 40px -18px rgba(18,24,38,.24);
+  --sh-3:0 10px 30px -12px rgba(18,24,38,.15),0 48px 110px -36px rgba(18,24,38,.32);
+  --sh-lip:inset 0 1px 0 rgba(255,255,255,.9);
+  --ring:0 0 0 1px var(--accent-line),0 0 0 5px rgba(138,100,16,.16);
+}
+
+/* ============================ 1. 基础 ============================ */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--txt);
+  font-family:var(--sans);font-size:var(--fs-body);line-height:var(--lh-body);letter-spacing:var(--tk-normal);
+  font-feature-settings:"tnum" 1,"cv05" 1,"ss01" 1;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;
+  overflow:hidden;
+  transition:background-color .34s var(--ease),color .34s var(--ease);
+}
+h1,h2,h3,h4,h5,p,figure{margin:0}
+button{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--accent-3);text-decoration:none;transition:color .16s var(--ease)}
+a:hover{color:var(--accent-2)}
+::selection{background:var(--accent-soft);color:var(--txt)}
+kbd{
+  font-family:var(--mono);font-size:var(--fs-micro);line-height:1;color:var(--txt-3);
+  background:var(--surface-2);border:1px solid var(--line-2);border-bottom-width:2px;
+  border-radius:var(--r-xs);padding:3px var(--sp-1);white-space:nowrap;
+}
+/* 滚动条：细、半透明、悬停变亮 */
+*{scrollbar-width:thin;scrollbar-color:var(--line-3) transparent}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--line-3);background-clip:content-box}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:var(--r-sm)}
+
+/* ============================ 2. 背衬 ============================ */
+/* 两层静态光：细网格（渐隐）+ 左上金环境光 + 右下玉反光 —— 制造"光从哪来"的体积。
+   全部是静态背景图，零滤镜、零常驻动画。 */
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.backdrop::before{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:48px 48px;background-position:-1px -1px;opacity:.75;
+  mask-image:radial-gradient(132% 84% at 50% -6%,#000 0%,rgba(0,0,0,.5) 40%,transparent 88%);
+  -webkit-mask-image:radial-gradient(132% 84% at 50% -6%,#000 0%,rgba(0,0,0,.5) 40%,transparent 88%);
+}
+.backdrop::after{
+  content:"";position:absolute;inset:-20vh -10vw;
+  background:
+    radial-gradient(52% 46% at 14% 4%,var(--accent-soft),transparent 72%),
+    radial-gradient(30% 36% at 92% 92%,var(--cyan-soft),transparent 76%);
+  opacity:.9;
+}
+
+/* ============================ 3. 应用外壳 ============================ */
+.app{
+  /* 注意：这里不能再加 z-index（哪怕 z-index:1）——加了会形成堆叠上下文，
+     窄屏(≤1200px)时检查器转浮层(z-index:90)就被整体压到遮罩 #mask(z-index:80，
+     在 .app 外层)下面：详情面板被暗色遮罩盖住、点击全被遮罩吃掉。 */
+  position:relative;height:100%;
+  display:grid;grid-template-columns:var(--railw) minmax(0,1fr);grid-template-rows:minmax(0,1fr);
+  overflow:hidden;
+}
+.shell{
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);
+  min-height:0;min-width:0;overflow:hidden;
+}
+/* ★ 修复（问题一 · 重叠 + 问题二 · 卡顿）：撤销 grid-template-columns 的 .4s 过渡。
+   旧版打开详情面板时列宽要连续过渡约 24 帧，左侧结果列表随之**逐帧重排**；
+   叠加 .res 的 content-visibility:auto（跳过渲染、尺寸按缓存占位）与
+   scroll-driven 动效（层提升）之后，绘制顺序在滑入过程中错位 ——
+   结果卡文字压到面板上面透出来（用户反馈的"CVE 文字被压在面板下方透出"）。
+   现在列宽一帧到位（只重排一次），滑入感全部交给 .inspector 自身的动画。
+   附带收益：拖拽调宽（#inspgrip 实时写 --inspw）不再有 .4s 迟滞，真正跟手。 */
+.stage{
+  display:grid;grid-template-columns:minmax(0,1fr) var(--inspw);grid-template-rows:minmax(0,1fr);
+  min-height:0;min-width:0;overflow:hidden;
+}
+.stage.insp{--inspw:452px}
+
+/* ============================ 4. 左侧图标导航栏 ============================ */
+.rail{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp-2);padding:var(--sp-4) 0 var(--sp-4);
+  border-right:1px solid var(--line);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 6%,var(--bg-2)),var(--bg-2) 46%);
+}
+/* 图标栏右缘一道从上到下的渐隐高光：让"侧栏"这件事有一道光收边 */
+.rail::after{
+  content:"";position:absolute;right:-1px;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 26%,transparent) 22%,transparent 78%);
+  opacity:.7;
+}
+.rail-brand{
+  width:40px;height:40px;flex:none;border-radius:13px;display:grid;place-items:center;
+  color:var(--accent-2);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 20%,var(--elev-2)),var(--elev-1));
+  border:1px solid var(--accent-line);
+  box-shadow:var(--sh-lip),0 10px 26px -14px var(--accent-glow);
+  position:relative;overflow:hidden;
+  transition:transform .3s var(--spring),border-color .2s var(--ease),color .2s var(--ease),box-shadow .3s var(--ease);
+}
+.rail-brand svg{width:22px;height:22px}
+.rail-brand::after{ /* 徽标上的一道斜向高光，静态 */
+  content:"";position:absolute;inset:0;background:linear-gradient(150deg,var(--accent-soft),transparent 62%);
+}
+.rail-brand:hover{transform:translateY(-1px) scale(1.05);border-color:var(--accent-line);color:var(--accent-3);box-shadow:0 6px 18px -10px var(--accent-glow)}
+.rail-nav{position:relative;display:flex;flex-direction:column;gap:var(--sp-2);margin-top:14px;width:100%;align-items:center}
+.rail-item{
+  position:relative;z-index:1;width:44px;height:44px;border:0;background:none;cursor:pointer;
+  border-radius:13px;display:grid;place-items:center;gap:0;color:var(--txt-3);
+  transition:color .18s var(--ease),background .18s var(--ease),transform .25s var(--spring);
+}
+.rail-item svg{width:21px;height:21px;transition:transform .3s var(--spring)}
+.rail-item span{
+  position:absolute;left:100%;margin-left:8px;white-space:nowrap;font-size:var(--fs-xs);font-weight:520;
+  color:var(--txt);background:var(--elev-2);border:1px solid var(--line-2);border-radius:var(--r-sm);
+  padding:var(--sp-1) var(--sp-3);box-shadow:var(--sh-2);
+  opacity:0;transform:translateX(-4px) scale(.96);transform-origin:left center;pointer-events:none;z-index:20;
+  transition:opacity .18s var(--ease),transform .22s var(--spring);
+}
+.rail-item:hover{color:var(--txt);background:var(--surface-2)}
+.rail-item:hover svg{transform:scale(1.1)}
+.rail-item:hover span{opacity:1;transform:none}
+.rail-item.on{color:var(--accent-3)}
+.rail-item:active{transform:scale(.93)}
+/* 活动指示块：由 JS 做 FLIP（真实位移，不是重画）。
+   v6 让它带上强调色的底与边，成为 rail 上唯一的"发光块"。 */
+.rail-pill{
+  position:absolute;left:50%;top:0;width:44px;height:44px;margin-left:-22px;border-radius:13px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 20%,var(--surface-3)),var(--surface-1));
+  border:1px solid var(--accent-line);box-shadow:var(--sh-lip),0 10px 26px -14px var(--accent-glow);
+  transition:transform .42s var(--ease-out),height .42s var(--ease-out),opacity .2s var(--ease);
+}
+.rail-foot{display:flex;flex-direction:column;gap:2px;margin-top:auto;align-items:center}
+.rail-btn{
+  width:36px;height:36px;border:0;background:none;border-radius:10px;cursor:pointer;
+  display:grid;place-items:center;color:var(--txt-4);
+  transition:color .16s var(--ease),background .16s var(--ease),transform .22s var(--spring);
+}
+.rail-btn svg{width:17px;height:17px}
+.rail-btn:hover{color:var(--txt);background:var(--surface-2)}
+.rail-btn:active{transform:scale(.9)}
+.rail-btn.on{color:var(--accent-2);background:var(--accent-soft)}
+
+/* ============================ 5. 顶部命令栏 ============================ */
+/* ★ 性能（问题二）：撤掉 backdrop-filter。
+   它是**常驻全宽**大件，而底下正压着每帧都在动的 WebGL 粒子画布 ——
+   18px 模糊会被迫逐帧重采样整条顶栏，是"背景动画拖垮全局"的典型。
+   第 22 节的 v2 修正已确立「常驻大件不留毛玻璃」这条原则，
+   但当时只撤了 viewhead / searchbar，漏了这条顶栏，这里补齐。
+   背景提到近乎不透明，与模糊版的观感差异仅剩画布约 5% 的透光。 */
+.cmdbar{
+  position:relative;
+  display:flex;align-items:center;gap:var(--sp-4);padding:0 var(--sp-5);height:66px;flex:none;
+  min-width:0;overflow:hidden;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 97%,transparent),color-mix(in srgb,var(--bg) 95%,transparent));
+}
+/* 顶栏下缘：一道蓝→青的渐隐分割线，把"外壳"与"工作区"切开 */
+.cmdbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--accent-line) 20%,var(--cyan-line) 80%,transparent);
+  opacity:.6;
+}
+.cmd-left{display:flex;align-items:center;gap:var(--sp-4);min-width:0;flex:0 1 auto;overflow:hidden}
+.brandline{display:flex;flex-direction:column;line-height:1.16}
+.brandline b{font-size:var(--fs-h3);font-weight:660;letter-spacing:-.45px;white-space:nowrap}
+.brandline small{font-size:var(--fs-micro);letter-spacing:2px;color:var(--txt-4);text-transform:uppercase;white-space:nowrap;font-weight:560}
+.cmd-div{width:1px;height:24px;background:linear-gradient(180deg,transparent,var(--line-2),transparent);flex:none}
+.crumbs{display:flex;flex-direction:column;line-height:1.2;min-width:0;overflow:hidden}
+.crumb{font-size:var(--fs-sm);font-weight:540;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb-sub{font-size:var(--fs-micro);color:var(--txt-4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1440px){.crumb-sub{display:none}}
+/* 命令面板触发器：长得像输入框，其实是个按钮 */
+.palette-trigger{
+  flex:1 1 300px;max-width:600px;min-width:170px;height:41px;display:flex;align-items:center;gap:var(--sp-3);
+  padding:0 var(--sp-3) 0 var(--sp-4);cursor:pointer;text-align:left;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  border:1px solid var(--line-2);border-radius:999px;color:var(--txt-4);
+  box-shadow:var(--sh-lip);
+  transition:border-color .18s var(--ease),background .18s var(--ease),color .18s var(--ease),box-shadow .25s var(--ease),transform .25s var(--spring);
+}
+.palette-trigger svg{width:16px;height:16px;flex:none;opacity:.9;color:var(--accent-2)}
+.palette-trigger .ptxt{flex:1;font-size:var(--fs-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 悬停：边框亮起 + 一层强调色柔光，让"这里是入口"这件事一眼可见 */
+.palette-trigger:hover{
+  border-color:var(--accent-line);background:var(--surface-3);color:var(--txt-2);
+  box-shadow:var(--sh-lip),0 0 0 4px var(--accent-soft);
+}
+.palette-trigger:active{transform:scale(.995)}
+.palette-trigger kbd{margin-left:auto}
+.cmd-right{display:flex;align-items:center;gap:var(--sp-2);margin-left:auto;min-width:0;flex:0 1 auto}
+
+/* 实时监测指示灯 */
+.livewrap{
+  display:flex;align-items:center;gap:var(--sp-2);flex:none;height:31px;padding:0 var(--sp-3);border-radius:999px;
+  border:1px solid var(--cyan-line);background:var(--cyan-soft);cursor:default;max-width:340px;
+  transition:border-color .2s var(--ease),background .2s var(--ease);
+}
+.livewrap:hover{border-color:var(--cyan)}
+.livedot{position:relative;width:6px;height:6px;flex:none;border-radius:50%;background:var(--cyan)}
+.livedot::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--ok);opacity:.5;animation:livering 2.2s var(--ease-out) infinite}
+.livedot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);animation:livepulse 2.2s ease-in-out infinite}
+@keyframes livering{0%{transform:scale(.6);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
+.livewrap.stale{border-color:color-mix(in srgb,var(--warn) 34%,transparent);background:color-mix(in srgb,var(--warn) 8%,transparent)}
+.livewrap.stale .livedot,.livewrap.stale .livedot::before,.livewrap.stale .livedot::after{background:var(--warn);border-color:var(--warn)}
+.livewrap.off{border-color:var(--line);background:transparent}
+.livewrap.off .livedot,.livewrap.off .livedot::before{background:var(--txt-4);animation:none}
+.livewrap.off .livedot::after{display:none}
+.livetxt{font-size:var(--fs-micro);font-family:var(--mono);color:var(--txt-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+
+/* 深度同步 */
+.refwrap{display:flex;align-items:center;gap:var(--sp-2);flex:none}
+.refstat{font-size:var(--fs-micro);font-family:var(--mono);color:var(--txt-4);white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.refbtn{
+  display:inline-flex;align-items:center;gap:var(--sp-2);height:35px;padding:0 var(--sp-4);cursor:pointer;flex:none;
+  font-size:var(--fs-xs);font-weight:540;color:var(--txt-2);background:var(--surface-1);
+  border:1px solid var(--line-2);border-radius:999px;
+  transition:color .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease),box-shadow .2s var(--ease);
+}
+.refbtn svg{flex:none}
+.refbtn:hover{color:var(--txt);background:var(--surface-3);border-color:var(--line-3);box-shadow:var(--sh-lip)}
+.refbtn:disabled{cursor:progress;color:var(--txt-4)}
+.refbtn.run{color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-soft)}
+.refbtn.run svg{animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rspin{
+  width:9px;height:9px;flex:none;border-radius:50%;display:inline-block;vertical-align:-1px;
+  border:1.5px solid var(--line-3);border-top-color:var(--accent-2);animation:spin .75s linear infinite;
+}
+
+/* 顶栏统计：装进一个「仪表胶囊」，与命令面板触发器同高，形成一条规整的读数栏 */
+.top-stat{
+  display:flex;align-items:center;flex:none;min-width:0;overflow:hidden;
+  height:41px;padding:0 var(--sp-1);border:1px solid var(--line-2);border-radius:16px;background:var(--surface-1);
+  box-shadow:var(--sh-lip);
+}
+.top-stat .kv{padding:0 var(--sp-3);border-left:1px solid var(--line);text-align:center;white-space:nowrap;line-height:1.14}
+.top-stat .kv:first-child{border-left:0}
+.top-stat .kv b{display:block;font-family:var(--mono);font-size:var(--fs-h3);font-weight:520;letter-spacing:-.4px;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,var(--txt),color-mix(in srgb,var(--txt) 62%,var(--accent-3)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.top-stat .kv span{display:block;font-size:var(--fs-micro);letter-spacing:1.1px;text-transform:uppercase;color:var(--txt-4)}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:livepulse 2.4s ease-in-out infinite}
+/* 数据新鲜度格（顶栏第 4 格）：不收缩、不裁切；空间不够时整格让位（见 1400px 断点） */
+.top-stat .kv.fresh{flex:none;display:flex;align-items:center;gap:7px}
+.top-stat .kv.fresh .pulse{flex:none}
+.top-stat .kv.fresh.stale .pulse{background:var(--warn)}
+
+/* 翻译 / 字号 */
+.trbtn{
+  height:35px;min-width:35px;flex:none;cursor:pointer;border-radius:var(--r-sm);font-size:var(--fs-sm);font-weight:560;padding:0 var(--sp-2);
+  color:var(--txt-3);background:var(--surface-1);border:1px solid var(--line-2);
+  transition:color .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease),box-shadow .2s var(--ease);
+}
+.trbtn:hover{color:var(--txt);background:var(--surface-3);border-color:var(--line-3)}
+.trbtn.on{color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-soft)}
+/* 翻译进行中：按钮临时变宽显示「AI 翻译中 12/30」，结束后恢复 29px。
+   整页自动翻译一次要翻几十~上百条（本地 CPU 推理，每批 8 条），
+   没有常驻进度的话用户面对一个不动的界面根本不知道卡在哪。 */
+.trbtn[data-trbusy]{
+  width:auto;min-width:29px;padding:0 var(--sp-3);
+  color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-soft);
+  animation:trpulse 1.1s var(--ease) infinite;cursor:progress;
+}
+@keyframes trpulse{0%,100%{opacity:1}50%{opacity:.6}}
+.zoomctl{display:flex;flex:none;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--surface-1)}
+.zoomctl button{
+  min-width:48px;height:33px;padding:0 var(--sp-4);border:0;background:transparent;cursor:pointer;
+  color:var(--txt-3);font-size:var(--fs-xs);letter-spacing:.2px;
+  transition:color .14s var(--ease),background .14s var(--ease);
+}
+.zoomctl button+button{border-left:1px solid var(--line)}
+.zoomctl button:hover{color:var(--txt);background:var(--surface-3)}
+.zoomctl button.on{color:var(--txt);background:var(--surface-4)}
+
+/* ============================ 6. 视图切换 ============================ */
+.workspace{
+  position:relative;min-height:0;min-width:0;overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);
+}
+.view{
+  grid-area:1/1;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);
+  min-height:0;min-width:0;overflow:hidden;
+  opacity:0;visibility:hidden;pointer-events:none;transform:translateY(9px) scale(.996);
+  transition:opacity .28s var(--ease),transform .4s var(--ease-out),visibility .28s;
+}
+.view.on{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+.view[data-view="search"]{grid-template-columns:330px minmax(0,1fr)}
+.view.nopanel[data-view="search"]{grid-template-columns:0 minmax(0,1fr)}
+
+/* 主工作区：独立滚动 + 顶到主区的宽度上限
+   ★ 性能（问题二 · 第三轮）加 will-change:scroll-position：
+   这是滚动容器专用的提示，告诉合成器「这个盒子的滚动位置会频繁变化」，
+   让滚动走上「合成层内平移」的快速路径，而不是每帧重绘整页
+   （重绘会把 fixed 的背景层与 WebGL 画布一并牵连进来）。
+   相比 transform:translateZ(0) 那种强制提升，它的副作用更小（不改变文字栅格化方式）。 */
+.main{
+  min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  will-change:scroll-position;
+  /* ★ 第五轮：为滚动条预留固定槽位。结果条数变化时滚动条的出现/消失会改变
+     可用宽度，进而触发整列卡片重排 —— 表现为翻页/换词后列表"抖一下"。 */
+  scrollbar-gutter:stable;
+  display:flex;flex-direction:column;gap:var(--sp-6);padding:var(--sp-6) var(--sp-7) 100px;
+}
+.main.wide{gap:var(--sp-6)}
+.main>*{max-width:1560px;width:100%;margin-inline:auto;flex:0 0 auto}
+/* 视图头：v6 用「大标题 + 小胶囊标签」的强尺度对比，取代 v5 的平铺 */
+.viewhead{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-5);flex-wrap:wrap;padding:var(--sp-2) 0 2px}
+.viewhead h2{display:flex;align-items:center;gap:var(--sp-4);font-size:var(--fs-h1);font-weight:680;letter-spacing:var(--tk-tight);margin-bottom:10px;line-height:1.1}
+/* 页面标题记号：蓝→青渐变竖条，四个视图共用同一节奏 */
+.viewhead h2::before{content:"";width:5px;height:1.02em;flex:none;border-radius:3px;
+  background:linear-gradient(180deg,var(--cyan-2),var(--accent-2) 52%,var(--accent));
+  box-shadow:0 0 20px -3px var(--accent-glow)}
+.viewhead p{font-size:var(--fs-sm);color:var(--txt-3);max-width:820px;line-height:1.7}
+/* 情报富化台页头（定点布局）：筛选按钮从右上角移回描述文字正下方，
+   与标题/描述左对齐竖排。仅作用于此视图页头，其余视图页头仍为横向 space-between；
+   ENRICH 数字是 .vh-ghost 绝对定位（右下角），不在此处触碰。 */
+.viewhead.vh-col{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:var(--sp-4)}
+.tagline{font-size:var(--fs-micro);color:var(--txt-4);font-family:var(--mono);letter-spacing:.2px;white-space:nowrap;
+  padding:var(--sp-1) var(--sp-3);border:1px solid var(--line);border-radius:999px;background:var(--surface-1)}
+
+/* 视图入场：主区前几个块做阶梯位移（只动 transform/opacity）。
+   ★ v11 去重：`@keyframes viewIn` 与这套 stagger 的**唯一权威定义**在第 21 节（v6 增强层）。
+     这里原先另写了一份（.56s/11px，与那边的 .72s/18px 冲突），
+     同名 keyframes 后定义的生效，改一处必漏一处 —— 已删除，只留这一行指针。 */
+
+/* ============================ 7. 左筛选栏 ============================ */
+.sidepanel{
+  position:relative;min-height:0;min-width:0;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 74%,transparent),color-mix(in srgb,var(--bg) 62%,transparent));
+  border-right:1px solid var(--line);
+  transition:transform .34s var(--ease-out),opacity .28s var(--ease);
+}
+.view.nopanel .sidepanel{transform:translateX(-24px);opacity:0;pointer-events:none}
+.sp-head{
+  display:flex;align-items:center;gap:var(--sp-2);flex:none;height:42px;padding:0 var(--sp-3) 0 var(--sp-4);
+  border-bottom:1px solid var(--line);
+}
+.sp-title{font-size:var(--fs-micro);letter-spacing:1.1px;text-transform:uppercase;color:var(--txt-4);font-weight:600}
+.sp-collapse{
+  margin-left:auto;width:24px;height:24px;border-radius:var(--r-xs);cursor:pointer;font-size:var(--fs-xs);
+  color:var(--txt-4);background:transparent;border:1px solid transparent;line-height:1;
+  transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease);
+}
+.sp-collapse:hover{color:var(--txt);background:var(--surface-3);border-color:var(--line-2)}
+/* 收起后从主区左缘伸出的展开把手 */
+.sp-open{
+  position:absolute;left:0;top:76px;z-index:6;width:20px;height:44px;border-radius:0 8px 8px 0;
+  display:none;place-items:center;cursor:pointer;color:var(--txt-3);
+  background:var(--surface-2);border:1px solid var(--line-2);border-left:0;
+  transition:color .16s var(--ease),background .16s var(--ease),width .2s var(--ease);
+}
+.sp-open:hover{color:var(--txt);background:var(--surface-4);width:24px}
+.view.nopanel .sp-open{display:grid}
+.side{
+  flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-4) var(--sp-4) var(--sp-7);
+  display:flex;flex-direction:column;gap:var(--sp-4);
+}
+/* ★ 卡片一律不参与 flex 收缩：.card 带 overflow:hidden，其自动最小尺寸为 0，
+   不锁 flex 的话内容一超高就被压扁裁掉，而且侧栏因此永远"不需要"滚动 = 下面的卡片永远看不到 */
+.side>*{flex:0 0 auto}
+
+/* 侧栏卡片（主体与模块共用：模块 sideSections 里写的就是 .card） */
+.card{
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1) 46%);
+  border:1px solid var(--line-2);border-radius:var(--r-md);
+  box-shadow:var(--sh-lip),0 8px 22px -20px rgba(0,0,0,.7);
+  overflow:hidden;transition:border-color .22s var(--ease),box-shadow .28s var(--ease),background .22s var(--ease);
+  animation:cardIn .44s var(--ease-out) both;
+}
+.card:hover{border-color:var(--line-3);box-shadow:var(--sh-lip),0 18px 40px -22px rgba(0,0,0,.9)}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card>h3{
+  display:flex;align-items:center;gap:var(--sp-2);margin:0;padding:var(--sp-3) var(--sp-4);
+  font-size:var(--fs-micro);font-weight:600;letter-spacing:1.15px;text-transform:uppercase;color:var(--txt-4);
+  border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg-2) 46%,transparent);
+}
+.card>h3::before{content:"";width:3px;height:10px;border-radius:2px;background:linear-gradient(180deg,var(--accent-2),var(--accent));flex:none}
+/* 卡片标题也是 flex 行。译文块若被插进来（TR.SEL 含 `#db h3`），
+   `margin-left:auto` 的右侧按钮会被译块顶走、`::before` 也会被挤变形。
+   让译文块自成一整行（flex-basis:100% + 换行），不参与按钮的横向排布。 */
+.card>h3{flex-wrap:wrap}
+.card>h3>.trl{flex:0 0 100%;order:9;margin:5px 0 1px}
+.card>h3 button{
+  margin-left:auto;background:none;border:0;cursor:pointer;font-size:var(--fs-micro);color:var(--txt-4);
+  padding:2px var(--sp-2);border-radius:var(--r-xs);transition:color .15s var(--ease),background .15s var(--ease);
+}
+.card>h3 button:hover{color:var(--accent-2);background:var(--accent-soft)}
+.card .body{padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+
+/* 折叠分组（筛选面板用 <details>，高度用 grid-template-rows 技巧平滑展开，无 JS 测量） */
+.fgroup{margin-bottom:2px;border-bottom:1px solid var(--line);padding-bottom:var(--sp-2)}
+.fgroup:last-child{border-bottom:0;padding-bottom:0}
+.fgroup>summary{
+  display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-1);cursor:pointer;list-style:none;
+  font-size:var(--fs-micro);letter-spacing:.5px;color:var(--txt-3);font-weight:600;text-transform:uppercase;
+  border-radius:var(--r-sm);transition:color .15s var(--ease),background .15s var(--ease);
+}
+.fgroup>summary::-webkit-details-marker{display:none}
+.fgroup>summary:hover{color:var(--txt);background:var(--surface-2)}
+.fgroup>summary::before{content:"";width:0;height:0;flex:none;border-left:4px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;transition:transform .22s var(--spring)}
+.fgroup[open]>summary::before{transform:rotate(90deg)}
+.fgroup>summary .fcount{margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4);font-weight:400;letter-spacing:0}
+.fgroup .fbody{display:flex;flex-direction:column;gap:1px;padding-top:2px;animation:viewIn .3s var(--ease-out) both}
+.flabel{display:flex;justify-content:space-between;align-items:center;font-size:var(--fs-xs);color:var(--txt-3);padding:2px var(--sp-1) var(--sp-2)}
+/* 长清单（如上百个数据来源）收进可滚子区域，别把整张卡撑到几千像素 */
+.fbody.tall{max-height:236px;overflow-y:auto;overscroll-behavior:contain;padding-right:var(--sp-1)}
+/* 「展开其余 N 个」：语料构成 / 高发组件 TOP 这类长清单默认只露头部几条 */
+.foldmore>summary{
+  display:flex;align-items:center;justify-content:center;gap:var(--sp-2);margin-top:10px;padding:var(--sp-2) var(--sp-2);
+  cursor:pointer;list-style:none;font-size:var(--fs-xs);color:var(--txt-3);
+  background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-sm);
+  transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease);
+}
+.foldmore>summary::-webkit-details-marker{display:none}
+.foldmore>summary::after{content:"\25be";font-size:var(--fs-micro);color:var(--txt-4);transition:transform .24s var(--spring)}
+.foldmore>summary:hover{color:var(--txt);background:var(--surface-3);border-color:var(--line-2)}
+.foldmore[open]>summary::after{transform:rotate(180deg)}
+.foldmore>div{padding-top:var(--sp-2);animation:viewIn .32s var(--ease-out) both}
+.foldmore>summary .fm-open{display:none}
+.foldmore[open]>summary .fm-closed{display:none}
+.foldmore[open]>summary .fm-open{display:inline}
+.fchk{
+  flex:0 0 auto;display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-2);border-radius:var(--r-sm);cursor:pointer;
+  font-size:var(--fs-sm);color:var(--txt-3);user-select:none;
+  transition:background .14s var(--ease),color .14s var(--ease);
+}
+.fchk:hover{background:var(--surface-2);color:var(--txt-2)}
+.fchk input{accent-color:var(--accent);width:13px;height:13px;flex:none;cursor:pointer}
+.fchk .dot{width:7px;height:7px;border-radius:2px;flex:none}
+.fchk .n{margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4);font-variant-numeric:tabular-nums}
+.fchk.on{color:var(--txt)}
+.fchk.on .n{color:var(--accent-2)}
+.rowsel{display:flex;gap:var(--sp-2);padding:2px 1px}
+.rowsel input,.rowsel select{
+  flex:1;min-width:0;background:var(--bg-2);color:var(--txt);font-family:var(--mono);font-size:var(--fs-xs);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-2);outline:0;
+  transition:border-color .16s var(--ease),box-shadow .16s var(--ease);
+}
+.rowsel input:focus{border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=range]{accent-color:var(--accent);width:100%;height:18px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);padding:var(--sp-2) var(--sp-2);border-radius:var(--r-sm);cursor:pointer;transition:background .14s var(--ease)}
+.switch:hover{background:var(--surface-2)}
+.switch span{font-size:var(--fs-sm);color:var(--txt-3)}
+.switch.on span{color:var(--txt)}
+.tgl{position:relative;width:32px;height:18px;flex:none;border-radius:999px;background:var(--surface-4);box-shadow:inset 0 0 0 1px var(--line-2);transition:background .22s var(--ease)}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--txt-3);
+  transition:transform .3s var(--spring),background .22s var(--ease)}
+.switch.on .tgl{background:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-line),0 3px 10px -4px var(--accent-glow)}
+.switch.on .tgl::after{transform:translateX(14px);background:var(--accent-ink)}
+/* 迷你条形图（语料构成 / 高发组件 / 模块归档） */
+.bar{height:5px;border-radius:999px;background:var(--surface-3);overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  transition:width .9s var(--ease-out)}
+.mini{display:flex;justify-content:space-between;gap:var(--sp-3);font-size:var(--fs-xs);font-family:var(--mono);color:var(--txt-3)}
+.mini>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini>span:last-child{color:var(--txt-2);font-variant-numeric:tabular-nums;flex:none}
+.prodrow{cursor:pointer;border-radius:var(--r-xs);padding:2px var(--sp-1);margin:0 -4px;transition:background .14s var(--ease)}
+.prodrow:hover{background:var(--surface-2)}
+
+/* ============================ 8. 检索区 ============================ */
+/* ★ 修复（用户反馈 · 第七轮 —— 层叠倒置）：
+   检索区内部有一个**绝对定位浮层** `#sug`（`.sugcard`，输入时的候选列表，
+   z-index:40），它向下悬垂、正好压在答复卡的上方。
+   问题在于：只要 `.searchbox` 因为任何原因成为**堆叠上下文**（最现实的原因见
+   第 1527 行：`.view.on .main>*` 的入场动画给每个直接子元素都留下了堆叠上下文），
+   浮层的 z-index:40 就只在 `.searchbox` 这棵子树内部参与比较 ——
+   于是斗不过 DOM 里排在后面的兄弟节点 `#answer`（答复卡）/`#results`（结果列表），
+   表现为「答复卡把检索建议浮层压住了」，也就是用户说的「覆盖顺序反了」。
+   这里给整棵检索区一个**显式的、确定的层级**：
+     · 高于答复卡 / 结果列表（它们都是 z-index:auto，即 0）；
+     · 低于结果条 `.resbar`（z-index:12，sticky 时必须压住滚动内容）。
+   这样浮层无论 `.searchbox` 是否成为堆叠上下文，都能盖住下面的卡片。 */
+.searchbox{position:relative;z-index:3;display:flex;flex-direction:column;gap:var(--sp-3)}
+.searchbar{
+  position:relative;display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-4);
+  background:linear-gradient(180deg,var(--surface-3),var(--surface-1));border:1px solid var(--line-2);border-radius:var(--r-xl);
+  box-shadow:var(--sh-lip),0 10px 30px -22px rgba(0,0,0,.9);
+  /* ★ 性能（第八轮）：从 transition 里删掉 background。
+     :focus-within 会把 background 由两段渐变换成实色 --surface-3，
+     浏览器要对「渐变 ↔ 实色」做逐帧插值 —— 整条搜索框（满宽 × ~64px）
+     每帧重绘一次，200ms ≈ 12 帧。而两者明度极接近，插值的中间态没人看得出，
+     直接瞬时切换：视觉无损失，省掉一整条满宽元素的重绘。 */
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+/* 聚焦时底部扫过一道强调色细线（scaleX 0→1，合成层动效） */
+.searchbar::after{
+  content:"";position:absolute;left:17px;right:17px;bottom:-1px;height:1px;border-radius:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-2),transparent);
+  transform:scaleX(0);opacity:0;transition:transform .5s var(--ease-out),opacity .3s var(--ease);
+}
+.searchbar:hover{border-color:var(--line-3)}
+.searchbar:focus-within{border-color:var(--accent-line);background:var(--surface-3)}
+.searchbar:focus-within::after{transform:scaleX(1);opacity:.9}
+.searchbar>svg{flex:none;color:var(--txt-4);transition:color .2s var(--ease)}
+.searchbar:focus-within>svg{color:var(--accent-2)}
+.searchbar input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--txt);font-size:var(--fs-h3);font-family:var(--sans);letter-spacing:-.1px}
+.searchbar input::placeholder{color:var(--txt-4)}
+.extgl{
+  display:inline-flex;align-items:center;gap:var(--sp-2);flex:none;cursor:pointer;user-select:none;white-space:nowrap;
+  font-size:var(--fs-xs);color:var(--txt-3);padding:var(--sp-1) var(--sp-3);border-radius:999px;
+  border:1px solid var(--line-2);background:var(--surface-1);
+  transition:color .18s var(--ease),border-color .18s var(--ease),background .18s var(--ease);
+}
+.extgl input{accent-color:var(--accent);width:12px;height:12px;margin:0;cursor:pointer}
+.extgl:hover{border-color:var(--line-3);color:var(--txt-2)}
+.extgl:has(input:checked){border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent-3)}
+.hints{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+.hint{
+  font-size:var(--fs-xs);color:var(--txt-3);cursor:pointer;padding:var(--sp-1) var(--sp-3);border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-1);
+  transition:color .16s var(--ease),border-color .16s var(--ease),background .16s var(--ease),transform .25s var(--spring);
+}
+.hint:hover{color:var(--txt);border-color:var(--line-3);background:var(--surface-3);transform:translateY(-1px)}
+.hint:active{transform:translateY(0) scale(.97)}
+.qparse{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center}
+.tagx{
+  display:inline-flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);padding:var(--sp-1) var(--sp-3);border-radius:999px;
+  border:1px solid var(--line-2);background:var(--surface-1);color:var(--txt-2);
+  transition:border-color .16s var(--ease),background .16s var(--ease);
+}
+.tagx b{color:var(--txt);font-weight:520}
+.tagx em{font-style:normal;font-family:var(--mono);font-size:var(--fs-xs);color:var(--accent-3)}
+.tagx.intent{border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent-3)}
+.tagx.concept{background:var(--surface-2)}
+.tagx.expand{border-style:dashed}
+.tagx.dym{cursor:pointer;border-color:color-mix(in srgb,var(--warn) 40%,transparent);background:color-mix(in srgb,var(--warn) 10%,transparent);color:var(--warn)}
+.tagx.dym:hover{background:color-mix(in srgb,var(--warn) 18%,transparent)}
+.tagx.relwrap{border-style:dashed;gap:var(--sp-1);flex-wrap:wrap}
+.relq{
+  font-size:var(--fs-xs);padding:2px var(--sp-2);border-radius:999px;cursor:pointer;color:var(--txt-2);
+  background:var(--surface-2);border:1px solid var(--line-2);
+  transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease);
+}
+.relq:hover{color:var(--accent-3);background:var(--accent-soft);border-color:var(--accent-line)}
+.qpd{flex-basis:100%}
+.qpd>summary{
+  display:inline-flex;align-items:center;gap:var(--sp-2);cursor:pointer;list-style:none;font-size:var(--fs-xs);
+  color:var(--txt-2);padding:var(--sp-1) var(--sp-3);border-radius:999px;border:1px dashed var(--line-3);background:var(--surface-1);
+  transition:background .15s var(--ease),color .15s var(--ease);
+}
+.qpd>summary::-webkit-details-marker{display:none}
+.qpd>summary::before{content:"";width:0;height:0;flex:none;border-left:4px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;transition:transform .22s var(--spring)}
+.qpd[open]>summary::before{transform:rotate(90deg)}
+.qpd>summary:hover{background:var(--surface-3);color:var(--txt)}
+.qpd-body{
+  margin-top:9px;padding:var(--sp-3) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-md);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--sh-lip);
+  display:flex;flex-direction:column;gap:var(--sp-2);animation:viewIn .3s var(--ease-out) both;
+}
+.qpd-row{display:flex;gap:var(--sp-2);align-items:baseline;font-size:var(--fs-xs)}
+.qpd-row>span{flex:none;min-width:66px;color:var(--txt);font-weight:520}
+.qpd-row>i{flex:none;font-style:normal;color:var(--txt-4)}
+.qpd-row>em{font-style:normal;font-family:var(--mono);font-size:var(--fs-xs);color:var(--accent-3);word-break:break-all}
+.qpd-row .cn{font-family:var(--sans);color:var(--txt-2)}
+/* 检索建议浮层 */
+.sugcard{
+  position:absolute;left:0;right:0;top:calc(100% - 2px);z-index:40;
+  background:var(--elev-1);border:1px solid var(--line-2);border-radius:var(--r-md);
+  box-shadow:var(--sh-3);overflow:hidden;animation:popIn .26s var(--ease-out) backwards;
+}
+.sugcard .body{padding:var(--sp-2)}
+@keyframes popIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
+.sugitem{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-2);border-radius:var(--r-sm);cursor:pointer;font-size:var(--fs-xs);color:var(--txt-2)}
+.sugitem:hover{background:var(--surface-3);color:var(--txt)}
+
+/* 按钮 */
+.btn{
+  position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:var(--sp-2);cursor:pointer;white-space:nowrap;
+  font-size:var(--fs-sm);font-weight:540;color:var(--txt);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-sm);
+  background:var(--surface-3);border:1px solid var(--line-3);
+  transition:background .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),transform .25s var(--spring),box-shadow .2s var(--ease);
+}
+/* 悬停「光扫」：一道斜向高光从左侧扫过（只动 transform/opacity） */
+.btn::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,240,205,.16) 50%,transparent 70%);
+  transform:translateX(-60%);transition:opacity .2s var(--ease),transform .6s var(--ease-out);
+}
+.btn:hover::after{opacity:1;transform:translateX(60%)}
+.btn:hover{background:var(--surface-4);border-color:var(--line-3);box-shadow:var(--sh-lip)}
+.btn:active{transform:scale(.975)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.sm{font-size:var(--fs-xs);padding:var(--sp-2) var(--sp-3)}
+.btn.ghost{background:transparent;color:var(--txt-2);border-color:var(--line-2)}
+.btn.ghost:hover{color:var(--txt);background:var(--surface-2);border-color:var(--line-3)}
+.btn.primary{
+  color:var(--accent-ink);border-color:transparent;
+  background:linear-gradient(180deg,var(--accent-2),var(--accent));
+  box-shadow:0 8px 20px -10px var(--accent-glow),inset 0 1px 0 rgba(255,248,228,.28);
+}
+.btn.primary::after{background:linear-gradient(105deg,transparent 32%,rgba(255,248,228,.40) 50%,transparent 68%)}
+.btn.primary:hover{filter:brightness(1.06);box-shadow:0 10px 26px -10px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,.24)}
+.btn.primary kbd{background:rgba(25,18,4,.18);border-color:rgba(25,18,4,.28);color:var(--accent-ink)}
+
+/* ============================ 9. 答复卡 ============================ */
+.answer{
+  border:1px solid var(--accent-line);border-radius:var(--r-lg);overflow:hidden;
+  background:
+    radial-gradient(130% 155% at 0% 0%,var(--accent-soft),transparent 56%),
+    radial-gradient(90% 132% at 100% 100%,var(--iris-soft),transparent 62%),
+    linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  box-shadow:var(--sh-lip),0 24px 58px -36px var(--accent-glow);
+  /* ★ 第七轮：同上 —— both → backwards（不残留堆叠上下文，也不压住后续的 transform 声明） */
+  animation:cardIn .48s var(--ease-out) backwards;
+}
+.answer .hd{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+.answer .hd .ic{
+  width:23px;height:23px;flex:none;border-radius:var(--r-sm);display:grid;place-items:center;font-size:var(--fs-xs);
+  color:var(--accent-ink);background:linear-gradient(160deg,var(--accent-2),var(--accent));
+  box-shadow:inset 0 0 0 1px rgba(255,248,228,.28),0 4px 12px -6px var(--accent-glow);
+}
+.answer .hd b{font-size:var(--fs-body);font-weight:620;letter-spacing:-.1px}
+.answer .hd .sub{margin-left:auto;font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-4);text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46%}
+.answer .body{padding:var(--sp-4) var(--sp-4) var(--sp-1)}
+.answer ul{margin:0;padding:0 0 0 var(--sp-1);list-style:none}
+.answer li{position:relative;margin:8px 0;padding-left:var(--sp-4);font-size:var(--fs-body);line-height:1.85;color:var(--txt-2)}
+.answer li::before{content:"";position:absolute;left:2px;top:.72em;width:5px;height:5px;border-radius:50%;background:var(--accent-2);opacity:.8}
+.answer .metrics{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:13px}
+.answer .metric{
+  display:inline-flex;align-items:baseline;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-radius:10px;
+  background:linear-gradient(180deg,var(--surface-3),var(--surface-1));border:1px solid var(--line);
+  box-shadow:var(--sh-lip);
+  font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-4);
+}
+.answer .metric b{font-size:var(--fs-h3);font-weight:520;color:var(--txt);font-variant-numeric:tabular-nums;font-family:var(--mono);letter-spacing:-.4px}
+.answer .plan{padding:2px var(--sp-4) var(--sp-4)}
+.answer .plan h4{display:flex;align-items:center;gap:var(--sp-2);margin:8px 0 10px;font-size:var(--fs-micro);font-weight:600;letter-spacing:1.15px;text-transform:uppercase;color:var(--txt-4)}
+.answer .plan h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.answer .plan ol{margin:0;padding:0;list-style:none;counter-reset:st}
+.answer .plan li{
+  counter-increment:st;position:relative;margin:6px 0;padding-left:var(--sp-6);
+  font-size:var(--fs-sm);line-height:1.75;color:var(--txt-2);
+}
+.answer .plan li::before{
+  content:counter(st);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:var(--r-xs);
+  display:grid;place-items:center;font-family:var(--mono);font-size:var(--fs-micro);color:var(--accent-3);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+}
+
+/* ============================ 10. 结果栏 ============================ */
+.resbar{
+  display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+  position:sticky;top:-1px;z-index:12;margin:-2px -2px 0;padding:var(--sp-2) 2px;
+  /* ★ 第二轮：撤掉 backdrop-filter（sticky 且坐在滚动容器里，毛玻璃要对下方
+     滚动内容逐帧重采样，是长列表滚动时最贵的一笔）。
+     ★ 第五轮：背景由 96% 半透明改成**完全不透明** —— sticky 条下正压着滚动的
+     卡片，半透明就意味着每帧都要把下方内容重新混合一次；纯色面则可直接缓存复用。 */
+  background:var(--bg);
+  border-bottom:1px solid transparent;transition:border-color .25s var(--ease);
+}
+.resbar.stuck{border-bottom-color:var(--line)}
+/* 检索进行中：结果区压暗保留（不闪屏）+ 顶部一条走动的细进度条
+   ★ 性能（问题二 · 第四轮）：去掉 filter:saturate(.65)。
+   filter 会为整个结果区强制新建图层，并在等待接口的整段时间里每帧重新
+   栅格化 12 张结果卡（那期间用户往往正在滚动）—— 而它的视觉贡献只是
+   "稍微不那么鲜艳"。opacity 是纯合成属性，压暗效果一样、成本几乎为零。 */
+#results.ld{opacity:.42;pointer-events:none;transition:opacity .18s var(--ease)}
+.resbar.busy::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--accent-2),transparent);
+  background-size:38% 100%;background-repeat:no-repeat;
+  animation:rsprog .9s var(--ease) infinite;
+}
+@keyframes rsprog{0%{background-position:-40% 0}100%{background-position:140% 0}}
+.hitcache{
+  font-size:var(--fs-micro);letter-spacing:.4px;color:var(--txt-4);border:1px solid var(--line-2);
+  border-radius:999px;padding:0 var(--sp-2);font-family:var(--mono);
+}
+.resbar .count{font-size:var(--fs-xs);color:var(--txt-4)}
+.resbar .count b{font-family:var(--mono);font-size:var(--fs-sm);color:var(--txt);font-variant-numeric:tabular-nums}
+.resbar .spacer{flex:1}
+.seg{
+  position:relative;display:flex;flex:none;padding:2px;gap:0;
+  border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-1);
+}
+.seg-thumb{
+  position:absolute;top:2px;left:2px;height:calc(100% - 4px);width:0;border-radius:6px;z-index:0;
+  background:linear-gradient(180deg,var(--surface-4),var(--surface-3));box-shadow:inset 0 0 0 1px var(--line-2),var(--sh-lip);
+  transition:transform .44s var(--ease-out),width .44s var(--ease-out);
+}
+.seg button{
+  position:relative;z-index:1;border:0;background:none;cursor:pointer;color:var(--txt-3);
+  font-size:var(--fs-xs);font-weight:520;padding:var(--sp-2) var(--sp-3);border-radius:6px;
+  transition:color .2s var(--ease);
+}
+.seg button:hover{color:var(--txt-2)}
+.seg button.on{color:var(--txt)}
+
+/* ============================ 11. 结果卡 ============================ */
+#results{display:flex;flex-direction:column;gap:var(--sp-4)}
+#results>*{flex:0 0 auto}
+.res{
+  flex:0 0 auto;position:relative;overflow:hidden;cursor:pointer;
+  padding:var(--sp-5) var(--sp-5);border:1px solid var(--line-2);border-radius:var(--r-md);
+  /* ★ 修复（用户反馈）：与答复卡同一个问题 —— 原背景是纯半透明渐变
+     （--surface-* 全是带 alpha 的暖白叠加），底层 48px 背景网格会穿过卡片正文。
+     拆成 background-color（**不透明**底色）+ background-image（明暗渐变）：
+     hover / 选中只改 background-image，底色不受影响，卡片始终不透光。 */
+  background-color:var(--bg-2);
+  background-image:linear-gradient(180deg,var(--surface-2),var(--surface-1) 52%);
+  /* ★ 性能（问题二 · 第三轮）：外阴影由 28px 大模糊换成 2px 微阴影。
+     原值 `0 12px 28px -24px` 的 blur 半径 28px —— 每张卡滚动进视口时都要
+     重新做一次大范围模糊填充，一屏 5~8 张就是 5~8 次。而它的视觉贡献只是
+     卡片下缘一圈极淡的暗晕。换成 2px 后分离感仍在，绘制成本几乎归零。 */
+  box-shadow:var(--sh-lip),0 1px 2px rgba(0,0,0,.35);
+  /* ★ 性能（问题二 · 第五轮，针对"滚动列表时的小顿挫"）：去掉 content-visibility。
+     一页只有 12 张卡 —— "跳过屏幕外渲染"的收益微乎其微，代价却很实在：
+       ① 卡片真实高度约 200~260px，而 contain-intrinsic-size 的估计值只有 140px。
+          滚动时每张卡进入视口都要做一次"估计高度 → 真实高度"的修正，
+          上方元素位置随之变化，进而触发浏览器的滚动锚定（scroll anchoring）
+          去补偿滚动位置 —— 手感就是"一顿一顿"；
+       ② 滚动过程中反复构建/销毁渲染，卡片里的文字要不断重新栅格化。
+     改为 contain:content（= layout + paint + style 隔离）：保留"卡片内部变化
+     不影响外部布局"的收益，但布局与文字栅格化一次性完成，滚动退化为纯合成。
+     若将来一页条数大幅提高（>50），再考虑换成显式高度或虚拟滚动。 */
+  contain:content;
+  /* ★ 第七轮：填充模式 both → backwards —— 与 `.view.on .main>*` 同一处根因。
+     `both` 让每张结果卡**永久**保留一个堆叠上下文（一屏 12 张 = 12 个），
+     并且它的填充值优先级高于普通声明，会把 `.res:hover{transform:translateY(-2px)}`
+     的悬停位移一直盖掉。改 backwards 后：入场错峰不变，动画结束即归还样式控制权，
+     堆叠上下文消失、悬停抬升恢复。 */
+  animation:cardIn .46s var(--ease-out) backwards;animation-delay:calc(var(--i,0) * 30ms);
+  /* ★ 第二轮：transition 只留 border-color 与 transform —— 去掉 box-shadow
+     （每帧重绘大范围模糊）与 background（渐变插值，每帧重绘整张卡）。
+     ★ 第四轮：时长收紧（.22s/.3s → .14s/.16s）。
+     结果列表是使用频率最高的交互面，过渡时长偏长会让反馈"慢半拍"，
+     主观上就是一种延迟感；收紧后抬升与边框提亮几乎即时到位，
+     跟手感明显变好，顺滑度不受影响。 */
+  transition:border-color .14s var(--ease),transform .16s var(--ease-out);
+}
+/* 左缘强调条：悬停/选中时从 0 长到 22px —— 给"这一条"一个明确的空间锚点
+   ★ 第四轮：时长与卡片本体对齐收紧（.32s → .18s），避免"卡片已经起来了、
+   左缘条还在慢慢长"的割裂感。 */
+.res::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,var(--cyan-2),var(--accent-2) 50%,var(--accent));
+  transform:scaleY(0);transform-origin:center;opacity:0;
+  transition:transform .18s var(--ease-out),opacity .14s var(--ease);
+}
+/* ★ 性能（问题二 · 第三轮）删除「指针跟随柔光」。
+   它给每个 .res 挂一个 inset:0 的全尺寸渐变伪元素，指针移动时 JS 每帧写 --mx/--my
+   → 该卡每帧重绘整块 280×210 的 radial-gradient；同时每张卡各有一个 pointermove
+   监听器、每帧一次 getBoundingClientRect。这是"鼠标在列表上移来移去就发涩"的主因。
+   悬停反馈不缺：边框提亮 + 背景提亮 + translateY 抬升 + 左缘强调条，四处已经够。 */
+/* 悬停：抬升 + 边框提亮。
+   ★ 第二轮：不再改 box-shadow —— 那是本卡最贵的一笔绘制，
+   而 hover 的层次感由 translateY 抬升、左缘强调条、边框提亮与背景提亮共同承担。
+   ★ 第三轮：指针跟随柔光整体删除，见上。 */
+/* ★ 修复（用户反馈 · 第七轮）：hover / 选中态**不能**再用 background 简写。
+   `background:var(--surface-2)` 会把 background-color 重置为 transparent，
+   而 --surface-* 全部是带 alpha 的暖白叠加（rgba(255,236,198,.118)）——
+   结果就是鼠标一移上去、或某条被选中，卡片又变回半透明，底层网格与粒子重新透出。
+   改成只覆盖 background-image（明暗渐变），不透明底色 background-color 保持不动：
+   悬停/选中的"提亮"效果由渐变的透明度层承担，透光问题彻底消除。
+   注：.res 的 transition 只列了 border-color / transform，图片渐变随 hover 瞬时切换，
+   只在进入/离开时各触发一次重绘，不产生每帧开销。 */
+.res:hover{border-color:var(--line-3);background-image:linear-gradient(180deg,var(--surface-3),var(--surface-2) 52%);transform:translateY(-2px)}
+.res:hover::before{transform:scaleY(1);opacity:.9}
+.res.sel{border-color:var(--accent-line);background-image:linear-gradient(180deg,var(--surface-4),var(--surface-3) 52%);box-shadow:0 0 0 1px var(--accent-line),var(--sh-lip)}
+.res.sel::before{transform:scaleY(1);opacity:1}
+.res .r1{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:9px}
+.cve{position:relative;font-family:var(--mono);font-size:var(--fs-body);font-weight:520;color:var(--txt);letter-spacing:-.2px;padding-left:var(--sp-3)}
+.cve::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.res .ttl{font-size:var(--fs-body);font-weight:540;line-height:1.52;letter-spacing:-.16px;color:var(--txt);margin:2px 0 8px}
+.res .snip{
+  font-size:var(--fs-sm);line-height:1.78;color:var(--txt-3);padding-left:var(--sp-3);border-left:1px solid var(--line-2);margin-bottom:9px;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;   /* 速览：两行封顶 */
+}
+.res mark{background:var(--accent-soft);color:var(--accent-3);border-radius:3px;padding:0 3px;font-weight:540}
+.res .r3{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;font-size:var(--fs-xs);color:var(--txt-4)}
+.res .r3 .date{font-family:var(--mono)}
+.res .why{
+  display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);align-items:center;margin-top:10px;padding-top:var(--sp-3);
+  border-top:1px solid var(--line);font-size:var(--fs-xs);color:var(--txt-4);
+}
+.res .why b{color:var(--txt-3);font-weight:540}
+.res .why .whytxt{flex:1 1 100%;line-height:1.65}
+.ev{display:inline-flex;align-items:center;gap:var(--sp-1);font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+.ev i{display:inline-block;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:evgrow .7s var(--ease-out) both}
+@keyframes evgrow{from{transform:scaleX(0);transform-origin:left}to{transform:none}}
+/* 紧凑密度：一屏看更多条（隐藏摘要与匹配依据，标题单行省略） */
+body.dense #results{gap:var(--sp-2)}
+body.dense .res{padding:var(--sp-3) var(--sp-4);border-radius:var(--r-sm)}
+body.dense .res .r1{margin-bottom:0}
+body.dense .res .ttl{font-size:var(--fs-sm);margin:6px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.dense .res .snip,body.dense .res .why,body.dense .res .r3{display:none}
+body.dense .cve{font-size:var(--fs-sm)}
+
+/* 徽章 / 标签（模块也直接用这些类） */
+.badge{
+  display:inline-flex;align-items:center;font-size:var(--fs-micro);font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  font-family:var(--mono);padding:2px var(--sp-2);border-radius:4px;border:1px solid;white-space:nowrap;
+}
+.badge.CRITICAL{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 36%,transparent);background:color-mix(in srgb,var(--crit) 12%,transparent)}
+.badge.HIGH{color:var(--high);border-color:color-mix(in srgb,var(--high) 36%,transparent);background:color-mix(in srgb,var(--high) 12%,transparent)}
+.badge.MEDIUM{color:var(--med);border-color:color-mix(in srgb,var(--med) 34%,transparent);background:color-mix(in srgb,var(--med) 11%,transparent)}
+.badge.LOW{color:var(--low);border-color:color-mix(in srgb,var(--low) 34%,transparent);background:color-mix(in srgb,var(--low) 11%,transparent)}
+.badge.UNKNOWN{color:var(--txt-3);border-color:var(--line-2);background:var(--surface-1)}
+.chip{
+  display:inline-flex;align-items:center;gap:var(--sp-1);font-size:var(--fs-xs);padding:2px var(--sp-2);border-radius:var(--r-xs);
+  border:1px solid var(--line);background:var(--surface-2);color:var(--txt-3);white-space:nowrap;
+}
+button.chip{cursor:pointer;transition:color .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease)}
+button.chip:hover{color:var(--txt);border-color:var(--line-3)}
+.chip.cat{border-color:color-mix(in srgb,var(--c) 40%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);color:color-mix(in srgb,var(--c) 82%,var(--txt))}
+.chip.alert{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 32%,transparent);background:color-mix(in srgb,var(--danger) 10%,transparent);font-weight:520}
+.chip.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 32%,transparent);background:color-mix(in srgb,var(--ok) 9%,transparent)}
+.chip.trust{color:var(--accent-3);border-color:var(--accent-line);background:var(--accent-soft);font-weight:520}
+
+/* ============================ 12. 空态 / 骨架 / 分页 ============================ */
+.empty{text-align:center;padding:var(--sp-8) var(--sp-5);color:var(--txt-4);font-size:var(--fs-sm);line-height:1.9}
+.empty .big{font-size:var(--fs-body);color:var(--txt-2);margin-bottom:6px;font-weight:520}
+.loading{padding:var(--sp-6);text-align:center;color:var(--txt-4);font-size:var(--fs-sm)}
+.sk,.skboard .sk{
+  height:104px;border-radius:var(--r-md);border:1px solid var(--line);position:relative;overflow:hidden;
+  background:var(--surface-1);
+}
+.sk::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 20%,var(--surface-3) 50%,transparent 80%);
+  transform:translateX(-100%);animation:sh 1.5s var(--ease-out) infinite;
+}
+@keyframes sh{to{transform:translateX(100%)}}
+.skboard{display:grid;gap:var(--sp-3)}
+.skboard .sk{height:120px}
+.pager{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);padding:var(--sp-4) 0 var(--sp-6)}
+.pager .pg{font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-4)}
+.pager .btn{min-width:34px;justify-content:center}
+
+/* ============================ 13. 情报检查器 ============================ */
+.inspector{
+  display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;
+  background:var(--bg-2);border-left:1px solid var(--line);
+  /* 始终不透明的背景 + z-index:1 显式声明「详情面板 > 搜索结果列表」
+     （窄屏 1200px 断点会覆盖为 position:fixed + z-index:90）。
+     ★ 修复：面板本体不再做 opacity 淡入 —— 面板透明期间左侧卡片会从其下方透出。
+     ★ 层级纪律（2026-10 火狐变暗事故）：桌面态 z-index 必须 > .mask 的 80。
+     事故根因是 JS 断点(1280)与 CSS 断点(1200)不一致，1201~1280px 区间遮罩开启
+     而检查器仍在内联态，整屏被压暗。断点已在 app.js 对齐，这里再把桌面态抬到
+     100 作为防御纵深：今后即使断点再次漂移，检查器也永远在遮罩之上（palette
+     120 / help 130 / toast 200 仍高于它，模态层级不受影响）。 */
+  z-index:100;
+  transform:translateX(100%);
+}
+/* 打开动画用 @keyframes，不用 transition ：
+   translateX(100%) 的百分比基准是**元素自身宽度**，而打开这一帧列宽从 0 变成 452
+   （.stage 已撤销列宽过渡）。若用 transition，起止计算值都是 0px、根本不会产生位移，
+   面板会"啪"地直接出现 —— 旧写法其实是靠"列宽慢慢变宽"才勉强滑得动的。
+   动画播放时元素宽度已经是 452px，100% 才真正等于"整块面板的宽度"。
+   关闭不做滑出：列宽瞬时归 0、面板宽度随之归 0，本来就是瞬隐，与"列宽瞬时到位"一致。 */
+.stage.insp .inspector{transform:none;animation:inspIn .4s var(--ease-out) both}
+@keyframes inspIn{from{transform:translateX(100%)}to{transform:none}}
+.insp-head{
+  display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;flex:none;
+  padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--line);
+  /* ★ 性能（问题二）：撤掉 backdrop-filter —— 面板头部底下就是面板自己的 .insp-body
+     （不是页面背景），模糊这里拿不到任何视觉收益，只白付每帧重采样。 */
+  background:var(--bg-2);z-index:3;
+}
+.insp-head h2{font-family:var(--mono);font-size:var(--fs-h3);font-weight:540;color:var(--txt);letter-spacing:-.2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.insp-head .x{
+  width:29px;height:29px;flex:none;cursor:pointer;border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--txt-3);
+  background:var(--surface-2);border:1px solid var(--line-2);
+  transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease),transform .25s var(--spring);
+}
+.insp-head .x:hover{color:var(--txt);background:var(--surface-4);border-color:var(--line-3)}
+.insp-head .x:active{transform:scale(.92)}
+.insp-head .x.close:hover{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 10%,transparent)}
+.insp-head .sp{flex:1}
+.insp-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:var(--sp-5) var(--sp-5) var(--sp-8);contain:layout paint}
+
+/* 详情区块 */
+.sec{margin-bottom:22px;animation:viewIn .4s var(--ease-out) both}
+.sec:nth-child(1){animation-delay:0ms}.sec:nth-child(2){animation-delay:45ms}
+.sec:nth-child(3){animation-delay:90ms}.sec:nth-child(4){animation-delay:130ms}
+.sec:nth-child(n+5){animation-delay:165ms}
+.sec>h4{
+  display:flex;align-items:center;gap:var(--sp-2);margin:0 0 10px;
+  font-size:var(--fs-micro);font-weight:600;letter-spacing:1.15px;text-transform:uppercase;color:var(--txt-4);
+}
+.sec>h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.desc-p{font-size:var(--fs-body);line-height:1.95;color:var(--txt-2)}
+.meta-note{margin-top:9px;font-size:var(--fs-xs);line-height:1.78;color:var(--txt-4)}
+.meta-note b{color:var(--txt-3);font-weight:520}
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--sp-2)}
+.kv2{padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--sh-lip);
+  transition:border-color .16s var(--ease)}
+.kv2:hover{border-color:var(--line-2)}
+.kv2 span{display:block;margin-bottom:3px;font-size:var(--fs-micro);letter-spacing:.5px;text-transform:uppercase;color:var(--txt-4)}
+.kv2 b{font-family:var(--mono);font-size:var(--fs-sm);font-weight:400;color:var(--txt);word-break:break-all}
+.kv2.long b{font-size:var(--fs-xs);line-height:1.68;color:var(--txt-2)}
+.tbl{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.tbl th{
+  text-align:left;padding:var(--sp-2) var(--sp-3);font-size:var(--fs-micro);font-weight:600;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--txt-4);border-bottom:1px solid var(--line-2);white-space:nowrap;
+}
+.tbl td{padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line);font-family:var(--mono);color:var(--txt-2);word-break:break-all}
+.tbl tr{transition:background .14s var(--ease)}
+.tbl tr:hover td{background:var(--surface-2)}
+.linklist{display:flex;flex-direction:column;gap:3px}
+.linklist a{
+  display:flex;gap:var(--sp-2);align-items:flex-start;padding:var(--sp-2) var(--sp-2);border-radius:var(--r-sm);
+  font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-3);word-break:break-all;
+  transition:background .15s var(--ease),color .15s var(--ease);
+}
+.linklist a:hover{background:var(--surface-2);color:var(--txt);text-decoration:none}
+.linklist a i{flex:none;font-style:normal;color:var(--txt-4)}
+.paper{
+  padding:var(--sp-3) var(--sp-4);margin-bottom:9px;border:1px solid var(--line);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--sh-lip);
+  transition:border-color .16s var(--ease),background .16s var(--ease);
+}
+.paper:hover{border-color:var(--line-2);background:var(--surface-2)}
+.paper b{display:block;margin-bottom:5px;font-size:var(--fs-sm);font-weight:540;line-height:1.6;color:var(--txt)}
+.paper p{margin:0 0 6px;font-size:var(--fs-xs);line-height:1.8;color:var(--txt-3)}
+.paper .mt{font-family:var(--mono);font-size:var(--fs-micro);color:var(--ok)}
+.steps{margin:0;padding:0;list-style:none;counter-reset:st}
+.steps li{counter-increment:st;position:relative;margin:7px 0;padding-left:var(--sp-6);font-size:var(--fs-sm);line-height:1.85;color:var(--txt-2)}
+.steps li::before{
+  content:counter(st);position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:var(--r-xs);
+  display:grid;place-items:center;font-family:var(--mono);font-size:var(--fs-micro);color:var(--accent-3);
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+}
+/* 可信度四宫格 */
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2);margin-bottom:10px}
+.tcell{padding:var(--sp-3) var(--sp-2);text-align:center;border:1px solid var(--line);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--sh-lip)}
+.tcell b{display:block;font-family:var(--mono);font-size:var(--fs-h2);font-weight:500;line-height:1.25;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,var(--txt),color-mix(in srgb,var(--txt) 66%,var(--txt-3)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tcell span{display:block;margin-top:3px;font-size:var(--fs-micro);letter-spacing:.4px;color:var(--txt-4)}
+.trustbar{height:5px;margin-top:2px}
+.trustbar>i{background:linear-gradient(90deg,var(--accent),var(--viz-2),var(--ok))}
+
+/* ── 原文外链 / CVSS「待评级」/ 可信度依据展开（2026-10-12） ──────────────
+   三处都是 2026-10-12 测试反馈的修复：
+     · 检索卡片此前没有任何"跳原文"的出口（博客 / 仓库 / 论文基本无链接可点）
+     · 没有 CVSS 的条目以前显示成空白，容易被读成"系统漏采"
+     · 可信度四宫格以前只有数字，点不开、看不到依据                                   */
+/* 检索卡片上的「↗ 原文」：与卡片本身的点击分流（点它只开原文，不打开详情） */
+.extlink{
+  display:inline-flex;align-items:center;gap:4px;margin-left:auto;
+  padding:1px var(--sp-2);border-radius:var(--r-xs);
+  font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.3px;
+  color:var(--accent-3);border:1px solid var(--accent-line);background:var(--accent-soft);
+  transition:color .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease);
+}
+.extlink:hover{color:var(--txt);border-color:var(--line-3);background:var(--surface-2);text-decoration:none}
+.extlink:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 「待评级」：既不是错误也不是漏采，用中性虚线等待态 —— 不用告警色，免得满屏刺眼 */
+.badge.wait{color:var(--txt-3);border-color:var(--line-2);border-style:dashed;background:var(--surface-1)}
+
+/* 可信度四宫格：由 div 改为可点击的 button（点开 = 显示这个分数的判定依据） */
+button.tcell{
+  font:inherit;color:inherit;width:100%;cursor:pointer;appearance:none;
+  transition:border-color .16s var(--ease),background .16s var(--ease),transform .2s var(--ease-out);
+}
+button.tcell:hover{border-color:var(--accent-line);transform:translateY(-1px)}
+button.tcell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.tcell[aria-expanded="true"]{border-color:var(--accent-line);background:linear-gradient(180deg,var(--accent-soft),var(--surface-1))}
+.tcell .tdi{
+  display:inline-grid;place-items:center;width:12px;height:12px;margin-left:3px;
+  font-style:normal;font-size:9px;line-height:1;border-radius:50%;
+  border:1px solid var(--line-3);color:var(--txt-4);
+}
+button.tcell:hover .tdi,button.tcell[aria-expanded="true"] .tdi{border-color:var(--accent);color:var(--accent-3)}
+
+/* 展开出来的判定依据面板 */
+.trust-detail{
+  margin:0 0 10px;padding:var(--sp-3) var(--sp-4);border:1px solid var(--accent-line);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,var(--accent-soft),var(--surface-1));
+  animation:viewIn .22s var(--ease-out) backwards;
+}
+.tdh{margin:0 0 5px;font-size:var(--fs-xs);font-weight:560;letter-spacing:.4px;color:var(--accent-3)}
+.tdh+.tdnote{margin-bottom:9px}
+.tdnote{font-size:var(--fs-xs);line-height:1.8;color:var(--txt-3)}
+.tdtbl{width:100%;border-collapse:collapse;margin:6px 0 9px;font-size:var(--fs-xs)}
+.tdtbl th{text-align:left;padding:4px 6px;font-weight:540;color:var(--txt-4);
+  border-bottom:1px solid var(--line-2);white-space:nowrap}
+.tdtbl td{padding:4px 6px;border-bottom:1px solid var(--line);color:var(--txt-2);vertical-align:top;line-height:1.7}
+.tdtbl tr:last-child td{border-bottom:none}
+.tdtbl td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tdpaper{padding:var(--sp-2) var(--sp-3);margin-bottom:6px;border:1px solid var(--line);
+  border-radius:var(--r-xs);background:var(--surface-1)}
+.tdpaper b{display:block;font-size:var(--fs-xs);font-weight:540;color:var(--txt);line-height:1.65}
+.tdlink{margin-top:3px}
+.tdlink a{font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4);word-break:break-all}
+.tdlink a i{font-style:normal;margin-right:4px}
+.tdmeta{margin-top:4px;font-size:var(--fs-micro);color:var(--txt-4);line-height:1.7}
+.tdchips{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:6px 0 8px}
+/* 关系图谱 */
+.graphbox{padding:var(--sp-2) var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-md);
+  background:radial-gradient(120% 130% at 50% 0%,var(--accent-soft),transparent 62%),var(--surface-1);overflow:hidden}
+.gsvg{display:block;width:100%;height:auto}
+.gnode{cursor:default;transform-box:fill-box;transform-origin:center;animation:nodeIn .6s var(--ease-out) both}
+@keyframes nodeIn{from{opacity:0;transform:scale(.45)}to{opacity:1;transform:none}}
+.gnode text{font-family:var(--sans)}
+/* 边用 path + pathLength=1 做描线（stroke-dashoffset 1→0），入场像"连起来" */
+.gedge{stroke-dasharray:1;stroke-dashoffset:1;animation:edgeIn .85s var(--ease-out) both}
+@keyframes edgeIn{to{stroke-dashoffset:0}}
+/* 中心节点外扩的雷达环 */
+.gping{transform-box:fill-box;transform-origin:center;opacity:0;animation:gping 3.4s var(--ease-out) infinite}
+@keyframes gping{0%{transform:scale(1);opacity:.5}70%{transform:scale(1.5);opacity:0}100%{transform:scale(1.5);opacity:0}}
+/* 复制回执：点 CVE 号复制时闪一下对勾 */
+[data-copy]{transition:color .18s var(--ease)}
+[data-copy].copied::after{content:" ✓";color:var(--ok);font-family:var(--sans)}
+.glegend{display:flex;flex-wrap:wrap;gap:var(--sp-3);padding:var(--sp-2) var(--sp-2) 2px}
+.ghops{display:flex;flex-wrap:wrap;gap:var(--sp-2);padding:var(--sp-2) var(--sp-2) 0;font-size:var(--fs-micro);color:var(--txt-3)}
+/* ★ 原为旧变量名 --bg-3：项目里**没有定义这个变量**（只有 --bg / --bg-2 / --elev-*），
+   浏览器静默回落到透明 → 跳转路径标签失去底色，在浅色底上只剩一圈边框。
+   与相邻 .lgd 的观感统一用 --elev-1。 */
+.hopchip{display:inline-flex;align-items:center;padding:2px var(--sp-2);border-radius:20px;background:var(--elev-1);border:1px solid var(--line-3);font-family:var(--mono)}
+.lgd{display:inline-flex;align-items:center;gap:var(--sp-1);font-size:var(--fs-micro);color:var(--txt-4)}
+.lgd i{width:7px;height:7px;border-radius:50%;display:inline-block;opacity:.9}
+/* 相关情报 */
+.relgrp{margin:11px 0 5px;font-size:var(--fs-xs);font-weight:540;letter-spacing:.4px;color:var(--txt-3)}
+.relrow{
+  display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);
+  border:1px solid transparent;cursor:pointer;
+  transition:background .15s var(--ease),border-color .15s var(--ease),transform .25s var(--ease-out);
+}
+.relrow:hover{background:var(--surface-2);border-color:var(--line-2);transform:translateX(2px)}
+.relrow .rid{flex:none;font-family:var(--mono);font-size:var(--fs-micro);color:var(--accent-3)}
+.relrow .badge{flex:none;font-size:var(--fs-micro);padding:1px var(--sp-1);border-radius:3px}
+.relrow .rtitle{flex:1 1 auto;min-width:0;font-size:var(--fs-xs);color:var(--txt-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relrow:hover .rtitle{color:var(--txt)}
+.relrow .rwhy{flex:none;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+
+/* ============================ 14. 监测台 / 富化台 ============================ */
+.kpirow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--sp-4)}
+.kpi{
+  position:relative;overflow:hidden;padding:var(--sp-5) var(--sp-5) var(--sp-5);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  background:
+    radial-gradient(130% 128% at 100% 0%,var(--accent-soft),transparent 54%),
+    linear-gradient(180deg,var(--surface-2),var(--surface-1) 62%);
+  box-shadow:var(--sh-lip),0 16px 36px -28px rgba(0,0,0,.85);
+  transition:border-color .22s var(--ease),transform .3s var(--ease-out),background .22s var(--ease),box-shadow .25s var(--ease);
+}
+.kpi:hover{border-color:var(--accent-line);background:var(--surface-2);transform:translateY(-3px);box-shadow:var(--sh-lip),var(--sh-2)}
+.kpi span{display:block;font-size:var(--fs-micro);letter-spacing:1.1px;text-transform:uppercase;color:var(--txt-4);font-weight:620}
+/* 大数字是这一屏的主角：v5 的 26px → 34px，字母紧排、等宽对齐 */
+.kpi b{display:block;margin:11px 0 2px;font-family:var(--mono);font-size:var(--fs-h1);font-weight:540;letter-spacing:-1.5px;line-height:1;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,var(--txt),color-mix(in srgb,var(--txt) 58%,var(--accent-3)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.kpi i{position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2) 55%,transparent);opacity:.85}
+.kpi.alert i{background:linear-gradient(90deg,var(--danger),transparent)}
+.kpi.warn i{background:linear-gradient(90deg,var(--warn),transparent)}
+.kpi.ok i{background:linear-gradient(90deg,var(--ok),transparent)}
+.boardgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:var(--sp-4);align-items:start}
+.panel{
+  border:1px solid var(--line-2);border-radius:var(--r-lg);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1) 40%);
+  box-shadow:var(--sh-lip),0 18px 40px -32px rgba(0,0,0,.85);overflow:hidden;
+  animation:cardIn .5s var(--ease-out) both;
+}
+.panel>header{
+  display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line);
+  font-size:var(--fs-sm);font-weight:560;letter-spacing:-.1px;color:var(--txt-2);
+  background:color-mix(in srgb,var(--bg-2) 42%,transparent);
+}
+.panel>header .ph-sub{margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:0;color:var(--txt-4)}
+.panel .pbody{padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+.stream{display:flex;flex-direction:column}
+.streamrow{
+  display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-2);border-bottom:1px solid var(--line);cursor:pointer;
+  transition:background .14s var(--ease),padding-left .2s var(--ease-out);
+}
+.streamrow:last-child{border-bottom:0}
+.streamrow:hover{background:var(--surface-2);padding-left:var(--sp-2)}
+.streamrow .st-date{flex:none;width:78px;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+.streamrow .st-title{flex:1;min-width:0;font-size:var(--fs-sm);color:var(--txt-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.streamrow:hover .st-title{color:var(--txt)}
+.streamrow.hot .st-title{color:var(--txt)}
+.streamrow .st-why{flex:none;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+.distrow{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:12px}
+.distrow .dl{flex:none;width:92px;font-size:var(--fs-xs);color:var(--txt-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.distrow .dbar{flex:1;height:20px;border-radius:var(--r-xs);background:var(--surface-2);overflow:hidden;position:relative}
+.distrow .dbar>i{display:block;height:100%;width:0;border-radius:var(--r-xs);background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .95s var(--ease-out)}
+.distrow .dn{flex:none;width:52px;text-align:right;font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-2);font-variant-numeric:tabular-nums}
+.enrow{
+  display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-4) var(--sp-4);margin-bottom:11px;cursor:pointer;
+  border:1px solid var(--line-2);border-radius:var(--r-md);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--sh-lip);
+  animation:cardIn .44s var(--ease-out) both;animation-delay:calc(var(--i,0) * 28ms);
+  transition:border-color .18s var(--ease),background .18s var(--ease),transform .26s var(--ease-out),box-shadow .25s var(--ease);
+}
+.enrow:hover{border-color:var(--accent-line);background:var(--surface-2);transform:translateX(3px);box-shadow:var(--sh-lip),var(--sh-2)}
+.enrow .cve{flex:none}
+.enrow .en-ttl{flex:1;min-width:0;font-size:var(--fs-sm);color:var(--txt-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.enrow:hover .en-ttl{color:var(--txt)}
+.enrow .en-go{flex:none;font-size:var(--fs-xs);color:var(--txt-4);font-family:var(--mono)}
+
+/* ============================ 15. AI 辅助翻译 ============================ */
+.trl{
+  position:relative;margin:8px 0 2px;padding:var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-7);font-size:var(--fs-sm);line-height:1.85;color:var(--txt-2);
+  border-left:2px solid var(--accent-2);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  background:linear-gradient(90deg,var(--accent-soft),transparent 74%);
+  /* 防横向溢出：译文块是被 JS 插到宿主节点旁边的，宿主可能是 flex 行。
+     译文里的长 URL/长串标识符不得把容器撑宽（撑宽 = 出现横向滚动条）。 */
+  min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word;
+  /* ★ 第八轮：both → backwards。viewIn 的 to 帧就是本元素的静态值（opacity:1/transform:none），
+     both 只会让每个译文块在动画结束后**继续**保留一个堆叠上下文，backwards 视觉完全一致。 */
+  animation:viewIn .35s var(--ease-out) backwards;
+}
+.trl::before{content:"AI译";position:absolute;left:11px;top:10px;font-family:var(--mono);font-size:var(--fs-micro);font-weight:600;letter-spacing:.3px;color:var(--accent-3)}
+.trl.loading{color:var(--txt-4)}
+.trl.loading::after{
+  content:"";display:inline-block;width:11px;height:11px;margin-left:8px;vertical-align:-2px;border-radius:50%;
+  border:1.5px solid var(--accent-line);border-top-color:var(--accent-2);animation:spin .8s linear infinite;
+}
+.trl.err{color:var(--warn);border-left-color:var(--warn)}
+.trl.err::before{content:"提示";color:var(--warn)}
+
+/* ============================ 16. 命令面板 / 快捷键 / 提示条 ============================ */
+/* ★ 层级纪律：.mask(80) 必须低于 .inspector（桌面态 100 / 窄屏浮层 90）。
+   2026-10 火狐「查看详情整屏变暗」事故：JS 断点 1280 与 CSS 断点 1200 不一致，
+   1201~1280px 区间遮罩开启而检查器仍在内联态，被遮罩整屏压暗。断点已对齐
+   （app.js isNarrow = 1200），检查器桌面态也已抬到 100 —— 双重保险。 */
+.mask{
+  position:fixed;inset:0;z-index:80;opacity:0;pointer-events:none;
+  /* ★ 性能（第八轮）：整屏 backdrop-filter 全部清退。
+     本层 inset:0 盖住整个视口，背后是每帧都在动的 WebGL 画布 ——
+     浮层一开，浏览器就被迫逐帧对**整屏**做一次模糊重采样，是打开抽屉/面板时掉帧的主因。
+     毛玻璃换成"更实一档的压暗"（68% → 78%）：遮挡感不减，合成成本归零。
+     ★ 多浏览器适配：不支持 color-mix 的内核（Chrome<111 / Safari<15 / Firefox<113
+     / 旧版 360、UC）会整条丢掉 background —— 遮罩全透，窄屏抽屉点背景关不掉。
+     用 @supports 回退到等效纯色（见本节末尾）。 */
+  background:color-mix(in srgb,var(--bg) 78%,transparent);
+  transition:opacity .26s var(--ease);
+}
+.mask.on{opacity:1;pointer-events:auto}
+.palette-wrap{
+  position:fixed;inset:0;z-index:120;display:flex;justify-content:center;align-items:flex-start;
+  padding:12vh var(--sp-4) var(--sp-4);opacity:0;pointer-events:none;
+  /* ★ 性能（第八轮）：整屏模糊清退，见 .mask 处说明。
+     注：命令面板打开时 .mask(z80) 与本层(z120) 会**同时**全屏叠着 —— 两层各带一次
+     整屏 blur，等于一次交互触发两遍全屏重采样，代价翻倍。 */
+  background:color-mix(in srgb,var(--bg) 80%,transparent);
+  transition:opacity .2s var(--ease);
+}
+.palette-wrap.on{opacity:1;pointer-events:auto}
+.palette{
+  width:100%;max-width:600px;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));border:1px solid var(--line-2);border-radius:var(--r-lg);box-shadow:var(--sh-3);
+  transform:translateY(-10px) scale(.975);opacity:0;
+  transition:transform .32s var(--ease-out),opacity .2s var(--ease);
+}
+.palette-wrap.on .palette{transform:none;opacity:1}
+.pal-top{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+.pal-top svg{width:16px;height:16px;flex:none;color:var(--txt-4)}
+.pal-top input{flex:1;background:none;border:0;outline:0;font-size:var(--fs-body);color:var(--txt);font-family:var(--sans)}
+.pal-top input::placeholder{color:var(--txt-4)}
+.pal-body{max-height:52vh;overflow-y:auto;padding:var(--sp-2)}
+.pal-grp{padding:var(--sp-2) var(--sp-3) var(--sp-1);font-size:var(--fs-micro);font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--txt-4)}
+.pal-row{
+  position:relative;display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);
+  cursor:pointer;font-size:var(--fs-sm);color:var(--txt-2);
+}
+.pal-row.on{color:var(--txt)}
+.pal-row.on::before{
+  content:"";position:absolute;inset:0;border-radius:var(--r-sm);background:var(--surface-3);
+  border:1px solid var(--line-2);box-shadow:var(--sh-lip);animation:palOn .25s var(--ease-out) backwards;
+}
+@keyframes palOn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+.pal-row>*{position:relative}
+.pal-row .pr-ic{width:18px;flex:none;text-align:center;color:var(--txt-4);font-family:var(--mono);font-size:var(--fs-xs)}
+.pal-row .pr-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pal-row .pr-d{flex:none;font-size:var(--fs-micro);color:var(--txt-4);font-family:var(--mono)}
+.pal-row .pr-t mark{background:none;color:var(--accent-3);font-weight:600}
+.pal-foot{
+  display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line);
+  font-size:var(--fs-micro);color:var(--txt-4);background:var(--surface-1);
+}
+.pal-foot kbd{margin-right:3px}
+.pal-brand{margin-left:auto;font-family:var(--mono)}
+/* ★ 性能（第八轮）：整屏模糊清退，见 .mask 处说明。 */
+.help-wrap{position:fixed;inset:0;z-index:130;display:grid;place-items:center;opacity:0;pointer-events:none;
+  background:color-mix(in srgb,var(--bg) 78%,transparent);transition:opacity .22s var(--ease)}
+.help-wrap.on{opacity:1;pointer-events:auto}
+/* ★ 多浏览器适配（color-mix 回退）：上面三处整屏压暗层（.mask / .palette-wrap /
+   .help-wrap）都依赖 color-mix(in srgb,var(--bg) N%,transparent)。不支持该函数
+   的内核会把整条 background 声明丢掉 → 遮罩全透明，窄屏抽屉「点背景关闭」失效
+   （点击直接穿透到下面的内容）。这里按主题给等效纯色：与 --bg 同色、同透明度，
+   视觉上只损失"背后内容微微透出"这一点，功能完全保留。
+   @supports 自 Chrome 28 / Firefox 22 / Safari 9 起可用，覆盖所有缺 color-mix 的版本。 */
+@supports not (background:color-mix(in srgb,red 50%,transparent)){
+  html[data-theme="dark"] .mask,
+  html[data-theme="dark"] .palette-wrap,
+  html[data-theme="dark"] .help-wrap{background:rgba(11,10,8,.78)}
+  html[data-theme="light"] .mask,
+  html[data-theme="light"] .palette-wrap,
+  html[data-theme="light"] .help-wrap{background:rgba(246,243,235,.78)}
+}
+.help{
+  width:min(520px,92vw);padding:var(--sp-5) var(--sp-5);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));box-shadow:var(--sh-3);transform:scale(.97);transition:transform .32s var(--spring);
+}
+.help-wrap.on .help{transform:none}
+.help h4{margin:0 0 15px;font-size:var(--fs-body);font-weight:620}
+.help-grid{display:grid;grid-template-columns:1fr auto;gap:var(--sp-2) var(--sp-4);margin-bottom:18px}
+.help-grid span{font-size:var(--fs-sm);color:var(--txt-2)}
+.help-grid kbd{justify-self:end}
+.toast{
+  position:fixed;left:50%;bottom:28px;z-index:200;pointer-events:none;
+  padding:var(--sp-3) var(--sp-4);border-radius:var(--r-md);font-size:var(--fs-sm);color:var(--txt);
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));border:1px solid var(--line-2);box-shadow:var(--sh-3);
+  opacity:0;transform:translateX(-50%) translateY(16px) scale(.96);
+  transition:opacity .22s var(--ease),transform .5s var(--spring);
+}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ============================ 17. 阅读字号（正文放大一档） ============================ */
+/* =====================================================================
+   浏览方式二：精读（body.zl）
+   不是"字号调大一点"，而是换一套阅读排版：正文栏限宽 + 行距放宽 + 摘要不截断。
+   速览（默认）= 紧凑条目 + 摘要两行；精读 = 大字距宽行距 + 摘要全文 + 正文栏限宽。
+   ===================================================================== */
+body.zl{font-size:var(--fs-h3)}
+/* 阅读栏限宽：只在检索视图收窄成"文章栏"，监测台/富化台那种数据看板保持满宽 */
+body.zl .view[data-view="search"] .main>*{max-width:900px}
+body.zl .main{gap:var(--sp-5);padding:var(--sp-6) var(--sp-6) var(--sp-8)}
+body.zl #results{gap:var(--sp-4)}
+body.zl .res{padding:var(--sp-5) var(--sp-6);border-radius:14px}
+body.zl .res .ttl{font-size:var(--fs-h2);line-height:1.48;margin:5px 0 12px;letter-spacing:-.25px}
+body.zl .res .snip{
+  font-size:var(--fs-h3);line-height:1.98;padding-left:var(--sp-4);margin-bottom:13px;
+  display:block;overflow:visible;-webkit-line-clamp:unset;   /* 精读：摘要全文展开 */
+}
+body.zl .cve{font-size:var(--fs-body)}
+body.zl .res .r3,body.zl .res .why{font-size:var(--fs-sm)}
+body.zl .badge{font-size:var(--fs-micro);padding:3px var(--sp-2)}
+body.zl .answer li{font-size:var(--fs-h3);line-height:2.02;margin:11px 0}
+body.zl .answer .plan li{font-size:var(--fs-h3);line-height:1.95}
+body.zl .desc-p{font-size:var(--fs-h3);line-height:2.05}
+body.zl .paper p,body.zl .paper b{font-size:var(--fs-h3);line-height:1.95}
+body.zl .steps li{font-size:var(--fs-h3);line-height:1.95}
+body.zl .tbl{font-size:var(--fs-body)}
+body.zl .viewhead h2{font-size:var(--fs-display)}
+body.zl .viewhead p{font-size:var(--fs-body);line-height:1.85}
+body.zl .sec>h4{font-size:var(--fs-xs)}
+body.zl .sec p,body.zl .sec li,body.zl .sec td,body.zl .sec th{font-size:var(--fs-body);line-height:1.85}
+body.zl .kv span{font-size:var(--fs-sm)}
+body.zl .kv b,body.zl .kv2 b{font-size:var(--fs-body)}
+body.zl .mini{font-size:var(--fs-sm)}
+body.zl .fchk{font-size:var(--fs-body);padding:var(--sp-2) var(--sp-2)}
+body.zl .card>h3{font-size:var(--fs-xs);padding:var(--sp-3) var(--sp-4)}
+body.zl .latd,body.zl .latt,body.zl .latload{font-size:var(--fs-sm)}
+body.zl .latmain .trl{font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-6);line-height:1.65}
+body.zl .latmain .trl::before{font-size:var(--fs-micro);left:7px;top:6px}
+body.zl .pal-row{font-size:var(--fs-body)}
+body.zl #askdock .qa-body,body.zl #askdock .qa-q,body.zl .sv-title,body.zl .sv-desc{font-size:var(--fs-h3)}
+body.zl .streamrow .st-title,body.zl .enrow .en-ttl{font-size:var(--fs-body)}
+body.zl .relrow .rtitle{font-size:var(--fs-sm)}
+body.zl .searchbar input{font-size:var(--fs-h3)}
+body.zl .tagx,body.zl .hint{font-size:var(--fs-sm)}
+
+/* ============================ 18. 模块坞适配层 ============================
+   模块面板的类名/颜色一律由模块自己决定（module source 不动）。这里只做两件事：
+     ① 把模块面板放进骨架时需要的「容器级」调整（高度、滚动、外边距）；
+     ② 主体与模块共用的老类名（.card/.mini/.bar/.lat/.badge…）在设计系统里的样式
+        —— 上面第 7 节已定义，模块零改动就能跟着变好看。
+   原则：不改模块的配色与内部排版，只给容器。
+   ============================================================================ */
+#askdock{display:flex;flex-direction:column;min-width:0;width:100%;max-width:1000px;margin:0 auto;align-self:start}
+#askdock>section{margin:0}
+#askdock .qa-card{display:flex;flex-direction:column;border-radius:var(--r-lg)}
+#askdock .qa-msgs{max-height:min(56vh,560px);flex:0 1 auto;min-height:170px}
+#askdock .qa-empty{padding:var(--sp-5) var(--sp-2)}
+#askdock .qa-src{border-radius:999px}
+/* m1 的「实时监测 · 最新情报」条目：新骨架里给它更紧凑的节奏 */
+.lat{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) 3px;border-bottom:1px solid var(--line);cursor:pointer;
+  transition:background .14s var(--ease),padding-left .2s var(--ease-out)}
+.lat:last-child{border-bottom:0}
+.lat:hover{background:var(--surface-2);padding-left:var(--sp-2)}
+.latd{flex:none;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+/* ★ .latmain：标题的独立纵向容器，**这层壳不能删**。
+   翻译块（.trl）是 TR 用 el.after() 插在 .latt 后面的兄弟节点；.lat 是不换行的
+   flex 行，译文块若直接挂在 .lat 下就成了并列 flex item，会和日期/徽章/标题
+   抢同一条横向空间 —— 标题被压成竖排窄条、整行还撑出横向滚动条。
+   放进纵向容器后：标题单行 ellipsis，译文落在标题下方，宽度受容器约束。 */
+.latmain{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.latmain .latt{flex:none;min-width:0;font-size:var(--fs-xs);color:var(--txt-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.latmain .trl{margin:0;padding:var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-6);font-size:var(--fs-micro);line-height:1.6}
+/* 侧栏窄，"AI译" 角标靠缩小左内边距（27px）来省空间，
+   而不是压字号 —— 9px 是全站最小字，看不清。 */
+.latmain .trl::before{left:6px;top:5px}
+.lat:hover .latt{color:var(--txt)}
+.latt.hot{color:var(--high)}
+.latc{flex:none;font-family:var(--mono);font-size:var(--fs-micro);color:var(--txt-4)}
+.lat .badge{flex:none;font-size:var(--fs-micro);padding:1px var(--sp-1);border-radius:3px}
+.newb{color:var(--ok)!important;border-color:color-mix(in srgb,var(--ok) 45%,transparent)!important;background:color-mix(in srgb,var(--ok) 12%,transparent)!important}
+.latload{font-size:var(--fs-xs);color:var(--txt-4);padding:3px 0}
+#latgo,#srcgo{font-size:var(--fs-micro)}
+/* 最新情报列表容器：默认限高 + 内部滚动。
+   原先只取 9 条（写死），实时监测看不出量；放开条数后如果不限高，
+   卡片会把侧栏整条撑长，下面的「多源归档」等卡片要滚很久才看得到。
+   限高后既能看到更多条，又保持卡片节奏一致——想看全的可以点「展开更多」。 */
+#latestbody{max-height:min(52vh,430px);overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin}
+#latestbody::-webkit-scrollbar{width:6px}
+#latestbody::-webkit-scrollbar-thumb{background:var(--surface-4);border-radius:3px}
+#latestbody::-webkit-scrollbar-track{background:transparent}
+.latmore{display:block;width:100%;margin-top:6px;padding:var(--sp-2) 0;font:inherit;font-size:var(--fs-xs);
+  color:var(--txt-4);background:transparent;border:1px dashed var(--line-2);border-radius:var(--r-sm);
+  cursor:pointer;transition:color .16s var(--ease),border-color .16s var(--ease),background .16s var(--ease)}
+.latmore:hover{color:var(--txt);border-color:var(--line-3,var(--line-2));background:var(--surface-2)}
+
+/* —— 提交链接即时收录 —— */
+.submitbox{display:flex;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3) 2px}
+.submitbox input{flex:1;min-width:0;padding:var(--sp-2) var(--sp-2);font:inherit;font-size:var(--fs-xs);
+  color:var(--txt);background:var(--surface-1);border:1px solid var(--line-2);
+  border-radius:var(--r-sm);outline:none;transition:border-color .16s var(--ease),box-shadow .16s var(--ease)}
+.submitbox input:focus{border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-soft)}
+.submitbox input::placeholder{color:var(--txt-4)}
+.submitbox button{flex:none;padding:var(--sp-2) var(--sp-3);font:inherit;font-size:var(--fs-xs);font-weight:600;
+  color:var(--txt-on-solid);background:var(--accent);border:none;border-radius:var(--r-sm);
+  cursor:pointer;transition:opacity .16s var(--ease),transform .1s var(--ease)}
+.submitbox button:hover{opacity:.92}
+.submitbox button:active{transform:translateY(1px)}
+.submitbox button:disabled{opacity:.5;cursor:not-allowed}
+.submsg{padding:2px var(--sp-3) var(--sp-3);font-size:var(--fs-xs);line-height:1.5;color:var(--txt-4)}
+.submsg.ok{color:var(--ok)}
+.submsg.warn{color:var(--warn)}
+.submsg.err{color:var(--danger)}
+/* ★ v11：这一组原先硬编码 4 个语义色（换主题/换色必漂移，v8 换色时已踩过一次），
+   现在全部走令牌 —— 颜色只在一个地方定义。 */
+.badge.subb{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 42%,transparent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.badge.q-优{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:color-mix(in srgb,var(--ok) 13%,transparent)}
+.badge.q-良{color:var(--cyan);border-color:color-mix(in srgb,var(--cyan) 42%,transparent);background:color-mix(in srgb,var(--cyan) 13%,transparent)}
+.badge.q-中{color:var(--med);border-color:color-mix(in srgb,var(--med) 42%,transparent);background:color-mix(in srgb,var(--med) 13%,transparent)}
+.badge.q-差{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 42%,transparent);background:color-mix(in srgb,var(--danger) 13%,transparent)}
+
+/* ============================ 19. 响应式 ============================
+   策略：优先保工作区宽度 —— 依次收窄命令栏统计、隐藏副标题、检查器转浮层、最终单列。
+   每档都是「主动减项」而不是让内容被裁切。 */
+/* ★ v11 断点纪律：
+   ① 必须**按宽度降序**排列（原先 max-width:1180 写在 1080 之后，级联顺序脆弱，
+      改一处可能连坏两档）；
+   ② 收敛为 6 档 —— 1440 / 1400 / 1200 / 1024 / 980 / 768
+      （原先 9 个 ad-hoc 断点：1500/1420/1400/1280/1180/1080/980/700/620）。 */
+@media (max-width:1440px){ .brandline small{display:none} }
+@media (max-width:1400px){
+  .crumbs,.cmd-div{display:none}
+  /* 只有 4 格：空间紧张时日期格（fresh）最先让位，三个数字格保住 */
+  .top-stat .kv.fresh{display:none}
+}
+@media (max-width:1200px){
+  /* 检查器转为浮层抽屉 */
+  .stage,.stage.insp{--inspw:0px;grid-template-columns:minmax(0,1fr)}
+  .inspector{
+    position:fixed;top:0;right:0;bottom:0;z-index:90;width:min(96vw,540px);
+    transform:translateX(103%);opacity:1;box-shadow:var(--sh-3);
+  }
+  .stage.insp .inspector{transform:none}
+  .top-stat .kv:nth-child(n+2){display:none}
+  .refstat{display:none}
+  /* ★ 修正：下文 v11 节里还有一条 `.vh-ghost{display:flex}`（无条件、位置更靠后），
+     它会把这条窄屏隐藏规则**整条吃掉** —— 于是 1100px 这类宽度下幽灵字照常显示，
+     右下角数字直接顶进页头描述文字里。用 !important 把这一档的控制权拿回来。 */
+  .vh-ghost{display:none!important}
+  .insp-grip{display:none}   /* 检查器浮层模式下不拖宽 */
+}
+@media (max-width:1024px){
+  .view[data-view="search"]{grid-template-columns:272px minmax(0,1fr)}
+  .boardgrid{grid-template-columns:minmax(0,1fr)}
+  /* 移动端命令栏拥挤：统计胶囊整块撤掉，只留实时点 + 状态（R4） */
+  .top-stat{display:none}
+  .main{padding:var(--sp-6) var(--sp-6) var(--sp-8)}
+}
+@media (max-width:980px){
+  /* 放弃固定高度外壳，回到文档流滚动（小屏更好用） */
+  body{overflow:auto}
+  .app{display:block;height:auto;min-height:100%;overflow:visible}
+  .shell{display:block;overflow:visible}
+  .stage{display:block;overflow:visible}
+  .workspace{display:block;overflow:visible}
+  .view{display:flex;flex-direction:column;transform:none;overflow:visible}
+  .view:not(.on){display:none}
+  .view[data-view="search"]{grid-template-columns:none}
+  .main{order:1}
+  .sidepanel{order:2}
+  .sidepanel{border-right:0;border-bottom:1px solid var(--line);max-height:none}
+  .view.nopanel .sidepanel{display:none}
+  .side{overflow:visible;max-height:none;padding-bottom:var(--sp-4)}
+  .main{overflow:visible;padding:var(--sp-4) var(--sp-4) var(--sp-7);gap:var(--sp-5)}
+  /* ★ v11 去重：这两条原先连写两遍（同一断点内重复声明） */
+  .viewhead h2{margin-bottom:8px}
+  .viewhead h2::before{width:4px}
+  .resbar{position:static;backdrop-filter:none;background:none}
+  .sp-open{display:none!important}
+  .cmdbar{height:auto;padding:var(--sp-2) var(--sp-3);gap:var(--sp-3);flex-wrap:wrap}
+  .palette-trigger{order:3;max-width:none;flex-basis:100%}
+  .cmdbar{border-bottom:1px solid var(--line)}
+  .rail{flex-direction:row;height:auto;width:100%;border-right:0;border-bottom:1px solid var(--line);padding:var(--sp-2) var(--sp-3);gap:2px}
+  .rail::after{display:none}
+  .rail-brand{margin-right:7px}
+  .rail-nav{flex-direction:row;margin:0;width:auto;gap:2px}
+  .rail-item span{display:none}
+  .rail-pill{display:none}
+  .rail-item.on{background:var(--surface-3);border:1px solid var(--line-2)}
+  .rail-foot{flex-direction:row;margin:0 0 0 auto}
+  .palette-wrap{padding:8vh var(--sp-3) var(--sp-3)}
+  .help-grid{grid-template-columns:1fr auto}
+  .viewhead{min-height:0;padding:var(--sp-5) var(--sp-5) var(--sp-4)}
+  .viewhead::before{left:16px;right:16px}
+}
+/* ============================ 20. 动效总开关 ============================ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .view{transform:none}
+  /* ★ 第五轮：原 `.res{content-visibility:auto}` 已删除 —— 主规则改用 contain:content，
+     reduced-motion 下无需另行处理（全站动效由上面那条总开关压平）。 */
+}
+
+/* —— 预警订阅未读角标（m2_enrich /api/subscribe 驱动，app.js initSubBadge 画） —— */
+.rail-item{position:relative}
+.rail-badge{
+  position:absolute; top:6px; right:6px; min-width:15px; height:15px;
+  padding:0 var(--sp-1); border-radius:999px; background:var(--crit); color:var(--accent-ink);
+  font-size:var(--fs-micro); font-weight:640; line-height:15px; text-align:center;
+  font-style:normal; font-family:var(--mono,monospace);
+  box-shadow:0 0 0 2px var(--bg);
+  animation:pulse-badge 2.4s var(--ease,ease) infinite;
+}
+@keyframes pulse-badge{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+/* ============================================================================
+   21. v6 增强层 —— 在 v5 骨架之上叠加「视觉记忆点」
+   纯加法：只改颜色 / 辉光 / 渐变，不动任何布局尺寸、类名与变量契约。
+   ============================================================================ */
+
+/* —— 页标题：文字本身走一层蓝白光晕渐变，成为每屏的视觉锚点 —— */
+.viewhead h2,
+body.zl .viewhead h2{
+  background:linear-gradient(116deg,var(--txt) 24%,color-mix(in srgb,var(--txt) 46%,var(--accent-3)) 86%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 6px 40px color-mix(in srgb,var(--accent) 26%,transparent);
+}
+/* —— 页头收边：横向贯穿的一条渐隐细线，让「标题区」与「内容区」分层 —— */
+.viewhead::after{
+  content:"";flex-basis:100%;height:1px;margin-top:20px;
+  background:linear-gradient(90deg,var(--accent-line),var(--line-2) 34%,transparent 78%);
+}
+
+/* —— rail 激活项：左侧一条发光竖柱，把「你在哪」钉在屏幕上 —— */
+.rail-pill::before{
+  content:"";position:absolute;left:-11px;top:50%;transform:translateY(-50%);
+  width:3px;height:20px;border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,var(--cyan-2),var(--accent));
+  box-shadow:0 0 16px -2px var(--accent-glow);
+}
+
+/* —— 搜索框：更强的外辉光；聚焦时像被「点亮」 ——
+   ★ 性能（第八轮）：静止辉光与聚焦辉光的模糊半径各收一档
+   （64px → 48px、90px → 56px）。box-shadow 的绘制面积随模糊半径近似平方增长，
+   而聚焦辉光还挂在 transition 上 —— 点击搜索框的那一下要在 200ms 内
+   逐帧重绘这条满宽辉光。收半径后"点亮"的观感保留，重绘面积砍掉约六成。 */
+.searchbar{box-shadow:var(--sh-lip),0 22px 48px -40px var(--accent-glow)}
+/* 聚焦辉光的**唯一权威定义**在下方第 21 节（.searchbar:focus-within，56px 那处）。
+   原先另有**两处**重复声明（第 8 节的 4px 环 + 68px、这里的 4px 环 + 68px），
+   都与那边同名同特异性、被完全覆盖 —— 只改一处必漏一处。
+   第八轮把两处 box-shadow 一并删掉（第 8 节那处保留其 live 的 border-color/background），
+   现在改聚焦辉光只需要动第 21 节那一行。 */
+
+/* —— 答复卡：顶部一道 金 → 玉 → 铜 的三色线，是「AI 产出」的签名 —— */
+.answer{position:relative}
+.answer::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;z-index:2;
+  background:linear-gradient(90deg,var(--accent),var(--cyan) 52%,var(--iris));
+}
+
+/* —— KPI 大数字：带上极轻的辉光，让「大数」真的亮起来 ——
+   ★ 性能（第八轮）：模糊半径 34px → 12px。
+   数字入场是 app.js 的 tweenNum（rAF 补间，每帧只改 textContent，共 620ms），
+   而每改一次文本就要重绘一次这圈 text-shadow —— 34px 大模糊在 6 张 KPI 卡上
+   等于每帧 6 次大范围模糊填充，是「监测台一进场就顿一下」的直接来源。
+   收到 12px 后辉光仍在（半径 ≈ 字号 1/3），绘制面积按半径平方降了一个数量级。 */
+.kpi b{text-shadow:0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}
+/* KPI 顶边：一道从左到右的彩色亮线，六张卡连成一条读数带 */
+.kpi::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 60%,transparent),transparent 70%);
+}
+
+/* —— 结果卡：hover 时左缘那道光更「实」 —— */
+.res:hover::before{opacity:1;box-shadow:0 0 20px -2px var(--accent-glow)}
+
+/* —— 桌面端：左筛选栏成为一张独立浮卡，与主区之间透出背景，形成前后层次 ——
+   （窄屏 <981px 是文档流模式，不走这套） */
+@media (min-width:981px){
+  .sidepanel{
+    margin:14px 0 14px 14px;
+    border:1px solid var(--line-2);
+    border-radius:var(--r-lg);
+    box-shadow:var(--sh-lip),0 26px 58px -40px rgba(0,0,0,.95);
+  }
+  .sp-head{border-radius:calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0}
+  /* 侧栏右侧那条老的分隔线不再需要（浮卡自带边） */
+  .sidepanel{border-right:1px solid var(--line-2)}
+}
+
+/* —— 工作区「聚光」：从顶栏中央向下发散的一束冷光，把内容区照亮 ——
+   纯静态径向渐变，零滤镜；只在有背景可透的容器上生效。 */
+.workspace::before{
+  content:"";position:absolute;left:50%;top:-16%;width:min(1100px,84%);height:58%;
+  transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(58% 100% at 50% 0%,var(--accent-soft),transparent 72%);
+  opacity:.95;
+}
+
+/* —— 入场编排：主区前几块错峰落下（v5 的 11px/.56s → 更明确的 18px/.72s） —— */
+@keyframes viewIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* ★ 修复（用户反馈 · 第七轮 · 根因）：填充模式 both → backwards。
+   `both` 会在动画结束后**继续填补 to 帧**（opacity:1 / transform:none）。
+   浏览器据此认定该元素「带填充中的动画属性」，于是把**每个 `.main` 直接子元素**
+   （含 `.searchbox`）都提升为**堆叠上下文**。而 `.searchbox` 里藏着浮层 `#sug`
+   （z-index:40，检索建议列表）——它的层级被锁死在子树内，
+   再也盖不住 DOM 里排在后面的兄弟节点（答复卡 / 结果列表），
+   于是就出现「答复卡把建议浮层压住」的层叠倒置。
+   改为 backwards：延迟期间照样显示起始帧（错峰观感完全不变，因为终帧本就等于常态样式），
+   动画结束后不再填充 → 不残留堆叠上下文，z-index 恢复全局比较。
+   附带收益：少一批常驻合成层；且 `both` 的高优先级填充值会一直压住 `transform`，
+   连 `.res:hover{transform:translateY(-2px)}` 这类悬停位移都会被吃掉 —— 改后一并恢复。 */
+.view.on .main>*{animation:viewIn .72s var(--ease-out) backwards}
+.view.on .main>*:nth-child(1){animation-delay:0ms}
+.view.on .main>*:nth-child(2){animation-delay:80ms}
+.view.on .main>*:nth-child(3){animation-delay:150ms}
+.view.on .main>*:nth-child(4){animation-delay:210ms}
+.view.on .main>*:nth-child(n+5){animation-delay:260ms}
+
+/* —— 空态：给「没有结果」一个体面的样子 —— */
+.empty{text-align:center;padding:var(--sp-8) var(--sp-5);color:var(--txt-4);font-size:var(--fs-sm);line-height:1.95}
+.empty .big{font-size:var(--fs-h2);color:var(--txt);margin-bottom:10px;font-weight:640;letter-spacing:-.3px}
+
+/* —— 顶栏下缘：一道金→玉的光收边。
+   ★ 性能（问题二）：原先让它 7.5s 无限流过 —— 这是一条**常驻全宽**动画，
+   虽然只动 background-position，但它让合成器永远无法进入空闲态。
+   改为静态光带（信号色仍在，只是不流动）。 */
+.cmdbar::after{
+  background:linear-gradient(90deg,transparent,var(--accent-2) 34%,var(--cyan) 54%,transparent 72%);
+  background-repeat:no-repeat;opacity:.5;
+}
+
+/* —— 答复卡的签名线：这里原本挂了一条 8s 无限流动（ansflow）。
+   它其实是**死代码** —— 后面「层级」一节把 .answer::before 整个改写成
+   横向陈述式签名线（走 ansflowV），本行从未生效。
+   ★ 性能（问题二）：顺手清掉，免得留一个"看起来在动"的陷阱。 */
+
+/* —— 页头记号（金玉竖条）：★ 性能（问题二）去掉 4.5s 常驻呼吸动画。
+   它只是 5px 宽竖条的明暗在 .78↔1 之间晃，却让合成器永远没有空闲帧。
+   固定在最亮档，静态观感与呼吸峰值等价。 */
+.viewhead h2::before{opacity:.95}
+
+/* ============================================================================
+   22. v7 材质与光 —— 在 v6 之上补「光源、体积、色彩信号」三件事。
+   纯加法：只改颜色 / 阴影 / 渐变 / 内边距，不动任何布局结构、类名与变量契约。
+   ============================================================================ */
+
+/* —— 环境光：顶部一束金色顶光 + 右下角一点青玉地面反光。
+   屏幕第一次有了"光从哪来"，画布不再是均匀的一块黑。 —— */
+body{
+  background-image:
+    radial-gradient(124% 66% at 50% -14%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 62%),
+    radial-gradient(88% 58% at 102% 106%,color-mix(in srgb,var(--cyan) 10%,transparent),transparent 62%);
+  background-attachment:fixed;
+}
+/* 浅色主题只留一层极淡的金色顶光 —— 白底上一片青绿反光会显脏 */
+:root[data-theme="light"] body{
+  background-image:radial-gradient(120% 62% at 50% -12%,color-mix(in srgb,var(--accent) 6%,transparent),transparent 60%);
+}
+.backdrop::before{opacity:.55}   /* 网格收敛：大面积细纹会"脏"，黑金要靠留白和光来说话 */
+.backdrop::after{opacity:.78}    /* 极光不过曝 */
+
+/* —— 页头英雄区：从"一行字"升级为一块独立面板。
+   上缘一道金玉细线 + 左上角光晕，标题落在这束光里，成为每屏的第一眼。 —— */
+.viewhead{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:152px;                      /* 给右上幽灵字与右下控件各留一条独立横带，互不打架 */
+  padding:var(--sp-5) var(--sp-6) var(--sp-5);border-radius:var(--r-lg);
+  border:1px solid var(--line-2);
+  background:
+    radial-gradient(118% 190% at 0% -34%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 58%),
+    linear-gradient(180deg,var(--surface-2),var(--surface-1) 62%,transparent);
+  box-shadow:var(--sh-lip),0 30px 72px -52px rgba(0,0,0,.92);
+}
+/* 英雄区里的正文一律浮在幽灵字之上 */
+.viewhead>*:not(.vh-ghost){position:relative;z-index:1}
+
+/* —— 幽灵字：英雄区右上角一枚描边大词，是这个界面的「签名笔迹」——
+   纯装饰（aria-hidden + pointer-events:none），窄屏自动收起。 —— */
+.vh-ghost{
+  position:absolute;right:26px;top:14px;z-index:0;
+  font-family:var(--mono);font-weight:700;font-size:clamp(44px,4.9vw,74px);
+  letter-spacing:.06em;line-height:1;white-space:nowrap;
+  pointer-events:none;user-select:none;color:transparent;
+  -webkit-text-stroke:1px color-mix(in srgb,var(--accent-2) 46%,transparent);
+  opacity:.6;
+}
+/* 上缘细线两端留出圆角，避免在圆角处"穿帮" */
+.viewhead::before{
+  content:"";position:absolute;left:20px;right:20px;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--accent-line) 12%,var(--cyan-line) 54%,transparent 92%);
+}
+.viewhead::after{margin-top:16px}   /* v6 的收边线：跟着新内边距收 */
+
+/* —— 卡片体积：顶边更亮、下坠更深，内容明确"浮"在画布之上 —— */
+.res,.card,.answer,.kpi,.panel{
+  box-shadow:var(--sh-lip),0 2px 6px -2px rgba(0,0,0,.6),0 26px 58px -36px rgba(0,0,0,.95);
+}
+.res:hover,.card:hover,.kpi:hover{
+  box-shadow:var(--sh-lip),0 4px 12px -3px rgba(0,0,0,.55),0 36px 78px -36px rgba(0,0,0,1);
+}
+/* 结果卡左缘那道指示条：v7 更实、更长 */
+.res::before{opacity:.62}
+
+/* —— 六张 KPI：顶边亮线各取一个数据色，六张卡并排时连成一条「刻度带」——
+   这是纯装饰层，不承载任何数据语义（真正的语义色仍走 .kpi i）。 —— */
+.kpi::after{
+  height:2px;
+  background:linear-gradient(90deg,var(--kpi-k,var(--accent)),transparent 84%);
+}
+.kpi:nth-child(1){--kpi-k:var(--viz-1)}
+.kpi:nth-child(2){--kpi-k:var(--viz-2)}
+.kpi:nth-child(3){--kpi-k:var(--viz-4)}
+.kpi:nth-child(4){--kpi-k:var(--viz-6)}
+.kpi:nth-child(5){--kpi-k:var(--viz-5)}
+.kpi:nth-child(6){--kpi-k:var(--viz-3)}
+
+/* —— 主按钮：三段渐变 + 实心外辉光，是界面上唯一"发光体" —— */
+.btn.primary{
+  background:linear-gradient(180deg,var(--accent-2),var(--accent) 58%,color-mix(in srgb,var(--accent) 82%,#000));
+  box-shadow:0 12px 30px -12px var(--accent-glow),inset 0 0 0 1px color-mix(in srgb,var(--accent-2) 55%,transparent),inset 0 1px 0 rgba(255,248,228,.40);
+}
+.btn.primary:hover{
+  filter:brightness(1.08);
+  box-shadow:0 16px 40px -12px var(--accent-glow),inset 0 0 0 1px color-mix(in srgb,var(--accent-2) 60%,transparent),inset 0 1px 0 rgba(255,248,228,.50);
+}
+
+/* —— 搜索框聚焦：辉光扩散，像被真正"点亮"（半径 90px → 56px，见第 21 节说明） —— */
+.searchbar:focus-within{
+  box-shadow:0 0 0 5px var(--accent-soft),0 0 56px -22px var(--accent-glow),var(--sh-2);
+}
+
+/* —— 左导航：底纹更明显的金调渐变；激活块更"实" —— */
+.rail{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--bg-2)),var(--bg-2) 46%)}
+.rail-pill{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 30%,var(--surface-3)),var(--surface-1));
+  box-shadow:var(--sh-lip),0 12px 30px -12px var(--accent-glow),inset 0 0 0 1px color-mix(in srgb,var(--accent-2) 38%,transparent);
+}
+
+/* —— 窄屏：英雄区收一档内边距，别把内容挤到边上 —— */
+
+/* ==========================================================================
+   22. v9 降噪层 —— 信息层次收敛（progressive disclosure）
+   --------------------------------------------------------------------------
+   反馈：「每个地方都摊开所有信息，信息量冲击太大」。
+   本层不动任何功能与数据流，只做三件事：
+     ① 降权：三级信息（元数据 / 次要指标 / 长文本）缩小、淡化、收紧间距；
+     ② 折叠：长描述、匹配依据、建议路径、长列表默认折起，需要时再展开；
+     ③ 去重：删掉页头里与别处重复的说明词。
+   原则：一屏只让「标题 / 主动作」（1 级）与「关键数字」（2 级）显性，
+         其余 3 级信息一律降权或可折叠。数字不删，只是不再抢视线。
+   ========================================================================== */
+
+/* ---------- 0. 尺度回落：v7 把标题推到 38px、主区留白 38/50，整体偏"重"。
+       ★ v11：字号统一由第 0 节令牌定义（h1=29 / display=44），此处**不再覆盖**。 ---------- */
+.main{padding:var(--sp-6) var(--sp-6) var(--sp-8);gap:var(--sp-5)}
+.main.wide{gap:var(--sp-5)}
+.viewhead{gap:var(--sp-4)}
+
+/* ---------- 1. 顶部命令栏：统计从"抢眼"降为"背景刻度" ---------- */
+.top-stat{gap:0}
+.top-stat .kv{padding:0 var(--sp-3)}
+.top-stat .kv b{font-size:var(--fs-sm);font-weight:470;opacity:.92}
+.top-stat .kv span{font-size:var(--fs-micro);letter-spacing:.5px;opacity:.7}
+.livewrap,.refwrap{opacity:.78;transition:opacity .2s var(--ease-out)}
+.livewrap:hover,.refwrap:hover{opacity:1}
+
+/* ---------- 2. 页头：一句说明，其余收起 ---------- */
+.viewhead{padding:var(--sp-4) var(--sp-5) var(--sp-3);min-height:0;align-items:flex-start}
+.viewhead h2{margin-bottom:4px}
+/* 描述默认 1 行；悬停/聚焦再展开 —— 需要时看得到，平时不占视线 */
+.viewhead p{
+  font-size:var(--fs-sm);line-height:1.62;max-width:940px;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;
+}
+.viewhead:hover p,.viewhead:focus-within p{-webkit-line-clamp:5}
+/* 页头的说明词与右侧控件/排序按钮重复，去掉不影响理解 */
+.viewhead>.tagline{display:none}
+
+/* ---------- 3. 左栏：长列表压矮、卡片整体收紧 ---------- */
+#latestbody{max-height:212px}
+.sidepanel .card>h3{padding:var(--sp-2) var(--sp-3) var(--sp-2);font-size:var(--fs-xs)}
+.sidepanel .card>.body{padding:var(--sp-2) var(--sp-3)}
+.lat{padding:3px 0;gap:var(--sp-2)}
+
+/* ---------- 4. 搜索区：示例词收一半，解析区不抢戏 ---------- */
+.hints{gap:var(--sp-1)}
+.hints .hint:nth-child(n+5){display:none}
+.qparse{margin-top:4px}
+
+/* ---------- 5. 结果条 & 结果卡：一屏 10 条不再被 chip / 证据块刷屏 ---------- */
+.chip{font-size:var(--fs-micro);padding:1px var(--sp-2)}
+.res .r1{gap:var(--sp-1);row-gap:var(--sp-1)}
+.res .r3{opacity:.8;font-size:var(--fs-xs)}
+.snip{-webkit-line-clamp:2}
+/* 「匹配依据」默认折成一行，悬停该条才铺开证据条 */
+.res .why{
+  display:block;max-height:20px;overflow:hidden;
+  transition:max-height .3s var(--ease-out),margin-top .3s var(--ease-out);
+}
+.res:hover .why,.res:focus-within .why{max-height:140px}
+
+/* ---------- 6. 答复卡：指标缩小，建议路径折起 ---------- */
+.answer .metrics{gap:var(--sp-2)}
+.answer .metrics .metric b{font-size:var(--fs-h2)}
+/* 「建议处置路径」由模板改为 <details>：默认收起，点标题才铺开 */
+.answer details.plan{padding:0 var(--sp-4)}
+.answer details.plan>summary{
+  display:flex;align-items:center;gap:var(--sp-2);margin:0;padding:var(--sp-3) 0 var(--sp-3);
+  font-size:var(--fs-micro);font-weight:600;letter-spacing:1.1px;text-transform:uppercase;color:var(--txt-4);
+  cursor:pointer;list-style:none;user-select:none;transition:color .2s var(--ease-out);
+}
+.answer details.plan>summary:hover{color:var(--txt-2)}
+.answer details.plan>summary::-webkit-details-marker{display:none}
+.answer details.plan>summary::before{
+  content:"";width:0;height:0;flex:none;
+  border-left:4px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;
+  transition:transform .22s var(--spring);
+}
+.answer details.plan[open]>summary::before{transform:rotate(90deg)}
+.answer details.plan>summary::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.answer details.plan ol{padding-bottom:var(--sp-3);animation:viewIn .3s var(--ease-out) both}
+
+/* ---------- 7. 移动端：触屏没有 hover，折起的内容要能常显 ---------- */
+@media (max-width:980px){
+  .viewhead p{-webkit-line-clamp:2}   /* R5：移动端页头收到 2 行 */
+  .res .why{max-height:none}
+  .hints .hint:nth-child(n+5){display:inline-flex}
+}
+
+/* ---------- 8. 监测台：KPI 卡降一档，右侧三个长面板默认折起 ---------- */
+.kpirow{gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+.kpi span{font-size:var(--fs-micro);letter-spacing:.8px}
+.kpi b{font-size:var(--fs-h2);margin:6px 0 1px;letter-spacing:-.8px}
+.panel>header{padding:var(--sp-3) var(--sp-4);font-size:var(--fs-sm)}
+.panel .pbody{padding:var(--sp-3) var(--sp-3) var(--sp-3)}
+.mini{font-size:var(--fs-xs)}
+.streamrow{padding:var(--sp-2) var(--sp-3)}
+/* 最新情报流是监测台的主角，保留展开，但一屏不再无限长 */
+.stream{max-height:432px;overflow-y:auto;overscroll-behavior:contain}
+
+/* 折起的面板（模板里 <details class="panel">）：标题即开关，标题行自带关键状态 */
+details.panel>summary{
+  display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);cursor:pointer;list-style:none;
+  font-size:var(--fs-sm);font-weight:560;letter-spacing:-.1px;color:var(--txt-2);
+  background:color-mix(in srgb,var(--bg-2) 42%,transparent);
+  border-bottom:1px solid transparent;transition:background .2s var(--ease-out),border-color .2s var(--ease-out);
+}
+details.panel>summary:hover{background:var(--surface-2);color:var(--txt)}
+details.panel>summary::-webkit-details-marker{display:none}
+details.panel>summary::before{
+  content:"";width:0;height:0;flex:none;
+  border-left:4px solid var(--txt-4);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;
+  transition:transform .22s var(--spring);
+}
+details.panel[open]>summary::before{transform:rotate(90deg);border-left-color:var(--accent-2)}
+details.panel[open]>summary{border-bottom-color:var(--line)}
+details.panel>summary .ph-sub{margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:0;color:var(--txt-4)}
+
+/* ==========================================================================
+   23. v10 加载态系统 —— 全页启动 / 按钮锁定 / 进度条 / 进度环 / 骨架 + 流光
+   --------------------------------------------------------------------------
+   七种反馈，按「等待时长是否可量化」分工：
+     · 不可量化（不知道还要多久）→ .spinner 旋转圈，不显示百分比；
+     · 可量化（有 done/total 或字节数）→ .pbar 横向进度条 / .ring 圆形进度环，填充与数字同步；
+     · 内容即将到来（结构已知）→ .sk 骨架占位 + 流光扫描，加载完直接替换、不跳布局；
+     · 触发型动作（提交/生成/同步）→ .btn.loading 按钮锁定，防重复点击；
+     · 首次进入 → #boot 全屏启动页，内容备好后淡出。
+   全部走设计令牌，深/浅两主题同时成立；动效统一受 prefers-reduced-motion 约束。
+   ========================================================================== */
+
+/* 骨架与流光的两个派生色：深色下是"亮扫过暗"、浅色下是"白扫过灰"，方向都对。
+   扫光取 34% 主色——16% 时在暗底上几乎看不见，"看不出在加载"就白做了。 */
+:root{--sk-base:var(--surface-3);--sk-sweep:color-mix(in srgb,var(--accent-2) 40%,transparent)}
+html[data-theme="light"]{--sk-base:color-mix(in srgb,var(--txt) 11%,transparent);--sk-sweep:rgba(255,255,255,.8)}
+
+/* ---------- 1. 旋转加载圈（spinner）：不确定等待，永不显示百分比 ---------- */
+.spinner{
+  --sp:16px;--spw:2px;
+  width:var(--sp);height:var(--sp);flex:none;display:inline-block;vertical-align:-2px;border-radius:50%;
+  border:var(--spw) solid color-mix(in srgb,var(--txt-4) 34%,transparent);
+  border-top-color:var(--accent-2);
+  animation:spin .78s linear infinite;
+}
+.spinner.lg{--sp:38px;--spw:3px}
+.spinner.sm{--sp:11px;--spw:1.6px}
+.spinner.on-accent{border-color:color-mix(in srgb,var(--accent-ink) 30%,transparent);border-top-color:var(--accent-ink)}
+/* 中心带一枚静点，旋转圈不"空" */
+.spinner.dot::before{content:"";position:absolute;width:calc(var(--sp) * .22);height:calc(var(--sp) * .22);
+  border-radius:50%;background:var(--accent-2);left:50%;top:50%;transform:translate(-50%,-50%)}
+
+/* ---------- 2. 横向进度条（pbar）：可量化任务，填充随数字走 ---------- */
+.pbar{
+  position:relative;height:6px;flex:1 1 auto;min-width:70px;border-radius:999px;overflow:hidden;
+  background:color-mix(in srgb,var(--txt-4) 20%,transparent);
+}
+.pbar>.fill{
+  position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 10px -1px color-mix(in srgb,var(--accent) 70%,transparent);
+  transition:width .34s var(--ease-out);
+}
+/* 不定量：填充块自己走，宽度固定 */
+.pbar.indet>.fill{width:34%;transition:none;animation:pbarslide 1.05s var(--ease) infinite}
+@keyframes pbarslide{0%{left:-38%}100%{left:100%}}
+.pbarline{display:flex;align-items:center;gap:var(--sp-3);width:100%}
+.pbarline .pct{font-family:var(--mono);font-size:var(--fs-xs);color:var(--txt-2);font-variant-numeric:tabular-nums;min-width:42px;text-align:right}
+
+/* ---------- 3. 圆形进度环（ring）：紧凑区域用，中心同步显示百分比 ---------- */
+.ring{--p:0;--rg:48px;--rw:4px;
+  width:var(--rg);height:var(--rg);flex:none;position:relative;display:inline-grid;place-items:center}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.ring .track{fill:none;stroke:color-mix(in srgb,var(--txt-4) 22%,transparent);stroke-width:var(--rw)}
+.ring .ind{
+  fill:none;stroke:var(--accent);stroke-width:var(--rw);stroke-linecap:round;
+  stroke-dasharray:125.66;stroke-dashoffset:calc(125.66 * (1 - var(--p)));
+  transition:stroke-dashoffset .42s var(--ease-out);
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent) 62%,transparent));
+}
+.ring .num{position:absolute;font-family:var(--mono);font-size:calc(var(--rg) * .27);font-weight:600;
+  color:var(--txt);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ring.lg{--rg:78px;--rw:5px}
+.ring.sm{--rg:34px;--rw:3px}
+.ring.spin-mode .ind{animation:spin 1.05s linear infinite;stroke-dasharray:30 96;stroke-linecap:round}
+.ring.spin-mode .num{display:none}
+
+/* ---------- 4-5. 骨架屏 + 流光：占位块不动，一条亮光从左往右扫 ---------- */
+.sk,.skl,.skdot,.sktile,.skbar{position:relative;overflow:hidden;background:var(--sk-base)}
+.sk::after,.skl::after,.skdot::after,.sktile::after,.skbar::after{
+  content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(100deg,transparent 22%,var(--sk-sweep) 50%,transparent 78%);
+  animation:sh 1.45s var(--ease-out) infinite;
+}
+/* 文本行 */
+.skl{height:10px;border-radius:6px;margin:9px 0}
+.skl.w20{width:20%}.skl.w35{width:35%}.skl.w50{width:50%}.skl.w70{width:70%}.skl.w90{width:90%}
+.skl.tall{height:13px}
+/* 小方块（头像/图标位） */
+.skdot{width:28px;height:28px;border-radius:9px;flex:none}
+/* 结论/发布条 */
+.skbar{height:34px;border-radius:var(--r-sm)}
+/* 瓦片（图块/指标位） */
+.sktile{height:64px;border-radius:var(--r-md)}
+/* 整卡骨架：一张卡片里排几行，加载完替换为真实卡，尺寸对齐不跳 */
+.skcard{padding:var(--sp-4) var(--sp-4);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-1);margin-bottom:10px}
+.skcard .skhead{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:11px}
+.skcard .skhead .skmeta{flex:1 1 auto;min-width:0}
+.skcard .skhead .skmeta .skl{margin:0 0 6px}
+.skcard .skhead .skmeta .skl:last-child{margin-bottom:0}
+.skgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--sp-3)}
+
+/* ---------- 6. 按钮加载态：锁死防重复点击 ---------- */
+.btn.loading,.refbtn.loading,.trbtn.loading{pointer-events:none;cursor:progress;position:relative;color:transparent!important}
+.btn.loading>*,.refbtn.loading>*,.trbtn.loading>*{visibility:hidden}
+/* ★ 必须显式重置 .btn::after 的「悬停光扫」继承值（inset:0 / opacity:0 /
+   transform / background）——否则转圈会被 opacity:0 藏掉、被 inset:0 拉成整块。 */
+.btn.loading::after,.refbtn.loading::after,.trbtn.loading::after{
+  content:"";position:absolute;left:50%;top:50%;right:auto;bottom:auto;
+  width:13px;height:13px;margin:-7.5px 0 0 -7.5px;border-radius:50%;
+  background:none;opacity:1;transform:none;
+  border:2px solid color-mix(in srgb,var(--accent-2) 32%,transparent);border-top-color:var(--accent-2);
+  animation:spin .72s linear infinite;
+}
+.btn.primary.loading::after{background:none;border-color:color-mix(in srgb,var(--accent-ink) 30%,transparent);border-top-color:var(--accent-ink)}
+/* 加载中的按钮保持底色/描边，只是内容换成转圈（别让它看起来"被禁用"） */
+.btn.loading{opacity:1}
+
+/* 顶栏任务条：任何"有进度的全局任务"（翻译/同步…）在命令栏下缘走一条线 */
+.cmdbar .taskbar{position:absolute;left:0;right:0;bottom:-1px;height:2px;z-index:22;pointer-events:none;overflow:hidden}
+.cmdbar .taskbar[hidden]{display:none}
+.cmdbar .taskbar>i{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 10px color-mix(in srgb,var(--accent) 75%,transparent);
+  transition:width .3s var(--ease-out);
+}
+.cmdbar .taskbar>i.indet{width:32%;transition:none;animation:pbarslide 1.05s var(--ease) infinite}
+
+/* ---------- 7. 整页加载：#boot 全屏启动页，内容备好后淡出 ---------- */
+#boot{
+  position:fixed;inset:0;z-index:9000;display:grid;place-items:center;
+  background:
+    radial-gradient(120% 120% at 50% -10%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 60%),
+    var(--bg);
+  transition:opacity .52s var(--ease-out),visibility .52s;
+}
+#boot.out{opacity:0;visibility:hidden;pointer-events:none}
+#boot .boot-core{display:flex;flex-direction:column;align-items:center;gap:var(--sp-5);transform:translateY(-3%)}
+#boot .boot-ring{position:relative;display:grid;place-items:center}
+#boot .boot-ring .glyph{position:absolute;color:var(--accent-2)}
+#boot .boot-name{font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:.42em;text-transform:uppercase;
+  color:var(--txt-2);padding-left:.42em}
+#boot .boot-step{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--txt-4);min-height:15px}
+#boot .boot-bar{width:236px}
+#boot .boot-bar .pbar{height:3px}
+
+/* 进度环 + 说明文字横向排布（富化台上传/解析这类"有百分比但要占一小块"的位置） */
+.loading.with-ring{display:flex;align-items:center;justify-content:center;gap:var(--sp-3);text-align:left;padding:var(--sp-4)}
+.loading.with-ring>span:last-child{flex:1 1 auto;min-width:0;line-height:1.5}
+
+/* ---------- 8. 触屏/降级：动画关掉，静态可见 ---------- */
+@media (prefers-reduced-motion:reduce){
+  .spinner,.btn.loading::after,.refbtn.loading::after,.trbtn.loading::after,.ring.spin-mode .ind,
+  .sk::after,.skl::after,.skdot::after,.sktile::after,.skbar::after,.cmdbar .taskbar>i.indet{
+    animation-duration:2.4s;
+  }
+  .pbar.indet>.fill,.cmdbar .taskbar>i.indet{animation-duration:2.6s}
+}
+
+/* ==========================================================================
+   24. v11 纪律层 —— 把「设计系统」从文档变成实现
+   --------------------------------------------------------------------------
+   v10 之前，第 0 节声明了 8 级字号 / 6 级间距 / 3 级行高 / 一组语义令牌，
+   但代码里散落 28 个裸字号、41 个内边距取值，令牌引用率接近于零 ——
+   设计系统只是「文档」，所以一致性才会漂。v11 做五件事：
+     ① 令牌真正接上：字号 / 间距已由脚本全量吸附，本层补齐行高 / 字距 / 阴影令牌；
+     ② 层级补一档：面板 / 卡片 / 区块标题分档，不再与正文同尺寸；
+     ③ 留白：长文本限宽、断行优化、命令栏与主区同宽、问答视图死区构图；
+     ④ 动效：滚动驱动渐显、视图切换方向感、常驻脉冲收敛；
+     ⑤ 原创性：幽灵字从装饰词升级为「本视图第一关键数字」，品牌盾形做一次性描边绘制。
+   纯视觉层：不动任何类名 / id / 变量名 / JS 数据流。
+   ========================================================================== */
+
+/* ---------- ① 排版：令牌接上 + 层级补档 ---------- */
+/* 行高令牌此前从未被引用 —— 接上，并按「阅读型 / 界面型 / 标题」三档分工：
+   loose(1.85) 给连续阅读的长文本，body(1.62) 给界面里的短句，
+   tight(1.22) 只给单行大标题（多行标题用 tight 会挤）。 */
+.desc-p,.answer li,.steps li,.paper p,.answer .plan li{line-height:var(--lh-loose)}
+.viewhead p,.empty{line-height:var(--lh-loose)}
+.res .ttl,.res .snip,.qpd-row,.meta-note,.help-grid span,.answer .metric{line-height:var(--lh-body)}
+.viewhead h2,.answer .hd b,.empty .big{line-height:var(--lh-tight)}
+/* 字距令牌：所有全大写小标签统一字距，不再各写各的 1.1 / 1.15 / 1.2px */
+.card>h3,.sec>h4,.sp-title,.badge,.fgroup>summary,.answer .plan h4,
+details.panel>summary,.viewhead p,.kpi span{letter-spacing:var(--tk-caps)}
+kbd{box-shadow:var(--sh-1)}
+
+/* T3 / H3：把「二级标题」这一层真正落地。
+   v10 页头 29px 直接跳到正文 13.5px，中间空了两级 —— 全站没有"二级标题"，
+   面板标题与正文几乎同尺寸，面板内部层级不可见。 */
+.panel>header{font-size:var(--fs-h3);font-weight:600}
+.answer .hd b{font-size:var(--fs-h3)}
+.insp-head h2{font-size:var(--fs-h3)}
+.card>h3,.sec>h4,.kpi span{font-size:var(--fs-micro)}
+.resbar .count,.card .body .mini:first-child{font-size:var(--fs-xs)}
+
+/* T6：断行优化 —— 中文标题易出「尾字孤行」，正文段落允许更聪明的折行 */
+.viewhead h2,.res .ttl,.card>h3,.panel>header,.answer .hd b,.empty .big{text-wrap:balance}
+.desc-p,.answer li,.res .snip,.viewhead p,.meta-note{text-wrap:pretty}
+
+/* T7：正文行长在超宽屏可达 150+ 字符（舒适区 45~90）。
+   只给**连续文本块**限宽 —— 卡片与数据网格保持满宽。 */
+.desc-p,.answer ul,.answer .plan ol,.paper p,.steps,.meta-note,.linklist{max-width:72ch}
+
+/* ---------- ② 留白 ---------- */
+/* S4：超宽屏命令栏与主区宽度不一致 —— 两者共用同一个 --maxw 上限 */
+.cmdbar{padding-inline:max(var(--sp-5),calc((100% - var(--maxw)) / 2))}
+.cmdbar{padding-block:0}
+/* S1：问答视图卡片只占屏 ~35%，下方 ~40% 是死区（"没做完"的观感）。
+   `safe center` 让内容在富余时垂直居中，内容超高时又不会截断顶部。 */
+.view[data-view="ask"] .main{justify-content:safe center}
+#askdock{flex:0 0 auto;align-self:center}
+
+/* ---------- ③ 层级：答复卡换成「横向陈述式」 ---------- */
+/* H2：结果卡与答卡共用「卡片 + 徽章 + 数字」同一套语汇，远看把三层结构压成一层。
+   答复卡不再是一张"卡片"，而是**一条系统结论**：去掉四边框与圆角，
+   改用左缘一道金→玉→铜的竖线 + 极淡底色，与"第 N 条结果"彻底分开。 */
+.answer{
+  border:0;border-radius:0;box-shadow:none;position:relative;
+  padding-left:var(--sp-5);
+  /* ★ 修复（用户反馈）：原值 `linear-gradient(94deg,var(--accent-soft),transparent 58%)`
+     右侧 58% 之后**完全透明** —— 底层的背景网格线（.backdrop 的 48px 网格）与
+     WebGL 粒子会直接穿过答复正文，视觉上就是"文字和后面的东西叠在一起"。
+     现在垫一层不透明底色 --bg-2，金色渐变光仍叠在最上层：
+     左侧的金色引导光、整体略亮于页面底的层次都保留，但不再透光。
+     注：不能再往后面追加半透明层 —— 底色必须是颜色（color），不是带 alpha 的渐变。 */
+  background:linear-gradient(94deg,var(--accent-soft),transparent 58%),var(--bg-2);
+}
+.answer::before{
+  top:var(--sp-2);bottom:var(--sp-2);left:0;right:auto;width:3px;height:auto;border-radius:3px;
+  background:linear-gradient(180deg,var(--accent),var(--cyan) 52%,var(--iris));
+  background-size:100% 240%;animation:ansflowV 24s var(--ease) infinite;
+}
+@keyframes ansflowV{0%,100%{background-position:0% 0%}50%{background-position:0% 100%}}
+.answer .hd{padding-left:0}
+.answer .body{padding-left:0}
+.answer details.plan{padding-left:0;padding-right:0}
+
+/* H4：左栏 5 张卡与主区卡片样式完全一致 → 侧栏与主区争夺注意力。
+   桌面端左栏退成「分组块」：去边框、去投影、去圆角，只留一条极淡分隔线。 */
+@media (min-width:981px){
+  .sidepanel .card{
+    background:transparent;border:0;border-radius:0;box-shadow:none;
+    border-top:1px solid var(--line);padding-top:var(--sp-3);
+  }
+  .sidepanel .card:first-child{border-top:0;padding-top:0}
+  .sidepanel .card>h3{background:transparent;border-bottom:0;padding:0 2px var(--sp-2)}
+  .sidepanel .card .body{padding:0 2px var(--sp-3)}
+}
+
+/* ---------- ④ 动效 ---------- */
+/* A5（滚动驱动渐显）★ 问题二修复：整块删除。
+   原来在 @supports (animation-timeline:view()) 里给每张 .res 挂了
+   `animation:revealUp; animation-timeline:view()`。三个代价：
+     ① 结果卡被提升为独立合成层，且每帧按滚动位置重算动画进度 —— 长列表滚动时最重的一笔；
+     ② 它**覆盖掉了 789 行 .res 的 cardIn 入场动画**（同一属性，后写的赢），
+        于是"结果卡错峰入场"这个效果其实早就失效了，用户看到的是滚动驱动的那套；
+     ③ 层提升 + .res 的 content-visibility:auto 是「问题一」绘制顺序错位的帮凶。
+   删掉之后 cardIn 入场动画自动恢复（789 行 → @keyframes cardIn，见第 11 节）。 */
+/* A6：视图切换原先只有 crossfade，没有方向感。JS 按导航顺序写 --vx（±22px），
+   进来的视图从「来的方向」推入，离开的视图往「去的方向」滑出。 */
+.view{transform:translateX(var(--vx,0)) translateY(9px) scale(.996)}
+.view.on{animation:viewSlide .44s var(--ease-out) backwards}
+@keyframes viewSlide{
+  from{opacity:0;transform:translateX(var(--vx,0)) translateY(7px) scale(.998)}
+  to{opacity:1;transform:none}
+}
+/* A7：常驻脉冲收敛 —— 只保留「实时点」与「订阅角标」两处，
+   图谱雷达环改为只播 2 次（打开详情提示一下即可，不再永久跳动）。 */
+.gping{animation-iteration-count:2}
+.pulse{animation:none}
+
+/* ---------- ⑤ 原创性 ---------- */
+/* O5：品牌盾形做一次性描边绘制（stroke-dashoffset 1 → 0），只播一次，之后永久静止。
+   这是「这个产品」的动效签名，也把启动页与左导航的同一个符号连成一条线。 */
+.rail-brand svg path,.boot-ring .glyph svg path{
+  stroke-dasharray:60;stroke-dashoffset:60;
+  animation:brandDraw 1.3s var(--ease-out) forwards;
+}
+.rail-brand svg path:nth-child(2),.boot-ring .glyph svg path:nth-child(2){animation-delay:.62s}
+@keyframes brandDraw{to{stroke-dashoffset:0}}
+
+/* O3：幽灵字此前只是装饰词（SEARCH / MONITOR / …），大片视觉资产不承载信息。
+   现在它是「本视图第一关键数字」的载体：上行是极小的英文视图名（保留签名感），
+   下行是本视图的第一关键数字 —— 装饰变信息，且随视图实时更新（数值由 app.js 写入）。 */
+.vh-ghost{
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+  text-align:right;
+  -webkit-text-stroke:0;color:transparent;opacity:1;
+  /* ★ 修正：幽灵字原先锚在**右上角**（top:14px），而页头右侧本来就有控件
+     （监测台的「刷新视图」按钮、富化台的「在野利用 / 含 POC」分段器），
+     两者落在同一条横带 → 数字与控件文字直接叠在一起。
+     改为锚在**右下角**：控件占右上、数字占右下，垂直分离；
+     底部那条收边线右侧 22% 本就是渐隐到透明的，数字落在那段空白上不打架。 */
+  top:auto;bottom:var(--sp-3);right:var(--sp-5);
+}
+/* 页头右侧有控件的视图（监测 / 富化）：给控件让出整条上带，数字整块下移 */
+.viewhead>.btn,.viewhead>.seg{flex:none}
+/* 页头底带加一档留白：右上控件与右下数字之间拉开净空，两行文字不再相互渗色 */
+.viewhead{padding-bottom:var(--sp-5)}
+.vh-ghost em{
+  font-style:normal;font-size:var(--fs-micro);letter-spacing:var(--tk-caps);
+  color:color-mix(in srgb,var(--accent-2) 62%,transparent);
+  /* ★ 去掉 translateY(6px)：它把英文视图名往下压 6px，正压进下方数字的描边里，
+     于是「MONITOR」和「109,328」看起来糊成一团。 */
+}
+.vh-ghost b{
+  font-family:var(--mono);font-weight:700;line-height:.86;
+  font-size:clamp(var(--fs-h1),4.6vw,var(--fs-display));
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--accent-2) 42%,transparent);
+}
+.vh-ghost b[data-v]{-webkit-text-stroke-color:color-mix(in srgb,var(--accent-2) 58%,transparent)}
+
+/* O4：招牌交互 —— 「意图解析链路」。
+   本产品区别于通用检索的第一步是「自然语言 → 意图 / 概念 / 同义词扩展」的解析，
+   v11 把这一步**画出来**：每个解析标签按顺序点亮，标签之间用一道渐隐箭头连成链路，
+   检索时视线可以顺着它一路看过去 —— 这是只有这个产品才有的第一步。 */
+.qparse{gap:var(--sp-4)}
+.qparse .tagx{
+  position:relative;
+  animation:intentLit .44s var(--ease-out) both;
+  animation-delay:calc(var(--ti,0) * 62ms);
+}
+.qparse .tagx+.tagx::before{
+  content:"";position:absolute;left:-15px;top:50%;width:9px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-line));
+}
+@keyframes intentLit{
+  from{opacity:0;transform:translateY(5px) scale(.94);border-color:var(--accent-line)}
+  to{opacity:1;transform:none}
+}
+
+/* A4：实时流新条目插入动画（m1 只给**真正新增**的行加 .lat-new，
+   整表重绘不重放，15s 一轮不会满屏闪） */
+.lat-new{animation:latIn .56s var(--ease-out) both;animation-delay:calc(var(--i,0) * 55ms)}
+@keyframes latIn{
+  0%{opacity:0;transform:translateX(-12px);background:var(--accent-soft)}
+  55%{background:var(--accent-soft)}
+  100%{opacity:1;transform:none;background:transparent}
+}
+
+/* O2：图标语汇 —— rail 图标统一描边与端点（不再各图标各写一份），
+   激活态给图标本身一层极淡金辉，让"当前在哪"不只靠底块，还靠图标发光。 */
+.rail-item svg,.rail-btn svg{stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rail-item.on svg{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 55%,transparent))}
+
+/* 触屏 / 无 hover 设备：折叠的内容要能常显（M7） */
+@media (hover:none){
+  .res .why{max-height:none}
+}
+
+/* R6：手机地址栏收放时 height:100% 会跳动 / 露缝，100dvh 跟随可视视口 */
+@supports (height:100dvh){
+  html,body{height:100dvh}
+  .app{height:100dvh}
+}
+
+/* R3：流体排版 —— 视图标题与大数字在断点之间连续缩放，不再突变 */
+.viewhead h2{font-size:clamp(var(--fs-h2),2.2vw + 8px,var(--fs-h1))}
+.kpi b{font-size:clamp(var(--fs-h3),1.5vw + 8px,var(--fs-h2))}
+
+/* ---------- ⑥ 微交互：清空按钮 / 拖拽手柄 / toast 堆叠 ---------- */
+/* M3：搜索框清空（×）—— 只在有内容时出现 */
+.sbclear{
+  flex:none;width:24px;height:24px;display:none;place-items:center;cursor:pointer;
+  border:0;background:transparent;color:var(--txt-4);border-radius:50%;
+  transition:color .15s var(--ease),background .15s var(--ease);
+}
+.sbclear:hover{color:var(--txt);background:var(--surface-3)}
+.searchbar:focus-within .sbclear,.searchbar.has-q .sbclear{display:grid}
+/* M3b：最近检索 */
+.sbrecent{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.sbrecent .lbl{font-size:var(--fs-micro);color:var(--txt-4)}
+.sbrecent .rq{
+  font-size:var(--fs-xs);color:var(--txt-3);cursor:pointer;padding:3px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-1);max-width:22ch;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;
+  transition:color .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease);
+}
+.sbrecent .rq:hover{color:var(--txt);border-color:var(--line-3);background:var(--surface-3)}
+
+/* M4：检查器拖拽调宽 —— 左缘一条 6px 手柄，双击复位 */
+.insp-grip{
+  position:absolute;left:-3px;top:0;bottom:0;width:6px;z-index:5;cursor:col-resize;
+  background:transparent;transition:background .18s var(--ease);
+}
+.insp-grip:hover,.insp-grip.on{background:var(--accent-line)}
+.insp-grip::after{
+  content:"";position:absolute;left:2px;top:50%;width:2px;height:34px;margin-top:-17px;
+  border-radius:2px;background:var(--line-3);opacity:0;transition:opacity .18s var(--ease);
+}
+.insp-grip:hover::after,.insp-grip.on::after{opacity:.9}
+
+/* M5：toast 由「单条覆盖」改为「最多 3 条堆叠」，连续操作不再互相吞掉 */
+.toastwrap{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:var(--sp-5);z-index:200;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;
+}
+.toast{
+  position:static;left:auto;bottom:auto;transform:translateY(14px) scale(.96);
+}
+.toast.on{transform:none}
+/* M6：触屏目标（≥44px）已在 768 断点统一处理 */
+
+/* ★ v11：原 700 / 620 两档合并为 768 一档（断点收敛） */
+@media (max-width:768px){
+  .searchbar{flex-wrap:wrap;padding:var(--sp-3)}
+  .searchbar input{flex-basis:100%;font-size:var(--fs-h3)}
+  .seg button{padding:var(--sp-2) var(--sp-2);font-size:var(--fs-xs)}
+  .trust-grid{grid-template-columns:repeat(2,1fr)}
+  .inspector{width:100vw}
+  .main{padding:var(--sp-4) var(--sp-3) var(--sp-7);gap:var(--sp-4)}
+  /* R5：移动端页头过高 —— 描述收到 2 行，刷新/导出这类按钮不再占首屏 */
+  .viewhead{padding:var(--sp-4) var(--sp-4) var(--sp-3);border-radius:var(--r-md)}
+  .viewhead::before{left:12px;right:12px}
+  /* M6：触屏目标 —— 列表行高抬到 ≥44px，手指点得中 */
+  .lat,.streamrow,.relrow,.fchk{min-height:44px}
+}
+
+/* ==========================================================================
+   25. v12 材质·动效·组件增强层 —— 纯加法增量（配合 fx.js）
+   --------------------------------------------------------------------------
+   在 v11 纪律层之上叠加四件事，不动任何既有布局尺寸 / 类名 / 变量契约 / JS 数据流：
+     ① 材质：颗粒纹理（.backdrop>i 此前无样式，正好承载）、五团渐变网格、
+        浮层真毛玻璃（调色板 / 快捷键 / 建议层 / toast / 工具提示）；
+     ② 动效：分段器拇指弹性化、建议层弹出弹性化、全站按压反馈补齐、
+        滚动渐入类（.fx-pre/.fx-in，fx.js 驱动）、主按钮涟漪（.fx-rip）；
+     ③ 3D 背景：#fxgl 画布样式（fx.js 插入，DOM 顺序即层级：网格 < 粒子 < 内容）；
+     ④ 组件：disabled 状态矩阵补齐、toast 语义变体、表单控件字体继承。
+   ========================================================================== */
+
+/* ---------- ① 材质 ---------- */
+/* 颗粒纹理：SVG 分形噪点内联，零请求 */
+:root{
+  --fx-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+/* ★ 性能（问题二 · 第四轮）：颗粒噪点层整体关闭。
+   它是一层**全屏平铺纹理**（180×180 的 SVG 分形噪点 data URI）+ 半透明叠加，
+   而视觉上 opacity 只有 .04 —— 深色底上肉眼基本看不出，却要在每次合成时
+   对整屏做一遍纹理平铺与 alpha 混合。收益与成本完全不成比例。
+   index.html 里的 <i> 结构保留（不动 HTML 骨架），这里让它不渲染；
+   --fx-grain 变量也保留，将来若要做"低分辨率静态颗粒"可直接复用。 */
+.backdrop>i{display:none}
+
+/* 渐变网格→渐变网"场"：五团光（金 / 古铜 / 玉×2 / 金尾）。
+   ★ 性能（问题二 · 第二轮）去掉 26s 的 meshBreath 整层缩放动画：
+   它作用在 inset:-20vh -10vw 的**比屏幕还大**的固定层上，等于让这层永远
+   无法被当作静态图层缓存 —— 每帧都要重新合成一整块全屏半透明层。
+   而它的动态幅度只有 scale 1→1.05、translateY 1.4%，肉眼基本不可辨。
+   撤掉后这层变成纯静态，可被合成器缓存。 */
+.backdrop::after{
+  background:
+    radial-gradient(46% 42% at 12% 2%,var(--accent-soft),transparent 72%),
+    radial-gradient(34% 38% at 88% 10%,color-mix(in srgb,var(--iris) 12%,transparent),transparent 76%),
+    radial-gradient(30% 36% at 92% 92%,var(--cyan-soft),transparent 76%),
+    radial-gradient(26% 30% at 8% 88%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 78%),
+    radial-gradient(40% 34% at 52% 118%,color-mix(in srgb,var(--cyan) 9%,transparent),transparent 80%);
+}
+
+/* 真毛玻璃：全部清退（第八轮）。
+   原 v2 只保留「瞬态小浮层」的 backdrop-filter（建议层/调色板/快捷键/toast/工具提示），
+   逐条查下来这五处没有一处真的用得上它：
+     · .palette / .help / .toast —— 底色本来就是**不透明**的 --elev-1/--elev-2 渐变
+       （见第 16 节基样式）。不透明底色把背后完全遮住，
+       毛玻璃在这里**视觉上根本不存在**，只是每帧白重采一次背景。纯浪费，删。
+     · .sugcard —— 检索建议向下悬垂时，背后要么是结果卡（已不透明），
+       要么是刚进页面、结果区还空着时的动态背景；后者会让「边打字边每帧模糊」
+       变成真实的掉帧来源。故把它也改成实色：90/92% 半透 → 100% 不透明。
+     · .rail-item span —— 第 244 行基样式已是实色 --elev-2，这里的半透覆盖纯属多余。
+   结论：全站不再有任何 backdrop-filter；浮层靠「实色底 + 1px 描边 + 投影」分层。 */
+.sugcard{
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));
+}
+.palette,.help{
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));
+}
+.toast{
+  background:linear-gradient(180deg,var(--elev-2),var(--elev-1));
+}
+.rail-item span{                               /* rail 悬浮工具提示 */
+  background:var(--elev-2);
+}
+
+/* ★ 性能（问题二 · 第三轮）删除「指针跟随柔光」（.fx-sheen）。
+   它由 fx.js 注入 div + 全局 pointermove 每帧 getBoundingClientRect 并写 --mx/--my，
+   让 .kpi / .panel 每帧重绘一整块 320×240 的 radial-gradient。
+   .panel{position:relative} 保留 —— 面板内部仍有绝对定位子元素依赖它。 */
+.panel{position:relative}                      /* .kpi 本身已是 relative */
+
+/* ---------- ② 动效 ---------- */
+/* 分段器拇指：匀速滑动 → 弹性滑动（过冲一点点再坐稳） */
+.seg-thumb{transition:transform .5s var(--spring),width .5s var(--spring)}
+/* 检索建议层：弹出带一点回弹（第八轮：both → backwards，见第 21 节填入模式说明） */
+.sugcard{animation:popIn .34s var(--spring) backwards}
+
+/* 按压反馈补齐：此前只有 .btn / .rail-* / .hint 有 :active，
+   其余可点元素按下去毫无反应 —— 统一补上（transition 与原声明逐条合并，不是覆盖丢项） */
+.seg button{transition:color .2s var(--ease),transform .22s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.fchk{transition:background .14s var(--ease),color .14s var(--ease),transform .2s var(--spring)}
+.fchk:active{transform:scale(.97)}
+.sugitem{transition:background .15s var(--ease),color .15s var(--ease),transform .2s var(--spring)}
+.sugitem:active{transform:scale(.97)}
+.relq{transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease),transform .2s var(--spring)}
+.relq:active{transform:scale(.94)}
+.sbrecent .rq{transition:color .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease),transform .2s var(--spring)}
+.sbrecent .rq:active{transform:scale(.95)}
+.prodrow{transition:background .14s var(--ease),transform .2s var(--spring)}
+.prodrow:active{transform:scale(.98)}
+.pal-row{transition:transform .2s var(--spring)}
+.pal-row:active{transform:scale(.985)}
+.fgroup>summary{transition:color .15s var(--ease),background .15s var(--ease),transform .2s var(--spring)}
+.fgroup>summary:active{transform:scale(.98)}
+.foldmore>summary{transition:color .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease),transform .2s var(--spring)}
+.foldmore>summary:active{transform:scale(.98)}
+.tagx.dym{transition:border-color .16s var(--ease),background .16s var(--ease),transform .2s var(--spring)}
+.tagx.dym:active{transform:scale(.95)}
+.extgl{transition:color .18s var(--ease),border-color .18s var(--ease),background .18s var(--ease),transform .2s var(--spring)}
+.extgl:active{transform:scale(.96)}
+
+/* 滚动渐入（fx.js 只给 .kpi 打标；入场后类名即回收，hover 过渡物归原主） */
+.fx-pre{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .55s var(--ease-out) var(--fxd,0ms),transform .55s var(--ease-out) var(--fxd,0ms);
+}
+.fx-pre.fx-in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .fx-pre{opacity:1;transform:none;transition:none}
+}
+
+/* 主按钮涟漪（fx.js 注入）：金底上的墨纹扩散，--accent-ink(#1a1305) 同族 */
+.fx-rip{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(26,19,5,.30) 0%,rgba(26,19,5,.12) 42%,transparent 68%);
+  transform:scale(0);opacity:1;animation:fxRip .62s var(--ease-out) forwards;
+}
+@keyframes fxRip{to{transform:scale(1);opacity:0}}
+
+/* ---------- ③ 3D 背景画布（fx.js 插入 .backdrop 之后；减弱动效时整层不存在） ---------- */
+#fxgl{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:0;transition:opacity 1.6s var(--ease-out);
+}
+#fxgl.on{opacity:1}
+:root[data-theme="light"] #fxgl.on{opacity:.9}  /* 浅色粒子已换压暗色板（fx.js），放心提亮 */
+@media (prefers-reduced-motion:reduce){#fxgl{display:none!important}}
+
+/* ---------- ④ 组件状态矩阵补齐 ---------- */
+/* disabled：此前只有裸 opacity —— 补上退饱和、去投影；主按钮退回次按钮材质而不是"灰掉的金" */
+.btn:disabled{filter:saturate(.5);box-shadow:none}
+.btn.primary:disabled{background:var(--surface-3);color:var(--txt-4);border-color:var(--line-2);filter:none}
+.seg button:disabled{color:var(--txt-4);cursor:not-allowed;opacity:.55}
+.trbtn:disabled{opacity:.45;cursor:not-allowed}
+.fchk:has(input:disabled){opacity:.45;cursor:not-allowed}
+/* 表单控件字体继承（全局只给 button 做过，输入类此前会掉回浏览器默认字体） */
+input,textarea,select{font-family:inherit}
+/* toast 语义变体（成功 / 失败 / 警告）：调用方加 .ok/.err/.warn 即获得对应语义描边与辉光 */
+.toast.ok{border-color:color-mix(in srgb,var(--ok) 42%,transparent);box-shadow:var(--sh-3),0 0 24px -12px var(--ok)}
+.toast.err{border-color:color-mix(in srgb,var(--danger) 48%,transparent);box-shadow:var(--sh-3),0 0 24px -12px var(--danger)}
+.toast.warn{border-color:color-mix(in srgb,var(--warn) 46%,transparent);box-shadow:var(--sh-3),0 0 24px -12px var(--warn)}

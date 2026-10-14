@@ -1,0 +1,39 @@
+# 只保留源码与文档；数据、缓存、日志、字节码都不入库
+__pycache__/
+*.pyc
+*.pyo
+
+# 共享数据目录（语料 220MB + 索引缓存 220MB + 采集缓存，体积大且可重建）
+data/
+# 采集/监测产生的状态与日志
+*.log
+server_stdout.log
+server_stderr.log
+live_feed.jsonl
+
+# 编辑器和系统
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini
+
+# 各人本机的 LLM Key：只允许放浏览器 localStorage / 环境变量，别写进代码
+*.key
+.env
+# 「设置密钥.bat」生成的本机密钥文件（含 Key / Token / 代理）
+secrets.env
+secrets.env.*
+
+# 归档的历史日志与临时物（评审时清理出的散落文件，不入库）
+_archive/
+
+# ── 环境配置产物（bootstrap.py 生成，本机相关，不入库）──────────────────
+# 虚拟环境：python -m venv 建在项目内 .venv，体积大且换机器必重建
+.venv/
+venv/
+# 环境档案：记录本机 python 路径 / 档位 / 已装依赖（bootstrap 每次重生成）
+.aisec_env.json
+# 打包产物：tools/build_installer.py 输出到 dist/
+dist/
+# 环境画像缓存：core/envprofile.py 落 data/env_profile.json（已随 data/ 排除）

@@ -1,0 +1,280 @@
+/* ops.css —— m0_ops「多智能体编排」面板样式
+ * 颜色全部走主体 styles.css 的 CSS 变量，明暗主题自动适配。
+ */
+
+/* 四个智能体状态卡 */
+.ops-agents{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:10px 14px;margin-top:12px;
+}
+.ops-agent{
+  border:1px solid var(--line);border-radius:var(--r-md,10px);
+  background:var(--bg-2,var(--surface-1));padding:10px 12px;min-width:0;
+  position:relative;
+}
+.ops-agent .ops-dot{
+  position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:999px;
+  background:var(--ok,#4acc8a);
+}
+.ops-agent.is-idle .ops-dot{background:var(--txt-4,#767e8a)}
+.ops-agent b{font-size:12.5px;display:flex;align-items:center;gap:6px}
+.ops-agent .ops-role{font-size:10.8px;color:var(--txt-3);margin-top:2px}
+.ops-agent .ops-last{
+  font-size:11px;color:var(--txt-2);margin-top:7px;line-height:1.45;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.ops-agent .ops-last .ops-fail{color:var(--crit,#e5484d)}
+
+/* trace 时间线 + 简报双栏 */
+.ops-cols{
+  display:grid;grid-template-columns:1.25fr 1fr;gap:14px 18px;margin-top:12px;
+}
+@media (max-width:900px){ .ops-cols{grid-template-columns:1fr} }
+.ops-t{font-size:11.5px;color:var(--txt-3);font-weight:600;margin-bottom:7px;
+  display:flex;align-items:center;gap:8px}
+.ops-t small{font-weight:400;color:var(--txt-4)}
+
+.ops-trace{max-height:250px;overflow:auto}
+.ops-row{
+  display:flex;gap:8px;align-items:baseline;padding:4px 0;
+  border-bottom:1px dashed var(--line);font-size:11.5px;min-width:0;
+}
+.ops-row .ops-time{font-family:var(--mono,monospace);color:var(--txt-4);flex:none;font-size:10.5px}
+.ops-row .ops-ag{
+  flex:none;font-size:10px;font-weight:640;letter-spacing:.2px;border-radius:999px;
+  padding:1px 7px;border:1px solid var(--line);color:var(--txt-2);
+}
+.ops-ag-a{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent,#e3b04b)}
+.ops-ag-b{border-color:color-mix(in srgb,var(--warn,#f2c94c) 45%,transparent);color:var(--warn,#f2c94c)}
+.ops-ag-c{border-color:color-mix(in srgb,var(--ok,#4acc8a) 45%,transparent);color:var(--ok,#4acc8a)}
+.ops-ag-d{border-color:color-mix(in srgb,var(--high,#ff8a3d) 45%,transparent);color:var(--high,#ff8a3d)}
+.ops-row .ops-act{color:var(--txt-1,var(--txt));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ops-row .ops-ms{margin-left:auto;flex:none;color:var(--txt-4);font-family:var(--mono,monospace);font-size:10px}
+.ops-row .ops-ok{color:var(--ok,#4acc8a);flex:none;font-weight:700}
+.ops-row .ops-no{color:var(--crit,#e5484d);flex:none;font-weight:700}
+
+.ops-briefs{max-height:250px;overflow:auto}
+.ops-brief{
+  border:1px solid var(--line);border-left:2px solid var(--accent,#e3b04b);
+  border-radius:var(--r-md,8px);background:var(--bg-2,var(--surface-1));
+  padding:8px 10px;margin-bottom:8px;font-size:11.5px;
+}
+.ops-brief .ops-bid{font-family:var(--mono,monospace);font-weight:640;color:var(--txt-1,var(--txt))}
+.ops-brief .ops-bmeta{color:var(--txt-4);font-size:10.5px;margin-left:6px}
+.ops-brief .ops-btext{
+  margin-top:5px;color:var(--txt-2);white-space:pre-wrap;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;
+}
+.ops-brief.open .ops-btext{-webkit-line-clamp:unset}
+
+/* 运行条 */
+.ops-runbar{
+  display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:12px;
+  font-size:11.5px;color:var(--txt-3);
+}
+.ops-runbar b{color:var(--txt-1,var(--txt))}
+.ops-run-on{color:var(--ok,#4acc8a);font-weight:640}
+.ops-run-off{color:var(--txt-4)}
+
+/* 第五个智能体：决策智能体（紫色系，区分于前四） */
+.ops-ag-e{border-color:color-mix(in srgb,#b18bff 45%,transparent);color:#b18bff}
+.ops-sp{flex:1}
+
+/* 处置决策卡 */
+.ops-decisions{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto}
+.ops-decision{
+  border:1px solid var(--line,rgba(255,255,255,.08));border-radius:10px;
+  padding:10px 12px;background:var(--surface-1,rgba(255,255,255,.02));
+}
+.ops-dec-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ops-dec-hd b{font-family:var(--mono,monospace);color:var(--txt-1,var(--txt))}
+.ops-dec-goal{font-size:12.5px;color:var(--txt-2);font-weight:600}
+.ops-pri{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff}
+.ops-p0{background:var(--danger,#ff5c5c)}
+.ops-p1{background:var(--high,#ff8a3d)}
+.ops-p2{background:var(--warn,#f2c94c)}
+.ops-dec-signals{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ops-sig{
+  font-size:10.5px;padding:2px 7px;border-radius:5px;color:var(--txt-3);
+  background:var(--surface-3,rgba(255,255,255,.06));border:1px solid var(--line,rgba(255,255,255,.08));
+}
+.ops-sig.kev{color:#fff;background:var(--danger,#ff5c5c);border-color:transparent}
+.ops-dec-actions{margin-top:9px;display:flex;flex-direction:column;gap:4px}
+.ops-act-row{font-size:12px;color:var(--txt-2);line-height:1.6}
+.ops-act-row b{color:var(--txt-1,var(--txt))}
+.ops-act-row code{font-family:var(--mono,monospace);font-size:11px;color:var(--accent,#e3b04b)}
+.ops-dec-verify{margin-top:8px;padding-top:7px;border-top:1px dashed var(--line,rgba(255,255,255,.08))}
+.ops-verify-row{font-size:11.5px;color:var(--ok,#4acc8a);line-height:1.6}
+
+/* 可解释决策轨迹（XAI）：推理链 + 回填记忆库 */
+.ops-dec-foot{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line,rgba(255,255,255,.08))}
+.ops-mini-btn{
+  font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;color:var(--txt-2,#c9ccd1);
+  background:var(--surface-3,rgba(255,255,255,.06));border:1px solid var(--line,rgba(255,255,255,.1));
+  transition:border-color .15s,color .15s
+}
+.ops-mini-btn:hover{color:var(--txt,var(--txt));border-color:var(--accent-line,rgba(227,176,75,.4))}
+.ops-mini-btn.ops-resolve{color:#4acc8a;border-color:rgba(74,204,138,.35)}
+.ops-mini-btn.ops-verify{color:#f0cd7a;border-color:rgba(227,176,75,.35)}
+.ops-mini-btn.ops-fp{color:#ff7b72;border-color:rgba(255,123,114,.35)}
+
+.ops-xai{margin-top:8px;padding:9px 11px;border-radius:8px;background:var(--surface-1,rgba(255,255,255,.02));border:1px solid var(--line,rgba(255,255,255,.08))}
+.ops-reason{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px;font-size:11.5px;line-height:1.7}
+.ops-reason-rule{font-weight:700;color:var(--accent-3,#f0cd7a)}
+.ops-reason-ev{color:var(--txt-2,#c9ccd1)}
+.ops-reason-concl{color:var(--ok,#4acc8a);font-weight:600}
+
+.ops-hist{margin-top:7px;font-size:11px;color:var(--accent-2,#f0cd7a);background:rgba(227,176,75,.08);border-radius:5px;padding:3px 8px}
+
+/* 红蓝自博弈：质疑智能体挑战 → 抗辩收敛 */
+.ops-adv{margin-top:8px;padding:9px 11px;border-radius:8px;background:rgba(160,120,255,.06);border:1px solid rgba(160,120,255,.22)}
+.ops-adv-hd{font-size:11.5px;font-weight:700;color:var(--accent-3,#f0cd7a);margin-bottom:6px}
+.ops-adv-hd.ops-adv-fix{color:#ff7b72}
+.ops-adv-row{padding:5px 0;border-top:1px dashed var(--line,rgba(255,255,255,.08))}
+.ops-adv-row:first-of-type{border-top:none}
+.ops-adv-q{font-size:11.5px;color:var(--txt,#e6e8ea)}
+.ops-adv-v{display:inline-block;margin-left:7px;font-size:10.5px;padding:1px 7px;border-radius:10px}
+.ops-adv-v.ok{color:#4acc8a;background:rgba(74,204,138,.12)}
+.ops-adv-v.part{color:#f2c94c;background:rgba(242,201,76,.12)}
+.ops-adv-v.rej{color:#8a929c;background:rgba(138,146,156,.12)}
+.ops-adv-d{margin-top:3px;font-size:11px;color:var(--txt-2,#c9ccd1)}
+
+/* 溯源归因：漏洞 → 利用者 → ATT&CK 战术链路 */
+.ops-attr{margin-top:8px;padding:9px 11px;border-radius:8px;background:rgba(47,191,158,.06);border:1px solid rgba(47,191,158,.22)}
+.ops-attr-hd{font-size:11.5px;color:var(--txt,#e6e8ea)}
+.ops-attr-hd b{color:var(--accent-2,#f0cd7a)}
+.ops-attr-conf{display:inline-block;margin-left:6px;font-size:10px;padding:1px 7px;border-radius:10px;color:#2fbf9e;background:rgba(47,191,158,.12)}
+.ops-attr-chain{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:6px 0;font-size:11px;color:var(--txt-2,#c9ccd1)}
+.ops-chain-step{font-family:var(--mono,monospace);padding:2px 7px;border-radius:5px;background:var(--surface-3,rgba(255,255,255,.06));border:1px solid var(--line,rgba(255,255,255,.1))}
+.ops-attr-ev{margin-top:3px;font-size:10.5px;color:var(--txt-4,#62666d)}
+
+.ops-memory{border:1px solid var(--line,rgba(255,255,255,.08));border-radius:10px;padding:10px 12px;background:var(--surface-1,rgba(255,255,255,.02))}
+.ops-mem-hd{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--txt-2,#c9ccd1)}
+.ops-mem-hd b{color:var(--txt,var(--txt));font-size:14px}
+.ops-mem-note{margin-top:6px;font-size:11px;color:var(--txt-4,#62666d)}
+.ops-mem-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ops-mem-chip{font-size:11px;padding:2px 8px;border-radius:5px;background:var(--surface-3,rgba(255,255,255,.06));border:1px solid var(--line,rgba(255,255,255,.1));color:var(--txt-2,#c9ccd1)}
+.ops-mem-chip code{font-family:var(--mono,monospace);color:var(--accent-3,#f0cd7a)}
+
+/* 基础设施指标与阈值告警（2026-10-06 新增） */
+.ops-metrics{margin-top:9px}
+.ops-mt-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.ops-mt-badge{
+  font-size:11.5px;font-weight:660;padding:2px 9px;border-radius:999px;
+  border:1px solid var(--line);
+}
+.ops-mt-badge.is-ok{
+  color:var(--ok,#4acc8a);
+  border-color:color-mix(in srgb,var(--ok,#4acc8a) 45%,transparent);
+  background:color-mix(in srgb,var(--ok,#4acc8a) 10%,transparent);
+}
+.ops-mt-badge.is-warn{
+  color:var(--warn,#f2c94c);
+  border-color:color-mix(in srgb,var(--warn,#f2c94c) 45%,transparent);
+  background:color-mix(in srgb,var(--warn,#f2c94c) 10%,transparent);
+}
+.ops-mt-badge.is-critical{
+  color:var(--bad,#ff5a52);
+  border-color:color-mix(in srgb,var(--bad,#ff5a52) 50%,transparent);
+  background:color-mix(in srgb,var(--bad,#ff5a52) 12%,transparent);
+}
+.ops-mt-tiles{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px 10px;
+}
+.ops-mt-tile{
+  border:1px solid var(--line);border-radius:var(--r-md,10px);
+  background:var(--bg-2,var(--surface-1));padding:7px 10px;min-width:0;
+  border-left-width:3px;
+}
+.ops-mt-tile.is-ok{border-left-color:var(--ok,#4acc8a)}
+.ops-mt-tile.is-warn{border-left-color:var(--warn,#f2c94c)}
+.ops-mt-tile.is-crit{border-left-color:var(--bad,#ff5a52)}
+.ops-mt-k{display:block;font-size:11px;color:var(--txt-3,#8b949e)}
+.ops-mt-v{
+  display:block;font-size:12.5px;font-weight:640;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ops-mt-tile.is-warn .ops-mt-v{color:var(--warn,#f2c94c)}
+.ops-mt-tile.is-crit .ops-mt-v{color:var(--bad,#ff5a52)}
+.ops-mt-alerts{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+.ops-mt-alert{
+  display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;font-size:12px;
+  border:1px solid var(--line);border-left-width:3px;border-radius:8px;
+  padding:6px 10px;background:var(--bg-2,var(--surface-1));
+}
+.ops-mt-alert.is-warn{
+  border-left-color:var(--warn,#f2c94c);
+  background:color-mix(in srgb,var(--warn,#f2c94c) 7%,transparent);
+}
+.ops-mt-alert.is-critical{
+  border-left-color:var(--bad,#ff5a52);
+  background:color-mix(in srgb,var(--bad,#ff5a52) 8%,transparent);
+}
+.ops-mt-lv{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.4px;color:var(--txt-3,#8b949e);flex:none;
+}
+.ops-mt-alert.is-critical .ops-mt-lv{color:var(--bad,#ff5a52)}
+.ops-mt-alert.is-warn .ops-mt-lv{color:var(--warn,#f2c94c)}
+.ops-mt-msg{font-weight:600}
+.ops-mt-adv{color:var(--txt-3,#8b949e);font-size:11.5px}
+
+/* ============================================================
+   v5 视觉对齐（2026-10-09）
+   只统一「质感层」：圆角 / 表面渐变 / 发丝描边 / 顶部高光 / 悬停微抬。
+   类名、布局、字号、语义配色一律不动 —— 主体改版时模块零改动跟着变。
+   ============================================================ */
+.ops-agent,.ops-brief,.ops-decision,.ops-xai,.ops-hist,.ops-chain-step,
+.ops-attr,.ops-mt-tile,.ops-mt-alert,.ops-mem-chip,.ops-sig,.ops-pri,.ops-adv{
+  border-radius:var(--r-md,12px);
+  background:linear-gradient(180deg,var(--surface-2,rgba(255,255,255,.048)),var(--surface-1,rgba(255,255,255,.026)));
+  border-color:var(--line,rgba(255,255,255,.076));
+  box-shadow:var(--sh-lip,inset 0 1px 0 rgba(255,255,255,.05));
+}
+.ops-agent,.ops-brief,.ops-mt-tile,.ops-hist,.ops-xai{
+  transition:border-color .2s var(--ease,ease),box-shadow .26s var(--ease,ease),transform .28s var(--ease-out,ease);
+}
+.ops-agent:hover,.ops-mt-tile:hover,.ops-hist:hover{border-color:var(--line-2,rgba(255,255,255,.122));transform:translateY(-1px)}
+.ops-mini-btn,.ops-mt-badge,.ops-mem-chip{border-radius:var(--r-sm,8px)}
+.ops-mini-btn{transition:background .16s var(--ease,ease),border-color .16s var(--ease,ease),color .16s var(--ease,ease)}
+
+/* ============================================================
+   v9 降噪（2026-10-09）
+   反馈「信息全摊开、冲击太大」——把面板里的 3 级信息收紧：
+   智能体卡降高、瓦片与行距压紧、长文本（简报 / 留痕）默认只看头几行。
+   类名、结构、事件绑定一律不动，只改观感密度。
+   ============================================================ */
+.ops-agents{grid-template-columns:repeat(auto-fit,minmax(166px,1fr));gap:8px 10px;margin-top:9px}
+.ops-agent{padding:8px 10px}
+.ops-agent b{font-size:11.5px}
+.ops-agent .ops-role{font-size:10px;color:var(--txt-4,var(--txt-3))}
+.ops-agent .ops-last{font-size:10.5px;margin-top:5px}
+
+.ops-cols{gap:12px 16px;margin-top:9px}
+.ops-t{font-size:11px;color:var(--txt-4,var(--txt-3));margin-bottom:5px}
+.ops-row{padding:3px 0;font-size:11px}
+.ops-trace{max-height:186px}
+.ops-briefs{max-height:186px}
+.ops-brief{padding:7px 9px;margin-bottom:6px}
+.ops-brief .ops-btext{-webkit-line-clamp:3}
+
+.ops-runbar{margin-top:9px;gap:6px 14px;font-size:11px}
+.ops-metrics{margin-top:8px}
+.ops-mt-head{margin-bottom:6px}
+.ops-mt-tiles{gap:6px}
+.ops-mt-tile{padding:6px 9px}
+.ops-mt-k{font-size:10px}
+.ops-decisions{max-height:280px}
+.ops-xai{margin-top:6px;padding:7px 9px}
+
+/* 折起的后台区块：标题即开关（与主体 details.panel 同一套语汇） */
+details.ops-fold{margin-top:11px}
+details.ops-fold>summary.ops-t{list-style:none;cursor:pointer;margin-bottom:0;padding:2px 0;user-select:none;
+  transition:color .2s var(--ease,ease)}
+details.ops-fold>summary.ops-t::-webkit-details-marker{display:none}
+details.ops-fold>summary.ops-t::before{content:"";width:0;height:0;flex:none;
+  border-left:4px solid var(--txt-4,var(--txt-3));border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;
+  transition:transform .22s var(--spring,ease)}
+details.ops-fold[open]>summary.ops-t::before{transform:rotate(90deg);border-left-color:var(--accent,#e3b04b)}
+details.ops-fold[open]>summary.ops-t{margin-bottom:5px}
+details.ops-fold>div{animation:viewIn .3s var(--ease-out,ease) both}

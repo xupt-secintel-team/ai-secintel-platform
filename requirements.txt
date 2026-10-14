@@ -1,0 +1,39 @@
+# AI-SecIntel（aisec-D 2.3）依赖清单
+# =====================================================================
+# 说明：本项目**零依赖也能跑主体**（检索 / 监测 / 图谱 / 报告 / 中文问答模板），
+# 下面分三档，按需安装即可。快速检查： py -3 tools/检查依赖.py
+#
+# 一键装核心：   pip install -r requirements.txt
+# 全功能（含语义索引 + 大模型 + HTML 解析）：
+#   pip install requests beautifulsoup4 numpy openai
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install transformers sentencepiece
+# =====================================================================
+
+# ── ① 核心（强烈建议安装）────────────────────────────────────────────
+# 富化模块 m2_enrich 的 HTTP 客户端：受影响资产定位 /api/assets、POC 搜索 /api/poc
+# 缺失时会自动降级到标准库实现（core/httpcompat.py），但功能与稳定性弱于 requests。
+requests>=2.31.0
+urllib3>=2.0.0
+
+# ── ② 增强（可选，缺失自动降级，不影响主流程）────────────────────────
+# HTML 解析：PacketStorm 页面解析与详情页作者抽取（缺失时该源跳过）
+beautifulsoup4>=4.12.0
+# 语义向量索引：向量存储与检索（缺失时问答自动降级为纯关键词检索）
+numpy>=1.24.0
+
+# ── ③ 可选能力（按需安装）────────────────────────────────────────────
+# 大模型问答 / 智能体工具调用（填了 AISEC_LLM_API_KEY 才需要）
+openai>=1.0.0
+# 本地免费嵌入模型 multilingual-e5-small（CPU 即可，约 470MB）
+# torch 建议装 CPU 版：pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
+transformers>=4.35.0
+sentencepiece>=0.1.99
+
+# ── ④ 报告导出（CMDB 报告下载 / 邮件投递）────────────────────────────
+# ★ 这一档和上面不同：缺了不是"降级"，是**功能直接报错**。
+#   页面上「下载简略版 xlsx」、勾选「发送 xlsx 到邮箱」都会抛 RuntimeError。
+openpyxl>=3.1.0
+# 邮件正文 Markdown → HTML 渲染；缺失时正文退化成等宽纯文本（内容不丢，样式没了）
+markdown>=3.3

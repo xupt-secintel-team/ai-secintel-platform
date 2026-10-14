@@ -1,0 +1,50 @@
+{
+  "id": "m2_enrich",
+  "name": "情报富化",
+  "owner": "成员B",
+  "enabled": true,
+  "entry": "api.py",
+  "backend_dirs": [
+    "backend"
+  ],
+  "web": [
+    "web/panel.css",
+    "web/panel.js"
+  ],
+  "routes": [
+    "GET /api/assets",
+    "GET /api/enrich/dimensions",
+    "GET /api/enrich/priority",
+    "POST /api/enrich/epss/refresh",
+    "GET /api/poc",
+    "POST /api/poc",
+    "POST /api/asset_scan",
+    "GET /api/asset_scan",
+    "POST /api/asset_scan/clear",
+    "GET /api/asset_search",
+    "GET /api/asset_search/status",
+    "GET /api/subscribe",
+    "POST /api/subscribe",
+    "POST /api/subscribe/update",
+    "POST /api/subscribe/delete",
+    "POST /api/subscribe/check",
+    "GET /api/subscribe/alerts",
+    "POST /api/subscribe/read",
+    "GET /api/remediation",
+    "GET /api/stix",
+    "GET /taxii2/",
+    "GET /taxii2/root/",
+    "GET /taxii2/root/collections/",
+    "GET /taxii2/root/collections/<cid>/objects/",
+    "GET /api/vuln_env",
+    "POST /api/vuln_env",
+    "POST /api/port_scan",
+    "GET /api/port_scan",
+    "POST /api/project_scan",
+    "GET /api/project_scan",
+    "POST /api/project_scan/clear"
+  ],
+  "docs": "docs",
+  "tests": "backend",
+  "notes": "给漏洞加料变档案：① POC/EXP 多源实抓（poc_scraper.py）；② 受影响资产定位（affected_assets.py：NVD/LLM/CPE 三路）；③ 受影响互联网资产测绘——语法生成（asset_locator.py：FOFA/Shodan/Quake/ZoomEye/Google，只生成语法不扫描）+ **实查**（asset_search.py）：接 FOFA/Shodan/Quake/ZoomEye REST API 返回全网暴露总量与国家/ASN/组织/端口分布，Key 走环境变量 AISEC_FOFA_KEY(+AISEC_FOFA_EMAIL)/AISEC_SHODAN_KEY/AISEC_QUAKE_KEY/AISEC_ZOOMEYE_KEY，无 Key 自动进入确定性「演示模式」（demo=true 显式标注，同查询同结果，绝不冒充真实数据；查的是平台公开索引，不扫描任何主机）；④ **公司互联网资产风险体检**（asset_scan.py）：上传 word/docx、excel/xlsx、txt/csv 资产清单 → 抽取域名/IP/端口/软件+版本 → 用模块 1 情报库的 NVD 原始 CPE 版本区间做确定性匹配（versionStartIncluding / versionEndExcluding），叠加 CISA KEV 在野利用、CVSS、可信度、官方补丁与处置建议 → 输出资产级风险报告，可导出 Markdown；报告落在 data/asset_reports/（索引 data/asset_scans.json）。老版 .doc/.xls（OLE 二进制）走可打印串尽力解析并显式告警。⑤ **漏洞预警订阅与推送**（alert_subscribe.py）：订阅产品/厂商/CVE/关键词/仅 KEV + 最低严重度 + AI 分门槛，对模块 1 情报库做增量匹配（时间水位 + (sub,doc) seen 双保险去重，新订阅有独立 48h 回看窗口），推送到前端通知栏（GET /api/subscribe/alerts + 未读角标）与 Webhook（环境变量 AISEC_WEBHOOK_URL 或订阅级 webhook，对接企微/钉钉/飞书群机器人）；ctx.on_start 拉起后台巡检线程（AISEC_SUB_INTERVAL 秒，默认 120s，有启用订阅才干活）。⑥ **漏洞修复方案生成**（remediation.py）：基于 desc/CWE/CPE 版本区间/KEV/CVSS 向量/官方补丁生成升级路径 + 配置加固（含代码示例）+ 临时缓解 + 验证方法；有 LLM Key 走 DeepSeek 兼容接口（AISEC_LLM_API_KEY），无 Key 自动降级模板模式（CWE→加固动作映射 + AV:N 暴露面收敛 + KEV 处置时限），结果缓存 data/remediation_cache.json（force=1 重生成）。⑦ POC 精度：poc_scraper._match_tier() 给每条结果打匹配等级 A/B/C/D（A=仓库名或抓到的代码含该 CVE 号，或来自 Metasploit/Nuclei/Exploit-DB/PacketStorm；B=描述提 CVE、或仓库名带产品名+漏洞词、或是 PoC 合集仓库；C=只是提及该组件；D=官方组件仓库/无关噪声），_score_results() 以等级为第一关键字重排并保留 raw_rank（优化前名次），前端按等级分组、C/D 折叠；api.py 的 POC 任务额外返回 tiers/precise。评测工具 tools/评测POC.py 用独立判据算「优化前 vs 优化后」精度。POST /api/poc 支持 &force=1 强制重跑：默认对已完成的 CVE 直接返回缓存（避免重复抓取），但用户再点搜索按钮时前端会带 force=1，保证「先快速、后完整」两次拿到的不是同一批旧结果。资产体检的独立回归见 tools/_test_asset_scan.py（52 项）与 tools/_gen_asset_samples.py；测绘实查回归 tools/_test_asset_search.py（37 项，注入假 HTTP 传输验证四平台真实响应结构解析与演示模式）；订阅推送回归 tools/_test_alert_subscribe.py（34 项，假引擎 + 临时存储，覆盖增量水位/去重/回看窗口/Webhook）；修复方案回归 tools/_test_remediation.py（28 项，覆盖模板推导/缓存/LLM 归一化/Markdown）。⑤ STIX/TAXII 标准导出（stix_export.py）：STIX 2.1 vulnerability SDO（确定性 uuid5 ID、x_ 自定义字段）Bundle 下载；最小 TAXII 2.1 只读服务端（all/kev/critical 三集合，AISEC_TAXII_KEY 可选 Bearer 鉴权），供 Splunk/QRadar/OpenCTI 导入或订阅。⑥ 漏洞复现环境生成器（vuln_env.py）：按 CPE 产品族映射官方镜像+版本，生成 docker-compose.yml+verify.py(零依赖无害验证)+README+POC 线索 zip（b64 下载），库组件(openssl/log4j 等)显式降级提示用 vulhub，不在本机跑 Docker。前端 panel.js 新增 ASTIX/TBOX 区块；离线测试 tools/_test_stix_export.py(49)、_test_vuln_env.py(23)。"
+}

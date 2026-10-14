@@ -1,0 +1,516 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\<user>> $env:GITHUB_TOKEN="<GITHUB_TOKEN>"
+PS C:\Users\<user>> curl -Uri "https://api.github.com/rate_limit" -Headers @{"Authorization"="token $env:GITHUB_TOKEN"} -UseBasicParsing | Select-Object -ExpandProperty Content
+{"resources":{"core":{"limit":5000,"used":0,"remaining":5000,"reset":1790246620},"search":{"limit":30,"used":0,"remaining":30,"reset":1790243080},"graphql":{"limit":5000,"used":0,"remaining":5000,"reset":1790246620},"integration_manifest":{"limit":5000,"used":0,"remaining":5000,"reset":1790246620},"source_import":{"limit":100,"used":0,"remaining":100,"reset":1790243080},"code_scanning_autofix":{"limit":10,"used":0,"remaining":10,"reset":1790243080},"actions_runner_registration":{"limit":10000,"used":0,"remaining":10000,"reset":1790246620},"scim":{"limit":15000,"used":0,"remaining":15000,"reset":1790246620},"dependency_snapshots":{"limit":100,"used":0,"remaining":100,"reset":1790243080},"dependency_sbom":{"limit":100,"used":0,"remaining":100,"reset":1790243080},"audit_log":{"limit":1750,"used":0,"remaining":1750,"reset":1790246620},"audit_log_streaming":{"limit":15,"used":0,"remaining":15,"reset":1790246620},"code_search":{"limit":10,"used":0,"remaining":10,"reset":1790243080},"copilot_usage_records":{"limit":1750,"used":0,"remaining":1750,"reset":1790246620},"enterprise_token_inventory":{"limit":1750,"used":0,"remaining":1750,"reset":1790246620}},"rate":{"limit":5000,"used":0,"remaining":5000,"reset":1790246620}}
+PS C:\Users\<user>> cd C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1> python test_poc_scraper.py
+=== 测试 search_poc(CVE-2021-44228) ===
+抓取耗时 39.8s，去重后共 13 条结果
+
+[01] source=github       可靠性=中  verified=True  lang=Python
+     title : NCSC-NL/log4shell
+     url   : https://github.com/NCSC-NL/log4shell
+     author: NCSC-NL
+     code_content: 11922 字符
+
+[02] source=github       可靠性=中  verified=True  lang=Python
+     title : kozmer/log4j-shell-poc
+     url   : https://github.com/kozmer/log4j-shell-poc
+     author: kozmer
+     code_content: 5841 字符
+
+[03] source=github       可靠性=中  verified=True  lang=Java
+     title : Cybereason/Logout4Shell
+     url   : https://github.com/Cybereason/Logout4Shell
+     author: Cybereason
+     code_content: 11828 字符
+
+[04] source=github       可靠性=中  verified=True  lang=Java
+     title : cisagov/log4j-scanner
+     url   : https://github.com/cisagov/log4j-scanner
+     author: cisagov
+     code_content: 10798 字符
+
+[05] source=github       可靠性=中  verified=True  lang=Java
+     title : Puliczek/CVE-2021-44228-PoC-log4j-bypass-words
+     url   : https://github.com/Puliczek/CVE-2021-44228-PoC-log4j-bypass-words
+     author: Puliczek
+     code_content: 2187 字符
+
+[06] source=github       可靠性=中  verified=True  lang=Java
+     title : f0ng/log4j2burpscanner
+     url   : https://github.com/f0ng/log4j2burpscanner
+     author: f0ng
+     code_content: 60040 字符
+
+[07] source=github       可靠性=中  verified=True  lang=-
+     title : jas502n/Log4j2-CVE-2021-44228
+     url   : https://github.com/jas502n/Log4j2-CVE-2021-44228
+     author: jas502n
+     code_content: 82264 字符
+
+[08] source=github       可靠性=低  verified=False lang=Python
+     title : mukul975/cve-mcp-server
+     url   : https://github.com/mukul975/cve-mcp-server
+     author: mukul975
+
+[09] source=github       可靠性=低  verified=False lang=Java
+     title : whwlsfb/Log4j2Scan
+     url   : https://github.com/whwlsfb/Log4j2Scan
+     author: whwlsfb
+
+[10] source=github       可靠性=低  verified=True  lang=Python
+     title : fox-it/log4j-finder
+     url   : https://github.com/fox-it/log4j-finder
+     author: fox-it
+     code_content: 13451 字符
+
+[11] source=exploit-db   可靠性=高  verified=True  lang=-
+     title : AD Manager Plus 7122 - Remote Code Execution (RCE)
+     url   : https://www.exploit-db.com/exploits/51183
+     author: Chan Nyein Wai
+     code_content: 2079 字符
+
+[12] source=exploit-db   可靠性=高  verified=True  lang=Python
+     title : Apache Log4j 2 - Remote Code Execution (RCE)
+     url   : https://www.exploit-db.com/exploits/50592
+     author: kozmer
+     code_content: 3519 字符
+
+[13] source=exploit-db   可靠性=高  verified=True  lang=Python
+     title : Apache Log4j2 2.14.1 - Information Disclosure
+     url   : https://www.exploit-db.com/exploits/50590
+     author: leonjza
+     code_content: 3189 字符
+
+已保存 13 条结果 -> C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1\data\poc_results.json
+
+测试通过。
+来源分布: {'github': 10, 'exploit-db': 3}
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1> python test_poc_scraper.py
+18:56:01 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+18:56:01 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+18:56:01 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+18:56:01 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+18:56:01 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+18:56:02 INFO    poc_scraper: 关键词(8个): cve-2021-44228, log4j, log4j rce, log4j exploit, jndi, jndi rce, ldap, ldap rce
+18:56:04 INFO    poc_scraper: github query[cve-readme] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[kw-log4j] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[cve-name] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[cve-desc] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[kw-jndi rce] 命中 2 条
+18:56:04 INFO    poc_scraper: github query[kw-log4j rce] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[kw-log4j exploit] 命中 15 条
+18:56:04 INFO    poc_scraper: github query[kw-jndi] 命中 15 条
+18:56:05 INFO    poc_scraper: github query[kw-ldap rce] 命中 2 条
+18:56:06 INFO    poc_scraper: github query[kw-ldap] 命中 15 条
+18:56:06 INFO    poc_scraper: 多 query 合并去重后：111 个仓库
+18:56:06 INFO    poc_scraper: 质量筛选后：103 个候选仓库
+18:56:06 INFO    poc_scraper: 进入深处理 50 个（上限 50），拉取 README ...
+18:56:29 INFO    poc_scraper: 相似度去重：候选 50 → 保留 50，去除 0 条重复
+18:57:26 INFO    poc_scraper: 代码抓取：共 25 个仓库，成功 24（96%），失败 1，原因分布 {'无代码文件(仓库可能为文档/配置类)': 1}
+18:57:26 INFO    poc_scraper: github 最终 25 个 POC
+18:57:28 INFO    poc_scraper: exploit-db 命中 3 条
+18:57:33 INFO    poc_scraper: packetstorm 命中 0 条
+18:57:34 INFO    poc_scraper: nuclei-templates 命中 1 条
+18:57:36 INFO    poc_scraper: metasploit 命中 5 条
+18:57:36 INFO    poc_scraper: search_poc(CVE-2021-44228) 共 34 条结果（去重+评分排序后）
+18:57:36 INFO    poc_scraper: 已保存 49 条 POC 结果到 C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1\data\poc_results.json
+=== 测试 search_poc(CVE-2021-44228) ===
+
+
+抓取耗时 95.0s，去重后共 34 条结果
+
+============================================================
+统计汇总
+============================================================
+总数: 34  (GitHub 25 / 其他 9)
+代码抓取率: 97%
+按 poc_type 分布:
+  利用代码         (exploit_code    ): 12 条
+  扫描器          (scanner         ): 2 条
+  检测脚本         (detection_script): 2 条
+  环境搭建         (environment     ): 1 条
+  分析报告         (analysis        ): 3 条
+  其他           (other           ): 14 条
+
+============================================================
+结果明细（按 poc_type 分组，组内按得分降序）
+============================================================
+
+◆ 利用代码 (exploit_code) — 12 条
+  [1] AD Manager Plus 7122 - Remote Code Execution (RCE)
+      得分=0.850 可靠性=高 verified=True star=0 lang=-
+      https://www.exploit-db.com/exploits/51183
+      code_content 2079 字符
+  [2] Apache Log4j 2 - Remote Code Execution (RCE)
+      得分=0.850 可靠性=高 verified=True star=0 lang=Python
+      https://www.exploit-db.com/exploits/50592
+      code_content 3519 字符
+  [3] Apache Log4j2 2.14.1 - Information Disclosure
+      得分=0.850 可靠性=高 verified=True star=0 lang=Python
+      https://www.exploit-db.com/exploits/50590
+      code_content 3189 字符
+  [4] MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/linux/http/mobileiron_core_log4shell.rb
+      code_content 4202 字符
+  [5] Log4Shell HTTP Header Injection
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/log4shell_header_injection.rb
+      code_content 10145 字符
+  [6] UniFi Network Application Unauthenticated JNDI Injection RCE (via Log4
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/ubiquiti_unifi_log4shell.rb
+      code_content 5355 字符
+  [7] VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shel
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/vmware_vcenter_log4shell.rb
+      code_content 4206 字符
+  [8] mbechler/marshalsec
+      得分=0.806 可靠性=中 verified=True star=3714 lang=Java
+      https://github.com/mbechler/marshalsec
+      code_content 10773 字符
+  [9] Mr-xn/Penetration_Testing_POC
+      得分=0.696 可靠性=低 verified=False star=7498 lang=HTML
+      https://github.com/Mr-xn/Penetration_Testing_POC
+      code_content 12104 字符
+  [10] Threekiii/Awesome-POC
+      得分=0.690 可靠性=低 verified=False star=5207 lang=Java
+      https://github.com/Threekiii/Awesome-POC
+      code_content 2344 字符
+  [11] 0xsyr0/OSCP
+      得分=0.686 可靠性=低 verified=False star=3851 lang=PowerShell
+      https://github.com/0xsyr0/OSCP
+      code_content 78349 字符
+  [12] welk1n/JNDI-Injection-Exploit
+      得分=0.682 可靠性=低 verified=False star=2831 lang=Java
+      https://github.com/welk1n/JNDI-Injection-Exploit
+      code_content 24159 字符
+
+◆ 扫描器 (scanner) — 2 条
+  [1] fullhunt/log4j-scan
+      得分=0.654 可靠性=中 verified=True star=3425 lang=Python
+      https://github.com/fullhunt/log4j-scan
+      code_content 18441 字符
+  [2] projectdiscovery/nuclei
+      得分=0.566 可靠性=低 verified=False star=31479 lang=Go
+      https://github.com/projectdiscovery/nuclei
+      code_content 21071 字符
+
+◆ 检测脚本 (detection_script) — 2 条
+  [1] Apache Log4j2 Remote Code Injection (critical)
+      得分=0.670 可靠性=高 verified=True star=0 lang=yaml
+      https://raw.githubusercontent.com/projectdiscovery/nuclei-templates/main/http/cves/2021/CVE-2021-44228.yaml
+      code_content 5112 字符
+  [2] Log4Shell HTTP Scanner
+      得分=0.670 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/scanner/http/log4shell_scanner.rb
+      code_content 7722 字符
+
+◆ 环境搭建 (environment) — 1 条
+  [1] cirosantilli/china-dictatorship
+      得分=0.474 可靠性=低 verified=False star=3217 lang=HTML
+      https://github.com/cirosantilli/china-dictatorship
+      code_content 513 字符
+
+◆ 分析报告 (analysis) — 3 条
+  [1] projectdiscovery/vulnx
+      得分=0.561 可靠性=中 verified=True star=2669 lang=Go
+      https://github.com/projectdiscovery/vulnx
+      code_content 17366 字符
+  [2] log4js-node/log4js-node
+      得分=0.452 可靠性=低 verified=False star=5823 lang=JavaScript
+      https://github.com/log4js-node/log4js-node
+      code_content 31158 字符
+  [3] alexandreborges/malwoverview
+      得分=0.447 可靠性=低 verified=False star=4106 lang=Python
+      https://github.com/alexandreborges/malwoverview
+      code_content 120000 字符
+
+◆ 其他 (other) — 14 条
+  [1] curl/curl
+      得分=0.450 可靠性=低 verified=False star=42912 lang=C
+      https://github.com/curl/curl
+      code_content 17239 字符
+  [2] authelia/authelia
+      得分=0.445 可靠性=低 verified=False star=29072 lang=Go
+      https://github.com/authelia/authelia
+      code_content 14861 字符
+  [3] docker-mailserver/docker-mailserver
+      得分=0.438 可靠性=低 verified=False star=18873 lang=Shell
+      https://github.com/docker-mailserver/docker-mailserver
+      code_content 2763 字符
+  [4] casdoor/casdoor
+      得分=0.435 可靠性=低 verified=False star=14467 lang=Go
+      https://github.com/casdoor/casdoor
+      code_content 18428 字符
+  [5] HariSekhon/DevOps-Bash-tools
+      得分=0.427 可靠性=低 verified=False star=8417 lang=Shell
+      https://github.com/HariSekhon/DevOps-Bash-tools
+      code_content 10202 字符
+  [6] humhub/humhub
+      得分=0.424 可靠性=低 verified=False star=6744 lang=PHP
+      https://github.com/humhub/humhub
+      code_content 6085 字符
+  [7] lldap/lldap
+      得分=0.423 可靠性=低 verified=False star=6512 lang=Rust
+      https://github.com/lldap/lldap
+      code_content 22774 字符
+  [8] kanidm/kanidm
+      得分=0.421 可靠性=低 verified=False star=5405 lang=Rust
+      https://github.com/kanidm/kanidm
+      code_content 66169 字符
+  [9] SpiderLabs/Responder
+      得分=0.419 可靠性=低 verified=False star=4889 lang=Python
+      https://github.com/SpiderLabs/Responder
+      code_content 32546 字符
+  [10] projectdiscovery/interactsh
+      得分=0.418 可靠性=低 verified=False star=4546 lang=Go
+      https://github.com/projectdiscovery/interactsh
+      code_content 54824 字符
+  [11] osixia/container-openldap
+      得分=0.417 可靠性=低 verified=False star=4230 lang=Shell
+      https://github.com/osixia/container-openldap
+      code_content 29161 字符
+  [12] apache/logging-log4j2
+      得分=0.415 可靠性=低 verified=False star=3637 lang=Java
+      https://github.com/apache/logging-log4j2
+      code_content 10977 字符
+  [13] glauth/glauth
+      得分=0.412 可靠性=低 verified=False star=2852 lang=Go
+      https://github.com/glauth/glauth
+      code_content 58973 字符
+  [14] imthenachoman/How-To-Secure-A-Linux-Server
+      得分=0.341 可靠性=低 verified=False star=31464 lang=-
+      https://github.com/imthenachoman/How-To-Secure-A-Linux-Server
+
+已保存 34 条结果 -> C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1\data\poc_results.json
+
+测试通过。
+来源分布: {'exploit-db': 3, 'metasploit': 5, 'github': 25, 'nuclei-templates': 1}
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1>
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1> ^C
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1> python test_poc_scraper.py
+19:22:48 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+19:22:48 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+19:22:48 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+19:22:48 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+19:22:48 WARNING poc_scraper: 已关闭 SSL 证书验证（不安全，仅建议在受信任网络使用）
+19:22:49 INFO    poc_scraper: 关键词(8个): cve-2021-44228, log4j, log4j rce, log4j exploit, jndi, jndi rce, ldap, ldap rce
+19:22:51 INFO    poc_scraper: github query[cve-readme] 命中 15 条
+19:22:51 INFO    poc_scraper: github query[cve-name] 命中 15 条
+19:22:51 INFO    poc_scraper: github query[kw-log4j] 命中 15 条
+19:22:51 INFO    poc_scraper: github query[cve-desc] 命中 15 条
+19:22:51 INFO    poc_scraper: github query[kw-jndi rce] 命中 2 条
+19:22:52 INFO    poc_scraper: github query[kw-log4j exploit] 命中 15 条
+19:22:52 INFO    poc_scraper: github query[kw-jndi] 命中 15 条
+19:22:52 INFO    poc_scraper: github query[kw-log4j rce] 命中 15 条
+19:22:52 INFO    poc_scraper: github query[kw-ldap rce] 命中 2 条
+19:22:53 INFO    poc_scraper: github query[kw-ldap] 命中 15 条
+19:22:53 INFO    poc_scraper: 多 query 合并去重后：111 个仓库
+19:22:53 INFO    poc_scraper: 质量筛选后：103 个候选仓库
+19:22:53 INFO    poc_scraper: 进入深处理 50 个（上限 50），拉取 README ...
+19:23:22 INFO    poc_scraper: 相似度去重：候选 50 → 保留 50，去除 0 条重复
+19:24:29 INFO    poc_scraper: 代码抓取：共 25 个仓库，成功 24（96%），失败 1，原因分布 {'无代码文件(仓库可能为文档/配置类)': 1}
+19:24:29 INFO    poc_scraper: github 最终 25 个 POC
+19:24:32 INFO    poc_scraper: exploit-db 命中 3 条
+19:24:38 INFO    poc_scraper: packetstorm 命中 0 条
+19:24:38 INFO    poc_scraper: nuclei-templates 命中 1 条
+19:24:40 INFO    poc_scraper: metasploit 命中 5 条
+19:24:40 INFO    poc_scraper: search_poc(CVE-2021-44228) 共 34 条结果（去重+评分排序后）
+19:24:40 INFO    poc_scraper: 已保存 49 条 POC 结果到 C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1\data\poc_results.json
+=== 测试 search_poc(CVE-2021-44228) ===
+
+
+抓取耗时 112.4s，去重后共 34 条结果
+
+============================================================
+统计汇总
+============================================================
+总数: 34  (GitHub 25 / 其他 9)
+代码抓取率: 97%
+按 poc_type 分布:
+  利用代码         (exploit_code    ): 12 条
+  扫描器          (scanner         ): 2 条
+  检测脚本         (detection_script): 2 条
+  环境搭建         (environment     ): 1 条
+  分析报告         (analysis        ): 3 条
+  其他           (other           ): 14 条
+
+============================================================
+结果明细（按 poc_type 分组，组内按得分降序）
+============================================================
+
+◆ 利用代码 (exploit_code) — 12 条
+  [1] MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/linux/http/mobileiron_core_log4shell.rb
+      code_content 4202 字符
+  [2] Log4Shell HTTP Header Injection
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/log4shell_header_injection.rb
+      code_content 10145 字符
+  [3] UniFi Network Application Unauthenticated JNDI Injection RCE (via Log4
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/ubiquiti_unifi_log4shell.rb
+      code_content 5355 字符
+  [4] VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shel
+      得分=0.850 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/multi/http/vmware_vcenter_log4shell.rb
+      code_content 4206 字符
+  [5] mbechler/marshalsec
+      得分=0.806 可靠性=中 verified=True star=3714 lang=Java
+      https://github.com/mbechler/marshalsec
+      code_content 10773 字符
+  [6] Apache Log4j 2 - Remote Code Execution (RCE)
+      得分=0.850 可靠性=高 verified=True star=0 lang=Python
+      https://www.exploit-db.com/exploits/50592
+      code_content 3519 字符
+  [7] Apache Log4j2 2.14.1 - Information Disclosure
+      得分=0.850 可靠性=高 verified=True star=0 lang=Python
+      https://www.exploit-db.com/exploits/50590
+      code_content 3189 字符
+  [8] AD Manager Plus 7122 - Remote Code Execution (RCE)
+      得分=0.850 可靠性=高 verified=True star=0 lang=-
+      https://www.exploit-db.com/exploits/51183
+      code_content 2079 字符
+  [9] Mr-xn/Penetration_Testing_POC
+      得分=0.696 可靠性=低 verified=False star=7498 lang=HTML
+      https://github.com/Mr-xn/Penetration_Testing_POC
+      code_content 12104 字符
+  [10] Threekiii/Awesome-POC
+      得分=0.690 可靠性=低 verified=False star=5207 lang=Java
+      https://github.com/Threekiii/Awesome-POC
+      code_content 2344 字符
+  [11] welk1n/JNDI-Injection-Exploit
+      得分=0.682 可靠性=低 verified=False star=2831 lang=Java
+      https://github.com/welk1n/JNDI-Injection-Exploit
+      code_content 24159 字符
+  [12] 0xsyr0/OSCP
+      得分=0.686 可靠性=低 verified=False star=3851 lang=PowerShell
+      https://github.com/0xsyr0/OSCP
+      code_content 78349 字符
+
+◆ 扫描器 (scanner) — 2 条
+  [1] fullhunt/log4j-scan
+      得分=0.654 可靠性=中 verified=True star=3425 lang=Python
+      https://github.com/fullhunt/log4j-scan
+      code_content 18441 字符
+  [2] projectdiscovery/nuclei
+      得分=0.566 可靠性=低 verified=False star=31481 lang=Go
+      https://github.com/projectdiscovery/nuclei
+      code_content 21071 字符
+
+◆ 检测脚本 (detection_script) — 2 条
+  [1] Apache Log4j2 Remote Code Injection (critical)
+      得分=0.670 可靠性=高 verified=True star=0 lang=yaml
+      https://raw.githubusercontent.com/projectdiscovery/nuclei-templates/main/http/cves/2021/CVE-2021-44228.yaml
+      code_content 5112 字符
+  [2] Log4Shell HTTP Scanner
+      得分=0.670 可靠性=高 verified=True star=0 lang=ruby
+      https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/scanner/http/log4shell_scanner.rb
+      code_content 7722 字符
+
+◆ 环境搭建 (environment) — 1 条
+  [1] cirosantilli/china-dictatorship
+      得分=0.474 可靠性=低 verified=False star=3217 lang=HTML
+      https://github.com/cirosantilli/china-dictatorship
+      code_content 513 字符
+
+◆ 分析报告 (analysis) — 3 条
+  [1] log4js-node/log4js-node
+      得分=0.452 可靠性=低 verified=False star=5823 lang=JavaScript
+      https://github.com/log4js-node/log4js-node
+      code_content 31158 字符
+  [2] projectdiscovery/vulnx
+      得分=0.561 可靠性=中 verified=True star=2669 lang=Go
+      https://github.com/projectdiscovery/vulnx
+      code_content 17366 字符
+  [3] alexandreborges/malwoverview
+      得分=0.447 可靠性=低 verified=False star=4106 lang=Python
+      https://github.com/alexandreborges/malwoverview
+      code_content 120000 字符
+
+◆ 其他 (other) — 14 条
+  [1] curl/curl
+      得分=0.450 可靠性=低 verified=False star=42912 lang=C
+      https://github.com/curl/curl
+      code_content 17239 字符
+  [2] docker-mailserver/docker-mailserver
+      得分=0.438 可靠性=低 verified=False star=18873 lang=Shell
+      https://github.com/docker-mailserver/docker-mailserver
+      code_content 2763 字符
+  [3] casdoor/casdoor
+      得分=0.435 可靠性=低 verified=False star=14467 lang=Go
+      https://github.com/casdoor/casdoor
+      code_content 18428 字符
+  [4] HariSekhon/DevOps-Bash-tools
+      得分=0.427 可靠性=低 verified=False star=8417 lang=Shell
+      https://github.com/HariSekhon/DevOps-Bash-tools
+      code_content 10202 字符
+  [5] humhub/humhub
+      得分=0.424 可靠性=低 verified=False star=6744 lang=PHP
+      https://github.com/humhub/humhub
+      code_content 6085 字符
+  [6] lldap/lldap
+      得分=0.423 可靠性=低 verified=False star=6512 lang=Rust
+      https://github.com/lldap/lldap
+      code_content 22774 字符
+  [7] SpiderLabs/Responder
+      得分=0.419 可靠性=低 verified=False star=4889 lang=Python
+      https://github.com/SpiderLabs/Responder
+      code_content 32546 字符
+  [8] projectdiscovery/interactsh
+      得分=0.418 可靠性=低 verified=False star=4546 lang=Go
+      https://github.com/projectdiscovery/interactsh
+      code_content 54824 字符
+  [9] osixia/container-openldap
+      得分=0.417 可靠性=低 verified=False star=4230 lang=Shell
+      https://github.com/osixia/container-openldap
+      code_content 29161 字符
+  [10] glauth/glauth
+      得分=0.412 可靠性=低 verified=False star=2852 lang=Go
+      https://github.com/glauth/glauth
+      code_content 58973 字符
+  [11] authelia/authelia
+      得分=0.445 可靠性=低 verified=False star=29072 lang=Go
+      https://github.com/authelia/authelia
+      code_content 14861 字符
+  [12] kanidm/kanidm
+      得分=0.421 可靠性=低 verified=False star=5405 lang=Rust
+      https://github.com/kanidm/kanidm
+      code_content 66169 字符
+  [13] apache/logging-log4j2
+      得分=0.415 可靠性=低 verified=False star=3637 lang=Java
+      https://github.com/apache/logging-log4j2
+      code_content 10977 字符
+  [14] imthenachoman/How-To-Secure-A-Linux-Server
+      得分=0.341 可靠性=低 verified=False star=31464 lang=-
+      https://github.com/imthenachoman/How-To-Secure-A-Linux-Server
+
+已保存 34 条结果 -> C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1\data\poc_results.json
+
+测试通过。
+来源分布: {'metasploit': 5, 'nuclei-templates': 1, 'github': 25, 'exploit-db': 3}
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1> python test_affected_assets.py
+19:47:38 INFO    affected_assets: 命中缓存 CVE-2021-44228（1 条资产）
+19:47:38 INFO    affected_assets: 命中缓存 CVE-2099-0001（0 条资产）
+=== 受影响资产定位模块测试 ===
+
+✓ test_parse_nvd 通过: apache log4j ['2.0-beta9 - <2.12.2', '2.13.0 - <2.15.0'] ['2.12.2 - <2.16.0']
+✓ test_json_tolerant 通过
+✓ test_merge_priority 通过
+✓ test_version_range_and_cpe 通过
+
+--- 在线演示（网络/未配 Key 时允许为空）---
+[CVE-2021-44228] 返回 1 条资产
+    - apache/log4j affected=['2.0.1 - <2.3.1', '2.4.0 - <2.12.2', '2.13.0 - <2.15.0', '2.0'] unaffected=[] conf=high method=nvd_api
+[描述模糊的 CVE-2099-0001] 返回 0 条资产
+    （三路均无结果，正确返回空列表）
+
+测试通过。
+PS C:\Users\<user>\Desktop\ai-sec-intel\搜索1.1>
+
