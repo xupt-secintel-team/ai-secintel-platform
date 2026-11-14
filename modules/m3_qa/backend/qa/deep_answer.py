@@ -264,6 +264,19 @@ def filter_by_constraints(docs: List[Dict], cons: Dict) -> List[Dict]:
     hard = [d for d in docs if _hard_ok(d)]
     if not hard:
         hard = list(docs)          # 安全回退：硬约束过滤后为空则退回（宁可宽不可空）
+    # ★ 2026-10-26 补：**复合条件**（数值 + kev/poc）下 kev/poc 必须硬过滤。
+    #   实测失分点：问「已被在野利用（KEV）且 CVSS 恰好 10 分的漏洞有哪些？」，
+    #   模板路径把 kev 当软约束 → 证据池里混着非 KEV 条目 → 答案列出的 CVE
+    #   不满足"在野利用"，评测按"答出不满足条件的 CVE"判错（多跳 B 类 0/2）。
+    #   为什么不影响 R3-2 那次修正：「哪些 AI 框架存在在野利用的漏洞」只有
+    #   kev 一个条件、没有数值约束，仍走软分层；只有用户明确给了数值区间时，
+    #   才算"复合精确条件"，此时不满足 kev/poc 的条目就是错的。
+    if (cons.get("kev") or cons.get("poc")) and (
+            "cvss_min" in cons or "cvss_eq" in cons or cons.get("entities")):
+        combo = [d for d in hard if _soft_ok(d)]
+        if combo:
+            return combo
+
     if not (cons.get("kev") or cons.get("poc")):
         return hard
     good = [d for d in hard if _soft_ok(d)]

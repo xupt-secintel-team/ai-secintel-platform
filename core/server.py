@@ -931,6 +931,15 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001
                 return self._json({"error": str(e)}, 500)
 
+        # —— /api/config/proxy：读取当前出网代理（网页控制台「代理」按钮用）——
+        if path == "/api/config/proxy":
+            try:
+                import net as _net
+                return self._json({"proxy": _net.current_proxy()})
+            except Exception as _sw_e:  # noqa: BLE001
+                _swallow("core/server.py:/api/config/proxy GET", _sw_e)
+                return self._json({"proxy": ""})
+
         # —— /api/health/live：存活探活（P1-2）——
         #   刻意放在 get_engine() **之前**：冷启动首次加载语料要几十秒，
         #   存活探活绝不能被引擎加载阻塞 —— 否则守护/容器会把冷启动中的健康实例
@@ -1175,7 +1184,14 @@ class Handler(BaseHTTPRequestHandler):
             req = Request(self, "GET", path, qs)
             if REGISTRY is not None and REGISTRY.dispatch(req):
                 return
-        except BrokenPipeError:
+        except ConnectionError as _sw_e:
+            # ★ 客户端在响应写完前主动断开（WinError 10053 连接中止 / 10054 连接重置）：
+            #   切视图、快速切换周期、fetch 取消都会触发。原来只吞 BrokenPipeError，
+            #   ConnectionAbortedError（10053）会落到下面的 except Exception —— 先
+            #   traceback 刷屏，再尝试写 500；而连接早没了，二次 write 又失败一次，
+            #   于是日志里同一请求冒出两段栈。这里统一按「连接已断」静默登记，
+            #   与 do_GET / do_POST 外层一致（允许吞，但 errlog 留痕）。
+            _swallow("core/server.py:_api.dispatch.conn", _sw_e)
             return
         except Exception as e:                                        # noqa: BLE001
             import traceback
@@ -1219,6 +1235,19 @@ class Handler(BaseHTTPRequestHandler):
                 if req.body is None:
                     req.body = b""
                 return self._daily_digest_post(path, qs, req.body)
+            # —— /api/config/proxy：设置出网代理（网页控制台「代理」按钮，实时生效）——
+            if path == "/api/config/proxy":
+                try:
+                    _data = json.loads((req.body or b"{}").decode("utf-8", "replace"))
+                    _val = str(_data.get("proxy") or "").strip()
+                    import net as _net
+                    _ok = _net.set_proxy(_val)
+                    return self._json({"ok": bool(_ok),
+                                       "proxy": _net.current_proxy(),
+                                       "note": "已生效，无需重启" if _ok else "写入失败"})
+                except Exception as _sw_e:  # noqa: BLE001
+                    _swallow("core/server.py:/api/config/proxy POST", _sw_e)
+                    return self._json({"ok": False, "error": str(_sw_e)}, 500)
             if REGISTRY is not None and REGISTRY.dispatch(req):
                 return
             return self._json({"error": "unknown api", "path": path}, 404)
@@ -1345,11 +1374,29 @@ class Handler(BaseHTTPRequestHandler):
 
     def _inject_modules(self, body):
         """把 <!--@modules--> 替换成各模块的 <script>（浏览器按顺序执行，
-        模块面板脚本因此可以放心使用主体 app.js 暴露的全局能力）。"""
+        模块面板脚本因此可以放心使用主体 app.js 暴露的全局能力）。
+
+        ★ 2026-10-18：脚本/样式 URL 追加 ``?v=<源文件 mtime>`` 版本参数。
+          为什么：JS/CSS 走 ``max-age=600`` 强缓存，且浏览器会话内还有
+          memory cache —— 文件更新后 10 分钟内（乃至整个会话内）浏览器
+          **根本不发请求**，用户跑的还是旧 JS。实测后果：高频漏洞统计
+          「周/月/年显示一样」（旧版 bug）在服务端已修复的情况下仍持续
+          出现在用户浏览器里，副标题文案还是两版之前的「按发现/命中日期
+          统计」，排查半天发现磁盘代码全是对的。
+          与 index.html 里 styles.css 的手工 ``?v=N`` 同理：文件一更新
+          mtime 就变 → URL 变 → 缓存键变 → 浏览器自动拉新版，不再依赖
+          用户记得 Ctrl+F5。
+        """
         scripts, ids = [], []
         if REGISTRY is not None:
             for url, _fp in REGISTRY.web_scripts():
-                if url.endswith(".css"):
+                try:
+                    v = str(int(os.stat(_fp).st_mtime))
+                except OSError:
+                    v = ""
+                if v:
+                    url = f"{url}?v={v}"
+                if url.split("?")[0].endswith(".css"):
                     scripts.append(f'<link rel="stylesheet" href="{url}">')
                 else:
                     scripts.append(f'<script src="{url}"></script>')
@@ -1410,6 +1457,15 @@ def _load_secrets_env() -> list:
                     loaded.append(k)
     except Exception as _e:  # noqa: BLE001
         _swallow("core/server.py:_load_secrets_env", _e)
+    # config.json 的 proxy 是用户主入口（网页「代理」按钮），覆盖 secrets.env 里的旧值，
+    # 并同步到 AISEC_PROXY 环境变量，让 live.py / translator 等直接读 env 的模块也生效。
+    try:
+        _cp = (paths.load_config().get("proxy") or "").strip()
+        if _cp:
+            os.environ["AISEC_PROXY"] = _cp
+            loaded.append("AISEC_PROXY")
+    except Exception as _e:  # noqa: BLE001
+        _swallow("core/server.py:_load_secrets_env.proxy", _e)
     return loaded
 
 

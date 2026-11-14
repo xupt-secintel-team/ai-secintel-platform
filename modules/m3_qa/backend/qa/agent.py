@@ -89,7 +89,7 @@ def tool_hybrid_search(query: str, top_k: int = 6) -> Dict:
     """混合检索（关键词+语义）：口语化、语义改写类提问的主力工具。"""
     from qa.retriever import hybrid_search
     d = hybrid_search(query, top_k=top_k)
-    return {"mode": d.get("mode"), "hits": [
+    return {"mode": d.get("mode"), "total": d.get("total"), "hits": [
         {"id": r.get("id"), "title": _trim(r.get("title"), 120),
          "cvss": (r.get("cvss") or {}).get("score"),
          "severity": (r.get("cvss") or {}).get("severity", ""),
@@ -106,7 +106,7 @@ def tool_keyword_search(query: str, top_k: int = 6) -> Dict:
     """精确路径检索：强标记题（在野利用/高危/POC）用它，避免语义泛相关干扰。"""
     from qa.retriever import hybrid_search
     d = hybrid_search(query, top_k=top_k, skip_vector=True)
-    return {"mode": "engine", "hits": [
+    return {"mode": "engine", "total": d.get("total"), "hits": [
         {"id": r.get("id"), "title": _trim(r.get("title"), 120),
          "cvss": (r.get("cvss") or {}).get("score"),
          "severity": (r.get("cvss") or {}).get("severity", ""),
@@ -121,7 +121,14 @@ def tool_get_detail(doc_id: str) -> Dict:
     """按 CVE/GHSA 编号取完整详情（CVSS、CWE、受影响产品、修复建议）。"""
     from qa.retriever import get_detail
     d = get_detail(doc_id) or {}
+    _papers = d.get("papers") or []
+    _paper_titles = []
+    for _p in _papers[:3]:
+        _t = _p.get("title") if isinstance(_p, dict) else str(_p)
+        if _t:
+            _paper_titles.append(_trim(_t, 120))
     return {"id": d.get("id") or doc_id, "title": _trim(d.get("title"), 160),
+            "papers": _paper_titles,
             "cvss": (d.get("cvss") or {}).get("score"),
             "severity": (d.get("cvss") or {}).get("severity", ""),
             "products": (d.get("products") or [])[:8],
@@ -140,6 +147,18 @@ def tool_search_ioc(ioc: str, top_k: int = 8) -> Dict:
          "cvss": (r.get("cvss") or {}).get("score"),
          "exploited": bool(r.get("exploited"))}
         for r in d.get("results", [])]}
+
+
+def tool_count_intel(query: str) -> Dict:
+    """结构化精确计数：返回引擎对该检索式的命中总数（/api/search 的 total）。
+
+    为什么单独做工具（2026-10-26）：统计类问题（"ollama 有多少个高危漏洞"）
+    的正确答案是**命中总数**，而 top-k 命中列表里看不到这个数 —— 模型只能
+    按"我看到几条"来猜（实测答 31，真值 302）。计数必须由引擎给。
+    """
+    d = _http_get("/api/search", {"q": query, "size": 1})
+    return {"query": query, "total": d.get("total"),
+            "note": "引擎精确过滤后的命中总数，可直接作为计数结论"}
 
 
 def tool_get_related(doc_id: str) -> Dict:
@@ -198,6 +217,7 @@ EXECUTORS = {
     "find_poc": lambda a: tool_find_poc(a.get("doc_id", "")),
     "locate_assets": lambda a: tool_locate_assets(a.get("doc_id", "")),
     "latest_intel": lambda a: tool_latest_intel(int(a.get("limit") or 5)),
+    "count_intel": lambda a: tool_count_intel(a.get("query", "")),
     "search_ioc": lambda a: tool_search_ioc(a.get("ioc", ""), int(a.get("top_k") or 8)),
 }
 
@@ -288,6 +308,16 @@ TOOL_SCHEMAS = [
     {
         "type": "function",
         "function": {
+            "name": "count_intel",
+            "description": "结构化精确计数：某个条件组合下共有多少条情报。回答'有多少个/共几个/总数'类问题时**必须**用它，不要按命中列表条数估算。",
+            "parameters": {"type": "object", "properties": {
+                "query": {"type": "string", "description": "检索式，如 'ollama cvss>=7'、'kev:yes'、'product:vllm poc:yes'"}
+            }, "required": ["query"]}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "search_ioc",
             "description": "查某个 IOC（IP/域名/哈希/URL）关联的情报。回答'这个 IP 是什么威胁''这个域名有没有恶意活动'时用。",
             "parameters": {"type": "object", "properties": {
@@ -350,6 +380,8 @@ def execute_tool(name: str, arguments: Dict[str, Any]) -> Dict:
     try:
         out = fn(arguments or {})
         n = len(out.get("hits") or out.get("items") or out.get("related") or out.get("assets") or [])
+        if not n and isinstance(out.get("total"), int):
+            n = out["total"]      # 计数工具没有 hits，用 total 作为"命中条数"
         return {"ok": True, "result": out, "ms": round((time.time() - t0) * 1000, 1), "n": n}
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": str(e)[:160], "ms": round((time.time() - t0) * 1000, 1), "n": 0}
@@ -371,24 +403,119 @@ _FAST_LATEST_RE = re.compile(r"最新|最近|今天|本周|刚刚|新增", re.I)
 _FAST_HIGH_RE = re.compile(r"高危|严重|critical|high|cvss\s*[>≥]\s*[7-9]", re.I)
 
 
+_FAST_SKIP_RE = re.compile(r"对比|比较|区别|差异|哪个更|为什么|如何|怎么|步骤|方案", re.I)
+# 只有问「这个 CVE 本身属性」时才能直达详情；问论文/POC/资产/关联的不行
+# （详情工具不返回这些字段，直达会让模型"没得说"，实测把多跳 F 题从 PASS 弄成 FAIL）
+_FAST_DETAIL_RE = re.compile(
+    r"cvss|评分|严重|等级|影响|版本|修复|补丁|cwe|弱点|是什么|详情|介绍|危害|利用条件", re.I)
+_FAST_CVE_RE = re.compile(r"CVE-\d{4}-\d{4,}", re.I)
+# 数值型 CVSS 条件（2026-10-26）：此前只认「高危/严重」→ 固定 cvss>=7，
+# 于是「KV + CVSS 恰好 10 分」被降级成纯 kev:yes，答案混入 7~9 分的条目。
+_CVSS_NUM_RE = re.compile(r"cvss\s*[^0-9]{0,14}(\d{1,2}(?:\.\d)?)", re.I)
+_CVSS_EXACT_RE = re.compile(r"恰好|刚好|正好|等于|满\s*分", re.I)
+
+
+def _cvss_suffix(q: str) -> str:
+    """把问题里的数值/严重度条件翻成引擎算子（返回带前导空格的字符串）。"""
+    if re.search(r"满分", q):
+        return " cvss:10.0"
+    m = _CVSS_NUM_RE.search(q)
+    if m:
+        try:
+            v = float(m.group(1))
+        except (TypeError, ValueError):
+            v = -1
+        if 0 < v <= 10:
+            if _CVSS_EXACT_RE.search(q):
+                return " cvss:%s" % ("%g" % v)      # 裸值按等值语义（引擎侧 >=，10 分即等值）
+            return " cvss>=%s" % ("%g" % v)
+    if _FAST_HIGH_RE.search(q):
+        return " cvss>=7"
+    return ""
+
+
 def fast_route(question: str):
-    """列表型强标记问题 → (tool_name, args) 直达工具；识别不了返回 None。"""
+    """强意图问题 → (tool_name, args) 直达工具；识别不了返回 None。
+
+    2026-10-26 扩面：原来只认「列表 + 强标记（KEV/POC/最新）」四类形态，
+    其余问题都要先付一次规划轮 LLM 往返（实测 3~5s），而它们中的大多数
+    （「vLLM 有哪些高危漏洞」「CVE-xxx 的 CVSS 多少」）本质上是**确定性映射**。
+    扩面后典型问答省掉规划轮，配合终局流式生成把 P50 压进 5s；
+    对比/因果/步骤类问题仍走完整规划轮（这些确实需要模型自己拆解）。
+    """
     q = (question or "").strip()
-    if not q or not _FAST_LIST_RE.search(q):
+    if not q:
         return None
+
+    try:
+        from qa.relevance import strong_terms as _strong
+        st = _strong(q)
+    except Exception:  # noqa: BLE001
+        st = []
+
+    cves = [t.upper() for t in st if _FAST_CVE_RE.fullmatch(t)]
+    # 单个 CVE 的「是什么/什么版本/严重吗」：详情就是最强证据，不必两跳
+    if len(cves) == 1 and re.search(r"论文|paper|研究|文献", q, re.I):
+        # 详情接口带 papers 字段（最多 3 篇标题），问论文时直达详情最稳
+        return ("get_detail", {"doc_id": cves[0]})
+    if (len(cves) == 1 and not _FAST_SKIP_RE.search(q)
+            and _FAST_DETAIL_RE.search(q)):
+        return ("get_detail", {"doc_id": cves[0]})
+    if len(cves) >= 2:
+        return None            # 双实体比较必须让模型自己编排
+
+    # 条件词不是实体：strong_terms 会把 kev/cvss 这些"看起来像标识符"的词抽进来，
+    # 直接拼进检索式会变成「kev kev:yes cvss:10」这种自相矛盾的查询。
+    _ENT_STOP = {"kev", "cvss", "poc", "exp", "exploit", "cwe", "epss", "nvd",
+                 "ghsa", "cve", "cnvd", "ai", "api", "rce", "xss", "sql", "dos"}
+    ents = [t for t in st
+            if not t.upper().startswith(("CVE-", "CWE-", "GHSA-", "CNVD-"))
+            and t.lower() not in _ENT_STOP]
+    ent = ents[0] if ents else ""
+
+    suf = _cvss_suffix(q)
+    # 统计类问题（"有多少个/共几个/总数"）：答案必须是引擎给的总数，走计数工具
+    if re.search(r"多少个|几个|多少条|总数|总共|count", q, re.I):
+        parts = []
+        if ents:
+            parts.append(ents[0])
+        if _FAST_KEV_RE.search(q):
+            parts.append("kev:yes")
+        if _FAST_POC_RE.search(q):
+            parts.append("poc:yes")
+        if parts:
+            return ("count_intel", {"query": (" ".join(parts) + suf).strip()})
+    # 概念/处置类（"LangChain 的提示词注入怎么防""提示词注入的原理是什么"）：
+    # 这类答案来自"某实体的一批情报 + 模型归纳"，规划轮选工具没有信息增量，
+    # 却要多付 3~5s（实测 P90 7.7s 就出在这类题）。直接取证后进终局生成。
+    if re.search(r"怎么防|如何防|怎么修|如何修|原理|是什么|怎么办|处置|缓解|措施|建议", q, re.I):
+        if ents:
+            return ("search_exact", {"query": ("%s%s" % (ents[0], suf)).strip(),
+                                     "top_k": 8})
+        if not cves:
+            return ("search_intelligence", {"query": q, "top_k": 6})
+    if not _FAST_LIST_RE.search(q):
+        return None
+    # 带实体的条件题（"GitLab 相关的、已被在野利用的漏洞"）必须把实体带进检索式，
+    # 否则只按 kev:yes 过滤 → 答出一堆与 GitLab 无关的 KEV 条目（多跳 E 题实测 FAIL）
     if _FAST_KEV_RE.search(q):
-        op = "kev:yes"
-        if _FAST_HIGH_RE.search(q):
-            op += " cvss>=7"
-        return ("search_exact", {"query": op, "top_k": 8})
+        q2 = ("%s kev:yes%s" % (ent, suf)) if ent else ("kev:yes" + suf)
+        return ("search_exact", {"query": q2, "top_k": 8})
     if _FAST_POC_RE.search(q):
-        op = "poc:yes"
-        if _FAST_HIGH_RE.search(q):
-            op += " cvss>=7"
-        return ("search_exact", {"query": op, "top_k": 8})
+        q2 = ("%s poc:yes%s" % (ent, suf)) if ent else ("poc:yes" + suf)
+        return ("search_exact", {"query": q2, "top_k": 8})
     if _FAST_LATEST_RE.search(q) and not _FAST_HIGH_RE.search(q):
         # 「最近有什么新情报」——不带风险筛选的最新情报流
         return ("latest_intel", {"limit": 8})
+    # 实体 + 列表（"vLLM 有哪些高危漏洞"）：直接精确检索该实体
+    if ents:
+        cond = suf
+        if cond:
+            return ("search_exact", {"query": "%s%s" % (ent, cond), "top_k": 8})
+        # 注意：工具名必须是 EXECUTORS 里存在的 search_exact（走 skip_vector 精确路径）；
+        # 2026-10-26 之前这里写成 search_keyword，EXECUTORS 里没有 → ok=False →
+        # 快路静默失效，白白多付一次规划轮 LLM 往返（实测 8s 里 3~5s 是这一轮）。
+        return ("search_exact", {"query": ent, "top_k": 8})
     return None
 
 
@@ -509,7 +636,9 @@ def run_agent(question: str, history: List[Dict] = None, llm_config: Dict = None
         # （3k token prefill + 3~8s 非流式等待）。失败不回退也不报错——
         # 证据为空时终局生成会如实说"没查到"，与规划轮空手而归等价。
         fast_used = False
-        fast = fast_route(question)
+        # 多轮对话不走快路：第二轮问的是「第一个漏洞的 CWE」这类回指，
+        # 需要模型先拿到上一轮实体再选工具，规则路由会把指代吃掉（实测 G 题 FAIL）。
+        fast = fast_route(question) if not history else None
         if fast and _left() > 10.0:
             fname, fargs = fast
             _emit("stage", {"stage": "plan",

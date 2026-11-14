@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-08 08:45:33",
+  "at": "2026-10-20 21:45:45",
   "quick": true,
   "summary": {
     "cves": 6,
@@ -19,8 +19,8 @@
       "@5": 100.0,
       "@10": 100.0
     },
-    "total_results": 12,
-    "total_relevant": 12
+    "total_results": 11,
+    "total_relevant": 11
   },
   "rows": [
     {
@@ -28,9 +28,9 @@
       "products": [
         "ollama"
       ],
-      "n": 2,
+      "n": 1,
       "tiers": {
-        "A": 2
+        "A": 1
       },
       "before": {
         "@3": 100.0,
@@ -48,34 +48,21 @@
         "@10": 100.0
       },
       "before_order": [
-        "Ollama Model Registry Path Traversal RCE",
-        "Ollama - Remote Code Execution (critical)"
+        "Ollama Model Registry Path Traversal RCE"
       ],
       "after_order": [
-        "Ollama Model Registry Path Traversal RCE",
-        "Ollama - Remote Code Execution (critical)"
+        "Ollama Model Registry Path Traversal RCE"
       ],
-      "relevant_total": 2,
+      "relevant_total": 1,
       "records": [
         {
           "id": "metasploit-f54a2601a9be3d56",
           "title": "Ollama Model Registry Path Traversal RCE",
           "source": "metasploit",
           "tier": "A",
-          "raw_rank": 2,
-          "rel": 10.0,
-          "score": 0.85,
-          "stars": 0,
-          "relevant": true
-        },
-        {
-          "id": "nuclei-templates-9bc62253502c6604",
-          "title": "Ollama - Remote Code Execution (critical)",
-          "source": "nuclei-templates",
-          "tier": "A",
           "raw_rank": 1,
           "rel": 10.0,
-          "score": 0.67,
+          "score": 0.85,
           "stars": 0,
           "relevant": true
         }
@@ -123,9 +110,9 @@
         "VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shell)",
         "Apache Log4j2 Remote Code Injection (critical)",
         "Log4Shell HTTP Scanner",
+        "AD Manager Plus 7122 - Remote Code Execution (RCE)",
         "Apache Log4j 2 - Remote Code Execution (RCE)",
-        "Apache Log4j2 2.14.1 - Information Disclosure",
-        "AD Manager Plus 7122 - Remote Code Execution (RCE)"
+        "Apache Log4j2 2.14.1 - Information Disclosure"
       ],
       "after_order": [
         "MobileIron Core Unauthenticated JNDI Injection RCE (via Log4Shell)",
@@ -134,9 +121,9 @@
         "VMware vCenter Server Unauthenticated JNDI Injection RCE (via Log4Shell)",
         "Apache Log4j2 Remote Code Injection (critical)",
         "Log4Shell HTTP Scanner",
+        "AD Manager Plus 7122 - Remote Code Execution (RCE)",
         "Apache Log4j 2 - Remote Code Execution (RCE)",
-        "Apache Log4j2 2.14.1 - Information Disclosure",
-        "AD Manager Plus 7122 - Remote Code Execution (RCE)"
+        "Apache Log4j2 2.14.1 - Information Disclosure"
       ],
       "relevant_total": 9,
       "records": [
@@ -202,29 +189,7 @@
           "tier": "A",
           "raw_rank": 5,
           "rel": 10.0,
-          "score": 0.67,
-          "stars": 0,
-          "relevant": true
-        },
-        {
-          "id": "exploit-db-e8d8f702a113f426",
-          "title": "Apache Log4j 2 - Remote Code Execution (RCE)",
-          "source": "exploit-db",
-          "tier": "A",
-          "raw_rank": 2,
-          "rel": 7.0,
-          "score": 0.85,
-          "stars": 0,
-          "relevant": true
-        },
-        {
-          "id": "exploit-db-f592a39d0c1f0ebd",
-          "title": "Apache Log4j2 2.14.1 - Information Disclosure",
-          "source": "exploit-db",
-          "tier": "A",
-          "raw_rank": 3,
-          "rel": 7.0,
-          "score": 0.85,
+          "score": 0.405,
           "stars": 0,
           "relevant": true
         },
@@ -235,7 +200,29 @@
           "tier": "A",
           "raw_rank": 1,
           "rel": 2.0,
-          "score": 0.85,
+          "score": 0.745,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "exploit-db-e8d8f702a113f426",
+          "title": "Apache Log4j 2 - Remote Code Execution (RCE)",
+          "source": "exploit-db",
+          "tier": "A",
+          "raw_rank": 2,
+          "rel": 2.0,
+          "score": 0.745,
+          "stars": 0,
+          "relevant": true
+        },
+        {
+          "id": "exploit-db-f592a39d0c1f0ebd",
+          "title": "Apache Log4j2 2.14.1 - Information Disclosure",
+          "source": "exploit-db",
+          "tier": "A",
+          "raw_rank": 3,
+          "rel": 0.0,
+          "score": 0.745,
           "stars": 0,
           "relevant": true
         }

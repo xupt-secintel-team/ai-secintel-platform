@@ -51,14 +51,11 @@ EVENT_FP = os.path.join(paths.DATA_DIR, "circuit_events.jsonl")
 # 格式：源名 → [(说明, URL 模板), ...]，URL 里 {q} 会被替换为原始查询。
 # 空列表 = 该源无镜像（真实存在这种情况，不假装有）。
 MIRRORS = {
-    # NVD：官方 API 之外，NVD 有 CVE 列表的 HTML/CSV 导出与 cvelistV5 GitHub 镜像
-    "nvd": [
-        ("CVEListV5 GitHub 镜像（cvelistV5 cve_YYYY 季度目录）",
-         "https://raw.githubusercontent.com/CVEProject/cvelistV5/master/cves/"
-         "{y}/{q}/"),
-        ("NVD CVE API v2 备用主机（services.nvdv.nist.gov）",
-         "https://services.nvdv.nist.gov/rest/json/cves/2.0"),
-    ],
+    # ★ 2026-10-18 清空：原两个镜像实测均不可用 ——
+    #   raw.githubusercontent.com 本机被 hosts 污染解析到 127.0.0.1（必挂）；
+    #   services.nvdv.nist.gov 域名根本不存在（DNS 解析失败）。
+    #   熔断期切到必挂镜像只会加速失败循环，如实留空比假装有备份强。
+    "nvd": [],
     # KEV：官方 JSON 单文件，无镜像；如实留空
     "kev": [],
     # 论文：arXiv 有 export.arxiv.org 备用主机
@@ -163,6 +160,11 @@ class CircuitBreaker:
             if time.time() - float(s.get("tripped_at", 0)) >= COOLDOWN_SEC:
                 s["tripped"] = False
                 s["half_open"] = True
+                # ★ 半开时必须清零 fails（2026-10-18）：trip 时 fails 已达阈值 3，
+                #   若不清零，半开后第一次空/失败（fails=4）就立刻重新熔断 ——
+                #   「暂时没新数据」的源永远凑不满连续 2 次成功，数学上不可能自愈。
+                #   NVD/KEV 就这样连挂 10 天（快车道绝大多数轮次本来就 0 新条目）。
+                s["fails"] = 0
                 # 记住"进入半开前确实熔断过" —— 否则 record() 里 was 恒为 False，
                 # 恢复时会返回 "open" 而不是 "recover"，恢复事件就丢了（实测踩到）。
                 s["was_tripped"] = True
@@ -221,6 +223,12 @@ class CircuitBreaker:
                 if now - s["empty_since"] >= gap:
                     s["fails"] = int(s.get("fails", 0)) + 1
                     s["last_err"] = "持续 %.0fs 无数据返回" % (now - s["empty_since"])
+                    # ★ 每个空窗只计一次失败，然后重新计时（2026-10-18）。
+                    #   原实现 empty_since 永不重置：fails 随时间无限滚雪球，
+                    #   且面板上永远挂着「持续 N 万秒无数据」的天文数字。
+                    #   重置后语义变为「每个采集间隔窗口空一次 = 计 1 次失败」，
+                    #   与连续网络失败（record ok=False）同量级、可自愈。
+                    s["empty_since"] = now
                 else:
                     return "-"
                 s["oks"] = 0

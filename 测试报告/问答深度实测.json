@@ -1,30 +1,17 @@
 {
- "base": "http://127.0.0.1:8940",
- "updated": "2026-10-08T10:14:40",
+ "base": "http://127.0.0.1:8848",
+ "updated": "2026-10-20T21:39:26",
  "total": 10,
  "metrics": {
-  "D1": 60.0,
+  "D1": 90.0,
   "D2": 100.0,
-  "D3": 80.0,
-  "D4": 3.2,
-  "D5": 60.0
+  "D3": 90.0,
+  "D4": 4.2,
+  "D5": 90.0
  },
  "cases": [
   {
    "q": "最近被在野利用的高危漏洞有哪些",
-   "n": 1,
-   "d1": false,
-   "back": 1,
-   "n_ids": 1,
-   "cves": 0,
-   "fake": [],
-   "d3": true,
-   "d5": false,
-   "wall": 14722.6,
-   "chars": 349
-  },
-  {
-   "q": "有公开 POC 的 AI 框架漏洞",
    "n": 5,
    "d1": true,
    "back": 5,
@@ -33,8 +20,21 @@
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 17170.7,
-   "chars": 4296
+   "wall": 15961.3,
+   "chars": 4718
+  },
+  {
+   "q": "有公开 POC 的 AI 框架漏洞",
+   "n": 5,
+   "d1": true,
+   "back": 5,
+   "n_ids": 5,
+   "cves": 9,
+   "fake": [],
+   "d3": true,
+   "d5": true,
+   "wall": 11548.5,
+   "chars": 4123
   },
   {
    "q": "vLLM 有哪些高危漏洞",
@@ -46,21 +46,21 @@
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 19702.1,
-   "chars": 3313
+   "wall": 5123.1,
+   "chars": 3179
   },
   {
    "q": "CVSS 10 分的漏洞举例",
-   "n": 5,
+   "n": 2,
    "d1": true,
-   "back": 5,
-   "n_ids": 5,
-   "cves": 8,
+   "back": 2,
+   "n_ids": 2,
+   "cves": 2,
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 17197.3,
-   "chars": 4881
+   "wall": 54907.4,
+   "chars": 1822
   },
   {
    "q": "Ollama 相关的远程代码执行漏洞",
@@ -72,8 +72,8 @@
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 20232.9,
-   "chars": 3927
+   "wall": 10858.1,
+   "chars": 4045
   },
   {
    "q": "LangChain 的提示词注入问题",
@@ -85,23 +85,21 @@
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 18084.8,
-   "chars": 4437
+   "wall": 11609.8,
+   "chars": 4734
   },
   {
    "q": "正在被勒索软件利用的漏洞",
-   "n": 0,
-   "d1": false,
-   "back": 0,
-   "n_ids": 0,
-   "cves": 1,
-   "fake": [
-    "CVE-2024-1234"
-   ],
-   "d3": false,
-   "d5": false,
-   "wall": 20738.0,
-   "chars": 231
+   "n": 5,
+   "d1": true,
+   "back": 5,
+   "n_ids": 5,
+   "cves": 8,
+   "fake": [],
+   "d3": true,
+   "d5": true,
+   "wall": 12797.1,
+   "chars": 4738
   },
   {
    "q": "Ray 框架有哪些已知漏洞",
@@ -113,21 +111,21 @@
    "fake": [],
    "d3": true,
    "d5": true,
-   "wall": 15102.0,
+   "wall": 9492.5,
    "chars": 4531
   },
   {
    "q": "最近修补的在野利用漏洞",
-   "n": 1,
-   "d1": false,
-   "back": 1,
-   "n_ids": 1,
-   "cves": 0,
+   "n": 5,
+   "d1": true,
+   "back": 5,
+   "n_ids": 5,
+   "cves": 8,
    "fake": [],
    "d3": true,
-   "d5": false,
-   "wall": 22696.8,
-   "chars": 345
+   "d5": true,
+   "wall": 10261.3,
+   "chars": 4782
   },
   {
    "q": "AI 组件里最容易被打的是哪个",
@@ -141,7 +139,7 @@
    ],
    "d3": false,
    "d5": false,
-   "wall": 20650.0,
+   "wall": 8056.2,
    "chars": 233
   }
  ]

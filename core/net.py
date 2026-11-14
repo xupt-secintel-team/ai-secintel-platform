@@ -43,7 +43,7 @@ STATE_FP = os.path.join(ROOT, "data", "net_state.json")
 #   有人的环境确实需要用能否直连 google 来判断网络类型。
 PROBE_URLS = ("https://www.google.com/generate_204", "https://api.github.com")
 # 常见代理端口（先试这些，再扫本机 LISTENING）
-COMMON_PORTS = (7890, 7891, 7897, 7898, 33252, 2484, 2080, 2081, 8080, 8888,
+COMMON_PORTS = (7890, 7891, 7896, 7897, 7898, 33252, 2484, 2080, 2081, 8080, 8888,
                 1080, 1081, 10809, 20171, 51837, 33210)
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
 
@@ -92,6 +92,60 @@ def _env_proxy():
         if v:
             return v
     return ""
+
+
+def _config_proxy():
+    """读 config.json 的 proxy 字段（用户在网页控制台/文件里设置的代理）。
+
+    优先级最高：这是"用户显式指定"，比环境变量和自动探测都更该被尊重。
+    文件不存在 / 字段缺失 / 为空都返回 ""（走后续探测）。"""
+    try:
+        fp = os.path.join(ROOT, "config.json")
+        if os.path.isfile(fp):
+            with open(fp, "r", encoding="utf-8") as f:
+                d = json.load(f)
+            return (d.get("proxy") or "").strip()
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("core/net.py:_config_proxy", _sw_e)
+    return ""
+
+
+def set_proxy(value):
+    """运行时设置代理：原子写入 config.json 的 proxy 字段 + 立即使缓存生效。
+
+    网页控制台「代理」按钮、或任何运行期配置入口都走这里，**无需重启**。
+    返回 True/False。空值 = 清除显式代理（回到自动探测）。"""
+    try:
+        fp = os.path.join(ROOT, "config.json")
+        cfg = {}
+        if os.path.isfile(fp):
+            with open(fp, "r", encoding="utf-8") as f:
+                cfg = json.load(f) or {}
+        cfg["proxy"] = (value or "").strip()
+        tmp = fp + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, fp)
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("core/net.py:set_proxy", _sw_e)
+        return False
+    _val = cfg.get("proxy") or ""
+    # 同步到 os.environ：live.py / httpcompat / local_embedder / translator 等
+    # 是直接读 AISEC_PROXY 环境变量的，只有这里同步了它们才跟着生效/清除。
+    if _val:
+        os.environ["AISEC_PROXY"] = _val
+    else:
+        os.environ.pop("AISEC_PROXY", None)
+    with _LOCK:
+        _CACHE.update(ts=time.time(), proxy=_val)
+        _save()
+    return True
+
+
+def current_proxy():
+    """当前生效的代理（config.json > AISEC_PROXY env > 探测缓存）。只读、不触发探测。"""
+    p = _config_proxy() or (os.environ.get("AISEC_PROXY") or "").strip()
+    return p or (_CACHE.get("proxy") or "")
 
 
 def _listening_ports():
@@ -179,8 +233,14 @@ def detect_proxy(force=False, verbose=False):
     _load()
     with _LOCK:
         now = time.time()
-        if not force and _CACHE.get("proxy") and now - (_CACHE.get("ts") or 0) < _TTL:
-            return _CACHE["proxy"]
+        # ★ 命中判断必须按 ts 而不是 proxy（2026-10-18）：
+        #   探测结果为空（本机没有可用代理）也写进了缓存（ts=now, proxy=""），
+        #   但原判据 `_CACHE.get("proxy")` 对空字符串恒为假 → 缓存永不命中，
+        #   无代理环境下每次 http_get 都重新全量扫端口 8~10s，
+        #   快车道一轮被拖到 1~3 分钟、大响应源全部逼近超时。
+        if not force and (_CACHE.get("ts") or 0) \
+                and now - float(_CACHE.get("ts") or 0) < _TTL:
+            return _CACHE.get("proxy") or ""
 
         # 整轮预算的截止时刻：下面三段探测共用
         _deadline = time.time() + DETECT_BUDGET
@@ -190,6 +250,20 @@ def detect_proxy(force=False, verbose=False):
             return max(1, int(min(PROBE_TIMEOUT, _deadline - time.time())))
 
         env = _env_proxy()
+        # ★ 显式代理（config.json 的 proxy 字段，或 secrets.env / 环境变量的
+        #   AISEC_PROXY）直接信任，不做 google/github 探针"二次验证"（2026-10-18）。
+        #   原因：本机代理可能是**选择性代理**——能通 NVD / arXiv / CISA，但
+        #   google / github 被上游拦截。若仍拿 google/github 当验收探针，会误判
+        #   "代理不可用"→ 退回直连 → 境外源 45s 超时逐个拖垮全量同步（一轮 2~3 小时）。
+        #   用户显式配了就该信它。
+        _explicit = _config_proxy() or (os.environ.get("AISEC_PROXY") or "").strip()
+        if _explicit:
+            _CACHE.update(ts=now, proxy=_explicit)
+            _save()
+            if verbose:
+                print(f"[net] 代理（显式配置）：{_explicit}", flush=True)
+            return _explicit
+
         if env and any(_curl_ok(u, proxy=env, timeout=_tmo()) for u in PROBE_URLS):
             _CACHE.update(ts=now, proxy=env)
             _save()

@@ -187,6 +187,7 @@ def aggregate(period: str = "weekly", top_n: int = _TOP_N) -> dict:
     ai_risk_counter = Counter()
     cwe_counter = Counter()
     product_counter = Counter()
+    kev_total = 0             # ★ 窗口内全部在野利用（KEV）漏洞数（2026-10-18 口径修复）
 
     seen_ids = set()          # corpus ∪ live 的去重集合（同 id 不重复计数）
     n_live_counted = 0
@@ -208,6 +209,12 @@ def aggregate(period: str = "weekly", top_n: int = _TOP_N) -> dict:
         seen_ids.add(cve)
         trend[day] += 1
         severity_counter[sev] += 1
+        # ★ 在野利用计数与「窗口内新发漏洞」同口径（2026-10-18 修复"对不上"）：
+        #   原 kev_count 只数 TOP20 高危榜里的 KEV —— KEV 条目 CVSS 不够高没进榜
+        #   就漏计（实测 weekly 窗口内实际 3 个 KEV，页面却显示 0，与日报页
+        #   的 KEV 条目对不上）。改为全窗口计数。
+        if bool((rec.get("kev") or {}).get("exploited") or rec.get("exploited")):
+            kev_total += 1
         if cat in _AI_CATS:
             ai_risk_counter[cat] += 1      # 用户指定的 AI 四分类口径
         else:
@@ -310,7 +317,9 @@ def aggregate(period: str = "weekly", top_n: int = _TOP_N) -> dict:
         "by_category": by_category,
         "by_ai_risk": by_ai_risk,
         "ai_risk_total": sum(x["count"] for x in by_ai_risk),
-        "kev_count": sum(1 for x in top_cve if x["kev"]),
+        # 在野利用数 = 窗口内全部 KEV 漏洞（与 total_cves 同口径），
+        # 不再是"TOP20 高危榜里的 KEV 数"
+        "kev_count": kev_total,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
 

@@ -77,6 +77,14 @@ def fuse_results(bm25_results: List[Dict], vector_results: List[Dict],
         if rid in merged:
             merged[rid]["score"] += ve.get(rid, 0.0) * vector_weight
             merged[rid]["src"] = "bm25+vector"
+            # ★ 把向量分写回条目（2026-10-18 实测补）：data 是 BM25 卡对象，
+            #   自带字段里没有 vector_score —— 融合后闸门的 _vector_score()
+            #   对**双路命中条目**恒拿 None，语义信号整个丢失。实测
+            #   《中华人民共和国数据安全法》(DSKB:REG01) 双路命中
+            #   （BM25 17.3 + vec 0.8991）却被当纯 BM25 条目判灭。
+            if merged[rid]["data"].get("vector_score") is None \
+                    and r.get("vector_score") is not None:
+                merged[rid]["data"]["vector_score"] = r.get("vector_score")
         else:
             merged[rid] = {"data": r, "score": ve.get(rid, 0.0) * vector_weight, "src": "vector"}
 
@@ -151,8 +159,10 @@ def hybrid_search(query: str, top_k: int = 12, filters: Dict = None,
     if not field_filter:
         results, rel_stats = _relevance_gate(results, query)
 
+    total = _ENGINE_META["total"] if _ENGINE_META["query"] == query else None
     return {
         "results": enrich_desc(results[:top_k]),
+        "total": total,
         "fusion": {
             "bm25_candidates": len(bm25_results),
             "vector_candidates": len(vector_results),
@@ -212,6 +222,11 @@ def _fusion_counts(results: List[Dict]) -> Dict[str, int]:
     return c
 
 
+# 最近一次引擎检索的命中总数（2026-10-26）：统计类问题（"ollama 有多少个高危漏洞"）
+# 必须能拿到 total，否则模型只能看到 top-k 条、答不出准确数字（实测 I 题 FAIL）。
+_ENGINE_META = {"query": None, "total": None}
+
+
 def _engine_search(query: str, size: int, filters: Dict = None) -> List[Dict]:
     """调主服务引擎检索（BM25/字段过滤），支持带筛选条件"""
     params = {"q": query, "size": size}
@@ -233,6 +248,8 @@ def _engine_search(query: str, size: int, filters: Dict = None) -> List[Dict]:
     try:
         with urllib.request.urlopen(url, timeout=30) as resp:
             d = json.load(resp)
+        _ENGINE_META["query"] = query
+        _ENGINE_META["total"] = d.get("total")
         return d.get("results", [])
     except Exception as e:
         print(f"[Retriever] 引擎检索失败: {e}")

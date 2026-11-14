@@ -16,7 +16,8 @@ api.py —— 模块1「情报监测」后端入口
     POST /api/daily_report/generate   手动生成并落盘（{"date": "..."} 缺省为今天）
     POST /api/daily_report/cleanup    手动清理超期报告（{"dry_run": true/false}）
 
-后台线程：live.py 快车道轮询（默认 15s，config.json 的 fast_interval 可调）、monitor.py 定时增量（config.json 可选）。
+后台线程：live.py 快车道轮询（默认 15s，config.json 的 fast_interval 可调）、monitor.py 定时增量（config.json 可选）、
+启动空窗补抓（历史追溯：启动时按「上次同步时间差」自动全源补抓，记录见 data/run_history.jsonl）。
 数据/缓存：一律走 paths.DATA_DIR（共享数据目录），不要再用 HERE/data。
 """
 from __future__ import annotations
@@ -25,6 +26,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime
 
 import paths                                   # noqa: F401  —— 强调：数据目录统一从这里取
 try:  # aisec-swallow：静默异常统一登记（允许吞，但必须留痕）
@@ -309,7 +311,7 @@ def refresh_status():
     return st
 
 
-def _run_refresh(window_hours=None, skip_github=False, light=False):
+def _run_refresh(window_hours=None, skip_github=False, light=False, extra_summary=None):
     import monitor
     now = time.strftime("%Y-%m-%dT%H:%M:%S")
     _t0 = time.time()
@@ -321,6 +323,10 @@ def _run_refresh(window_hours=None, skip_github=False, light=False):
     try:
         summary = monitor.refresh(progress=cb, window_hours=window_hours,
                                   skip_github=skip_github, light=light)
+        if extra_summary:
+            # 全源强制同步会把「快车道新增数」并进 summary，供前端一次性拿到完整结果
+            summary = dict(summary)
+            summary.update(extra_summary)
         # 轻量轮没写盘（本轮无新增）→ 语料没变，**不动引擎**。
         # 否则 5 分钟一次全量重建索引（99k 文档，分钟级）会把服务拖死。
         if light and not summary.get("saved"):
@@ -896,6 +902,110 @@ def handle_refresh_post(req):
     return req.json({"started": True, "running": True, "status": refresh_status()})
 
 
+def _run_force_sync():
+    """全源强制同步：先快车道轮询一遍（全部博客/社区源，不论语言），
+    再走慢车道全量增量（NVD / KEV / arXiv / GitHub / CSDN）。"""
+    live_added = 0
+    with REFRESH_LOCK:
+        REFRESH.update(stage="live", detail="强制轮询全部博客/社区源（中英）…", pct=3)
+    try:
+        live_added = _live_poll_once()
+    except Exception as _sw_e:  # noqa: BLE001 —— 快车道失败不阻断慢车道
+        _swallow("modules/m1_monitor/api.py:_run_force_sync.live", _sw_e)
+    print(f"[force-sync] 快车道轮询完成：+{live_added} 条（博客/社区源）", flush=True)
+    _run_refresh(window_hours=None, skip_github=False, light=False,
+                 extra_summary={"live_added": live_added})
+
+
+def handle_force_sync(req):
+    """POST /api/force_sync —— 强制同步所有数据源（中英全量）。
+
+    与 /api/refresh 的区别：额外先触发一次快车道（博客/社区 RSS 源），
+    再跑慢车道全量增量；进度复用同一套 REFRESH 状态机。"""
+    with REFRESH_LOCK:
+        if REFRESH["running"]:
+            return req.json({"started": False, "running": True,
+                             "status": dict(REFRESH)}, 409)
+        REFRESH.update(running=True, stage="live", detail="启动全源强制同步",
+                       pct=0, started_at=time.strftime("%Y-%m-%dT%H:%M:%S"),
+                       finished_at=None, error=None, summary=None)
+    threading.Thread(target=_run_force_sync, daemon=True, name="force-sync").start()
+    return req.json({"started": True, "running": True, "status": refresh_status()})
+
+
+# ======================================================================
+# 历史追溯：启动时记录「本次运行 ↔ 上次运行/同步」的时间差，并强制补抓近 5 天
+# ======================================================================
+# 启动补抓窗口固定为「近 5 天」（120 小时）：无论上次同步是什么时候、空窗多大，
+# 每次启动都无条件强制拉取近 5 天所有数据源（中英，不限语言），
+# 覆盖 NVD / KEV / arXiv / GitHub / CSDN（快车道博客/社区源由 _live_loop 启动即轮询）。
+_BOOT_BACKFILL_HOURS = 24 * 5   # 启动强制补抓窗口：近 5 天（120h）
+_RUN_HISTORY_FP = paths.data_path("run_history.jsonl")
+
+
+def _peek_last_sync():
+    """读 monitor_state.json 的 last_sync（上次增量同步时间戳），供空窗计算。"""
+    try:
+        with open(paths.data_path("monitor_state.json"), "r", encoding="utf-8") as f:
+            return (json.load(f) or {}).get("last_sync")
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("modules/m1_monitor/api.py:_peek_last_sync", _sw_e)
+        return None
+
+
+def _read_run_history():
+    """读 run_history.jsonl 的最后一条（上一次运行的启动记录）。"""
+    if not os.path.isfile(_RUN_HISTORY_FP):
+        return None
+    try:
+        last = None
+        with open(_RUN_HISTORY_FP, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    last = json.loads(line)
+        return last
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("modules/m1_monitor/api.py:_read_run_history", _sw_e)
+        return None
+
+
+def _gap_hours(iso):
+    """距某个 ISO 时间戳的空窗（小时）。无记录 / 解析失败返回 None（=首次）。"""
+    if not iso:
+        return None
+    try:
+        prev = datetime.fromisoformat(str(iso))
+        if prev.tzinfo is None:
+            prev = prev.astimezone()          # naive → 本机时区
+        return max(0.0, (datetime.now(prev.tzinfo) - prev).total_seconds() / 3600.0)
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("modules/m1_monitor/api.py:_gap_hours", _sw_e)
+        return None
+
+
+def _fmt_gap(hours):
+    if hours is None:
+        return "首次运行（无上次同步记录）"
+    mins = hours * 60.0
+    if mins < 1:
+        return "不足 1 分钟"
+    if hours < 1:
+        return "%d 分钟" % int(round(mins))
+    if hours < 24:
+        return "%.1f 小时" % hours
+    return "%.1f 天" % (hours / 24.0)
+
+
+def _append_run_history(entry):
+    """追加一条运行追溯记录（时间戳 + 时间差），供事后审计。"""
+    try:
+        with open(_RUN_HISTORY_FP, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as _sw_e:  # noqa: BLE001
+        _swallow("modules/m1_monitor/api.py:_append_run_history", _sw_e)
+
+
 # ======================================================================
 # 启动钩子：注册路由 + 拉起后台线程
 # ======================================================================
@@ -960,6 +1070,40 @@ def start(core):
                            started_at=time.strftime("%Y-%m-%dT%H:%M:%S"),
                            finished_at=None, error=None, summary=None)
         return True
+
+    # ── 启动强制补抓（历史追溯）：记录「本次运行 ↔ 上次运行/同步」时间差，
+    #    再无条件强制拉取近 5 天所有数据源（NVD / KEV / arXiv / GitHub / CSDN，不限语言）。
+    #    快车道博客/社区 RSS 源由 _live_loop 启动即轮询，不在这里重复触发。
+    def _gap_backfill():
+        time.sleep(10)                       # 避开引擎加载高峰，让快车道先跑一轮
+        started_at = time.strftime("%Y-%m-%dT%H:%M:%S")
+        last_sync = _peek_last_sync()
+        gap = _gap_hours(last_sync)          # 距上次「同步」的空窗（仅追溯记录）
+        prev = _read_run_history()           # 上一次「运行」的启动记录
+        run_gap = _gap_hours((prev or {}).get("started_at"))  # 距上次「运行」的空窗
+        entry = {
+            "started_at": started_at,
+            "prev_started_at": (prev or {}).get("started_at"),
+            "run_gap_hours": None if run_gap is None else round(run_gap, 2),
+            "run_gap_human": _fmt_gap(run_gap),
+            "last_sync": last_sync,
+            "sync_gap_hours": None if gap is None else round(gap, 2),
+            "sync_gap_human": _fmt_gap(gap),
+            "backfill": True,
+            "backfill_window_hours": _BOOT_BACKFILL_HOURS,
+            "note": "启动强制补抓：近 5 天（120h）全源，不限语言",
+        }
+        _append_run_history(entry)
+        if not _claim("启动强制补抓（近5天全源）"):
+            print("  历史追溯：已有同步在跑，跳过启动强制补抓", flush=True)
+            return
+        print("  历史追溯：上次运行 %s / 上次同步 %s（空窗 %s）→ 启动强制补抓近 5 天（%dh）全源，不限语言"
+              % (entry["prev_started_at"] or "（无记录）",
+                 entry["last_sync"] or "（无记录）", entry["sync_gap_human"],
+                 _BOOT_BACKFILL_HOURS), flush=True)
+        _run_refresh(window_hours=_BOOT_BACKFILL_HOURS, skip_github=False, light=False)
+
+    threading.Thread(target=_gap_backfill, daemon=True, name="gap-backfill").start()
 
     if auto_sec > 0:
         def _quick_loop():
@@ -1053,6 +1197,7 @@ def register(ctx):
     ctx.route("GET", "/api/sources", handle_sources)
     ctx.route("GET", "/api/refresh", handle_refresh_get)
     ctx.route("POST", "/api/refresh", handle_refresh_post)
+    ctx.route("POST", "/api/force_sync", handle_force_sync)
     ctx.route("POST", "/api/m1/submit_article", handle_submit_article)
     ctx.route("GET", "/api/daily_reports", handle_daily_reports)
     ctx.route("GET", "/api/daily_report", handle_daily_report)

@@ -344,6 +344,52 @@ def record_poll(ok: Any, err: Any, per_source: Optional[Dict[str, Any]] = None) 
     return snapshot(_ledger=ledger)
 
 
+def mark_success(names, items: int = 0, note: str = "") -> Dict[str, Any]:
+    """外部通道（6h 深度同步）成功时回写账本：清零失败、刷新时间戳。
+
+    为什么需要（2026-10-26）：快车道只轮询 RSS / 社区；NVD、KEV、arXiv 由
+    monitor.refresh 的 6h 深同步负责。此前账本**只记快车道轮询结果**，
+    深度同步的实际产出完全没进账本 → 看板上 NVD/KEV/arXiv 长期显示
+    「熔断中（连续失败 735/731/718 次）」，而同一时刻语料的 meta 明明写着
+    「nvd_new=1 / nvd_updated=18」。这既是误导评委的风险，也让"源健康"
+    这个本该最可信的页面变得不可信。深度同步成功必须回写。
+    """
+    ledger = _load()
+    _ensure_seeded(ledger)
+    now = time.time()
+    hit = []
+    for name in (names or []):
+        n = str(name or "").strip()
+        if not n:
+            continue
+        rec = _ensure_rec(ledger, n)
+        rec["last_success_at"] = now
+        if items:
+            rec["last_item_at"] = now
+            ev = rec.setdefault("item_events", [])
+            ev.append(now)
+            rec["item_events"] = ev[-_EVENT_KEEP:]
+        rec["consecutive_failures"] = 0
+        rec["last_error"] = ""
+        if note:
+            rec["channel_note"] = note
+        hit.append(n)
+    if hit:
+        k = _stale_k()
+        for name in hit:
+            rec = ledger["sources"].get(name) or {}
+            _recompute_items(rec, now)
+            st = judge_state(rec, now, k, first_round_done=True)
+            rec["state"] = st
+            rec["last_state"] = st
+            if st == "stale":
+                rec["stale_for_sec"] = int(now - (rec.get("last_item_at") or now))
+            else:
+                rec["stale_for_sec"] = 0
+        _save(ledger)
+    return snapshot(_ledger=ledger)
+
+
 def _file_alert(name: str, rec: Dict[str, Any], state: str, now: float) -> None:
     """状态变化时写一条告警（同源同状态不重复写）。"""
     if AL is None:

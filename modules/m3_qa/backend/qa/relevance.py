@@ -59,6 +59,13 @@ BM25_FLOOR = float(os.environ.get("AISEC_QA_BM25_FLOOR", "1.0") or 1.0)
 #     ② 否则退回**绝对下限** `BM25_MIN`（只留分数明显高的），滤掉泛相关长尾。
 BM25_MIN = float(os.environ.get("AISEC_QA_BM25_MIN", "8.0") or 8.0)   # 纯 BM25 路首条/兜底分数下限
 BM25_RATIO = float(os.environ.get("AISEC_QA_BM25_RATIO", "2.0") or 2.0)  # 保留：断层判据（当前默认不启用）
+# ★ 2026-10-26 补：**绝对分强信号**。口语化中文提问（"大模型输出被投毒污染"）的
+# BM25 分布天然平坦（27.6/25.8/25.8…），断层比值永远 <2.0，只看比值会把
+# 整池判成"泛相关"清空；而真正无关的查询（"如何做红烧肉" 8.6、"zzzqqq…" 13.0）
+# 绝对分明显低一个量级。所以补一条：首条分 ≥ BM25_STRONG 时，按"首条的 55%"
+# 取带宽保底，既救回真命中，又不会把无关查询放进来（实测分离点是 13 vs 27）。
+BM25_STRONG = float(os.environ.get("AISEC_QA_BM25_STRONG", "18") or 18)
+BM25_STRONG_RATIO = float(os.environ.get("AISEC_QA_BM25_STRONG_RATIO", "0.55") or 0.55)
 
 # 查询里的「实词」：英文/数字标识符（≥3 字符）与中文词（≥2 字）。
 # 停用词不参与判据 —— 否则「有什么漏洞」会因为"漏洞"二字出现在库里而误判相关。
@@ -298,6 +305,19 @@ def is_relevant(doc: Dict, terms: List[str] = None,
         _word_ok = any(len(t) >= 2 and t not in _FRAGMENTS and t in text for t in terms)
         if _word_ok or doc.get("_fusion") == "bm25+vector":
             return True
+    # ④b **双路交集**（词面 BM25 + 语义）不再要求铁证词（2026-10-18 实测补）：
+    #    原 ③ 要求 `strong_hit`，但铁证词只认拉丁标识符（CVE/产品名），纯中文
+    #    提问永远抽不出 → ③ 对纯中文查询恒死。而 `_fusion == "bm25+vector"`
+    #    本身已是**两个独立信号的交集**：BM25 引擎确认词面匹配 + 语义余弦
+    #    ≥ VECTOR_FLOOR（实测不相关组上限 0.885）。实测《中华人民共和国
+    #    数据安全法》（DSKB:REG01）双路命中（BM25 17.3 + vec 0.8991）却被
+    #    全灭 —— 卡在两处：查询长段「数据安全法对企业」滑窗产物全被标为
+    #    碎片（真词判据失效），0.8991 又差 0.0009 不过纯语义路的 0.90 门槛。
+    #    门槛说明：0.90 高门槛是给**纯语义单路**的（防"同域泛相关"）；
+    #    双路有词面佐证，回到实测分离点 VECTOR_FLOOR(0.89) 即可。
+    if not strong and vs is not None and vs >= VECTOR_FLOOR \
+            and doc.get("_fusion") == "bm25+vector":
+        return True
     # ⑤ **纯 BM25 路**（无 vector_score）**且查询无铁证词**。
     #    为什么必须有这一条（第 3 轮 R3-2 根因，整条链路实测还原）：
     #      `hybrid_search` 识别到"强标记意图"（在野利用/POC/高危）时会**主动跳过
@@ -310,6 +330,18 @@ def is_relevant(doc: Dict, terms: List[str] = None,
     #      真命中首条 35.4 vs 次条 6.9（5.1×）；不相关是平坦群 8.4/8.3（1.05×）。
     #      `ctx["cut"]` 是 gate() 预算好的"断层以上同梯队"的分数线，
     #      这里只做一次比较 —— 判定逻辑集中在 gate()，避免每个 doc 重复算分布。
+    # ⑤c **混合池里的 BM25 命中**（2026-10-26 补）：池子里既有 BM25 条目
+    #    （带 score）又有向量条目（只有 vector_score）时，BM25 条目过去必须
+    #    二选一：要么余弦 ≥0.89（它没这么高），要么走下面「纯 BM25 路」（vs 必须
+    #    为 None，但它被融合时挂上了 vector_score）→ **两条都进不去，整池被清空**。
+    #    实测检索评测 8 道语义改写/中文题混合检索返回 0 条即此因。
+    #    修法：只要这条候选在 BM25 断层线以上就认它 —— 引擎的词面排序本来就是
+    #    本系统最强的信号，语义路不该把它挤掉。
+    if not strong:
+        _cut = (ctx or {}).get("bm25_cut")
+        if _cut and _cut > 0 and _bm25_score(doc) >= _cut:
+            return True
+
     if not strong and vs is None:
         ctx = ctx or {}
         # ① 引擎已按结构化条件（kev:yes 等）精确过滤过整批 → 全部放行。
@@ -317,6 +349,22 @@ def is_relevant(doc: Dict, terms: List[str] = None,
         #      而中文查询常常抽不出真词（"最近被在野利用的漏洞" → terms=[]），
         #      要求 terms 会让这条唯一可信的判据失效（实测整池被清空）。
         if ctx.get("bm25_all_kev"):
+            return True
+        # ①c **逐条**字段证据放行（2026-10-18 实测补，修复"整批"前提失效）：
+        #    strong_marker 把「在野利用」翻成 kev:yes 后，retriever 会把
+        #    **boosted（KEV 精确过滤）批**与**原始查询批**合并成一个候选池 ——
+        #    于是「整批都 exploited」的前提永远不成立（实测 72 条候选中 50 条
+        #    KEV + 22 条普通），上面 ① 判不出来；断层判据对 KEV 平坦分布
+        #    （26.2/25.5/24.6，比值 1.03 < 2.0）也天然不成立 → 50 条真命中
+        #    全灭，问答答"知识库没有匹配情报"，而页面"相关推荐"明明列着
+        #    同样的 KEV 热点 —— 自相矛盾。
+        #    修法：exploited=True 本身就是 CISA KEV 的**权威在野利用确认**，
+        #    是与词面/断层启发式不同维度的可信信号（本闸门设计原则：
+        #    "引擎的字段级过滤比我们的启发式更可信"），逐条放行；
+        #    叠加 BM25_FLOOR 要求"引擎确实召回它"（防纯噪声混入）。
+        #    零命中诚实化不受影响：无关查询（"红烧肉"）词面与 KEV 条目
+        #    毫无交集，BM25 分 < 1.0，进不了候选池。
+        if doc.get("exploited") and _bm25_score(doc) >= BM25_FLOOR:
             return True
         # ② 无精确过滤 → 必须"有真词命中 + 分数过断层线"才留
         cut = ctx.get("bm25_cut")
@@ -346,17 +394,28 @@ def gate(docs: List[Dict], query: str,
     #   ② 否则退回**绝对下限**：只留分数 ≥ BM25_MIN 的，滤掉泛相关长尾
     #      （非 KEV 中文博客典型 8~20 分且 exploited 为空）。
     ctx = {"top_bm25": 0.0, "bm25_cut": None, "bm25_all_kev": False}
-    _scores = sorted((_bm25_score(d) for d in (docs or [])), reverse=True)
+    # 只统计**正值** BM25 分：向量路独有条目没有 score（记 0），
+    # 把它们混进排序会让 top2=0，从而把"首条断层"误判成成立。
+    _scores = sorted((x for x in (_bm25_score(d) for d in (docs or [])) if x > 0),
+                     reverse=True)
     if _scores:
         ctx["top_bm25"] = _scores[0]
     _all_bm25 = bool(docs) and all(_vector_score(d) is None for d in docs)
-    if _all_bm25 and not strong:
+    # ★ 2026-10-26 修：断层线过去**只在纯 BM25 池**里算（_all_bm25 才进这个分支）。
+    #   混合检索的池子是 BM25（有 score）+ 向量（有 vector_score）混排，
+    #   _all_bm25=False → ctx["bm25_cut"] 恒为 None → is_relevant 第⑤条（纯 BM25 路）
+    #   对 BM25 命中一律失效，只能靠 0.89/0.90 的余弦门槛；而口语化提问的余弦
+    #   普遍停在 0.86~0.88（同域噪声区）→ **整池被清空**。
+    #   实测：检索评测 40 题里 8 道"语义改写/中文源"题混合检索返回 0 条
+    #   （@10 从 92.5% 掉到 80%），而同一问题走 /api/search 关键词路排第 1。
+    #   修法：断层线与池子是否含向量无关，只要能算出显著断层就给出 cut。
+    if not strong:
         _expl = [d for d in (docs or []) if d.get("exploited")]
-        if _expl and len(_expl) == len(docs):
+        if _all_bm25 and _expl and len(_expl) == len(docs):
             # ① 引擎精确过滤过（整批都满足条件）→ 全留
             ctx["bm25_all_kev"] = True
             ctx["bm25_cut"] = 0.0
-        else:
+        elif _scores:
             # ② **无精确过滤** → 必须同时满足"首条断层"与"绝对下限"才留。
             #    为什么非要断层：实测不相关查询（"如何做红烧肉"）的分数分布是
             #    **平坦群** 8.4/8.3/8.3/8.3（1.05×）—— 词只在库里"普遍出现"，
@@ -366,6 +425,10 @@ def gate(docs: List[Dict], query: str,
             top2 = _scores[1] if len(_scores) > 1 else 0.0
             if top1 >= BM25_MIN and (top2 <= 0 or top1 >= top2 * BM25_RATIO):
                 ctx["bm25_cut"] = max(BM25_MIN, top2 * BM25_RATIO * 0.5)
+            elif top1 >= BM25_STRONG:
+                # 平坦分布 + 绝对分很高：正常的多词同主题命中，按首条取带宽
+                # （不启用这条时，8 道口语化题会整池被清空 —— 见 2026-10-26 实测）
+                ctx["bm25_cut"] = max(BM25_MIN, top1 * BM25_STRONG_RATIO)
     kept, dropped = [], 0
     for d in docs or []:
         if is_relevant(d, terms, strong, ctx):

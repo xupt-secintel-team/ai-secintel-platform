@@ -1,3 +1,0 @@
-﻿  [w820] ready=True shot=881604
-  [w390] ready=True shot=380482
-

@@ -228,6 +228,20 @@
                   <input type="checkbox" id="expcbx" checked><span>同义词扩展</span>
                 </label>
                 <button class="btn primary" id="go">检索 <kbd>↵</kbd></button>
+                <button class="btn ghost" id="forcesync" title="全源强制同步：立即拉取所有数据源（中英博客/社区/CVE/论文/GitHub/CSDN），并热切换索引，不重启服务">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+                  全源同步
+                </button>
+                <button class="btn ghost" id="proxyset" title="设置出网代理（境外源 NVD/arXiv/GitHub 抓取加速；留空=自动探测）">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"></path></svg>
+                  代理
+                </button>
+              </div>
+              <div class="proxypanel" id="proxypanel" style="display:none">
+                <span class="pp-label">出网代理</span>
+                <input id="proxyin" type="text" spellcheck="false" placeholder="http://127.0.0.1:7890（留空=自动探测）">
+                <button class="btn ghost sm" id="proxysave">保存</button>
+                <span class="pp-hint" id="proxyhint"></span>
               </div>
               <div class="sbrecent" id="sbrecent"></div>
               <div class="hints" id="hints"></div>

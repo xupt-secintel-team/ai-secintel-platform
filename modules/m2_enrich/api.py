@@ -1726,6 +1726,106 @@ def _find_doc(engine, cid: str):
     return None
 
 
+# ----------------------------------------------------------------------
+# 富化覆盖率（2026-10-26）：把"维度全"和"覆盖全"分开报
+# ----------------------------------------------------------------------
+# 为什么必须有这个接口：决赛评分要「富化准确率**与召回率**」，而此前的
+# /api/enrich/dimensions 只给每维的**落盘条数**（如 EPSS 缓存 1,721 条），
+# 没有分母 —— 评委无法判断这是"覆盖 2%"还是"覆盖 80%"。
+# 这个接口按**文档总数做分母**逐维给覆盖率，全部现场统计、可复算。
+_COV_CACHE = {"ts": 0.0, "data": None}
+_COV_TTL = 300.0
+
+
+def _count_json(path):
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            d = json.load(fh)
+        if isinstance(d, dict):
+            for k in ("scores", "items", "data", "results"):
+                if isinstance(d.get(k), dict):
+                    return len(d[k])
+            return len(d)
+        return len(d) if isinstance(d, list) else 0
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+def _enrich_coverage(engine):
+    now = time.time()
+    if _COV_CACHE["data"] and now - _COV_CACHE["ts"] < _COV_TTL:
+        return _COV_CACHE["data"]
+    docs = getattr(engine, "docs", None) or []
+    # 分母只算**漏洞类**文档（CVE/GHSA/CNVD/OSV）：语料里还有论文、仓库、
+    # 标准法规等知识条目，它们本就不该有 CVSS/CWE，混进分母会把覆盖率算低。
+    vuln = [d for d in docs
+            if str(d.get("id", "")).upper().startswith(("CVE-", "GHSA-", "CNVD-", "OSV-"))]
+    docs = vuln or docs
+    total = len(docs) or 1
+    cnt = {"cvss": 0, "cwe": 0, "cpe_products": 0, "poc_links": 0,
+           "kev": 0, "papers": 0, "remediation_builtin": 0}
+    for d in docs:
+        if (d.get("cvss") or {}).get("score") is not None:
+            cnt["cvss"] += 1
+        if d.get("cwe"):
+            cnt["cwe"] += 1
+        if d.get("cpe") or d.get("products"):
+            cnt["cpe_products"] += 1
+        if d.get("poc_links"):
+            cnt["poc_links"] += 1
+        if d.get("kev") or d.get("exploited"):
+            cnt["kev"] += 1
+        if d.get("papers"):
+            cnt["papers"] += 1
+        if d.get("remediation"):
+            cnt["remediation_builtin"] += 1
+    data_dir = (getattr(paths, "DATA_DIR", "") or getattr(paths, "DATA", "")
+                or os.path.join(getattr(paths, "ROOT", "."), "data"))
+    cache = {
+        "epss_cache": _count_json(os.path.join(data_dir, "epss_cache.json")),
+        "affected_assets_cache": _count_json(os.path.join(data_dir, "affected_assets_cache.json")),
+        "remediation_cache": _count_json(os.path.join(data_dir, "remediation_cache.json")),
+        "poc_results": _count_json(os.path.join(data_dir, "poc_results.json")),
+    }
+    dims = []
+    labels = {
+        "cvss": "CVSS 评分", "cwe": "CWE 弱点", "cpe_products": "受影响资产(CPE/products)",
+        "poc_links": "POC 链接", "kev": "KEV 在野利用", "papers": "关联论文",
+        "remediation_builtin": "内置修复建议",
+    }
+    for k, label in labels.items():
+        dims.append({"key": k, "label": label, "covered": cnt[k],
+                     "coverage_pct": round(100.0 * cnt[k] / total, 2)})
+    on_demand = [
+        {"key": "epss", "label": "EPSS 利用概率", "cached": cache["epss_cache"],
+         "coverage_pct": round(100.0 * cache["epss_cache"] / total, 4)},
+        {"key": "affected_assets", "label": "受影响资产定位", "cached": cache["affected_assets_cache"],
+         "coverage_pct": round(100.0 * cache["affected_assets_cache"] / total, 4)},
+        {"key": "remediation", "label": "修复方案生成", "cached": cache["remediation_cache"],
+         "coverage_pct": round(100.0 * cache["remediation_cache"] / total, 4)},
+        {"key": "poc_results", "label": "POC 实抓结果", "cached": cache["poc_results"],
+         "coverage_pct": round(100.0 * cache["poc_results"] / total, 4)},
+    ]
+    data = {"ok": True, "total_docs": len(docs),
+            "total_all_docs": len(getattr(engine, "docs", None) or []),
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "build_time_dims": dims, "on_demand_dims": on_demand,
+            "note": "build_time_dims 是构建期写入每条记录的字段覆盖率；"
+                    "on_demand_dims 是「按需触发」能力的缓存覆盖面（分母同为文档总数）。"
+                    "两类必须分开看：前者是语料级覆盖，后者是演示级覆盖。"}
+    _COV_CACHE["ts"] = now
+    _COV_CACHE["data"] = data
+    return data
+
+
+def handle_enrich_coverage(req):
+    """GET /api/enrich/coverage —— 富化覆盖率的可核验口径（含分母）。"""
+    try:
+        return req.json(_enrich_coverage(req.engine))
+    except Exception as e:  # noqa: BLE001
+        return req.json({"ok": False, "error": str(e)[:200]}, 500)
+
+
 def handle_enrich_dimensions(req):
     """GET /api/enrich/dimensions —— 富化维度清单 + 当前真实计数。
 
@@ -1809,6 +1909,7 @@ def register(ctx):
     ctx.route("GET", "/api/assets", handle_assets)
     # 富化维度清单（维度数 / 关联层 / 每个维度的当前真实计数）——验收覆盖率用
     ctx.route("GET", "/api/enrich/dimensions", handle_enrich_dimensions)
+    ctx.route("GET", "/api/enrich/coverage", handle_enrich_coverage)
     # P0-2：优先级四元组 + EPSS 缓存刷新
     ctx.route("GET", "/api/enrich/priority", handle_enrich_priority)
     ctx.route("POST", "/api/enrich/epss/refresh", handle_epss_refresh)

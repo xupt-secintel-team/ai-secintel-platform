@@ -1567,7 +1567,7 @@ const ACMDB = (() => {
             <summary>库在服务器上？直接填路径（不上传）</summary>
             <div class="as-form" style="margin-top:6px">
               <input id="cmDbPath" class="as-in" type="text" spellcheck="false"
-                     placeholder="SQLite 数据库文件路径，如 E:\cmdb\sqlite\cmdb.db">
+                     placeholder="SQLite 数据库文件路径，如 data/cmdb.db">
             </div>
             <div class="meta-note" style="margin-top:6px">已上传的文件优先于这里填的路径；两者都为空时才报错。填了就直接读服务器本地文件，不经过浏览器。</div>
           </details>

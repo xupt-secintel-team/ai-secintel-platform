@@ -254,15 +254,18 @@ def http_get(url, headers=None, data=None, tries=3, timeout=None):
     last = None
     to = timeout or TIMEOUT
     proxy, verify = "", True
+    use_proxy = True
     try:
         net = _net()
         proxy = net.detect_proxy()
+        use_proxy = bool(proxy)
     except Exception:  # noqa: BLE001
         net = None
+        use_proxy = False
     for i in range(tries):
         try:
             req = urllib.request.Request(url, data=data, headers=h)
-            if net is not None and (proxy or not verify):
+            if net is not None and use_proxy and (proxy or not verify):
                 with net.opener(proxy, verify).open(req, timeout=to) as r:
                     return r.read()
             with urllib.request.urlopen(req, timeout=to) as r:
@@ -276,7 +279,13 @@ def http_get(url, headers=None, data=None, tries=3, timeout=None):
         except Exception as e:  # noqa: BLE001
             last = e
             if net is not None and net.ssl_fallback(e) and verify:
-                verify = False          # MITM 代理：下一次重试跳过证书校验
+                verify = False          # MITM 代理：下一次重试跳过证书校验（仍走代理）
+                continue
+            if use_proxy:
+                # ★ 代理连接级失败（超时/EOF/重置）→ 下一轮退回直连再试（2026-10-18）。
+                #   代理可能临时挂掉/端口漂移：配了死代理就"全体失败"比直连更糟。
+                #   直连虽慢但至少是最后一道兜底。
+                use_proxy = False
                 continue
             time.sleep(3 * (i + 1))
     raise RuntimeError(f"GET failed: {url} :: {last}")

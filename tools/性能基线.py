@@ -3,8 +3,8 @@
 性能基线.py —— 一次性性能体检脚本（只读，不改数据）
 
 用法：
-    D:/python/python.exe tools/性能基线.py            # 全部接口
-    D:/python/python.exe tools/性能基线.py search     # 只跑检索类
+    python tools/性能基线.py            # 全部接口
+    python tools/性能基线.py search     # 只跑检索类
 
 输出：每个接口的 端到端耗时（含序列化+传输）中位数/最小值，
 以及接口自报的服务端计算耗时（elapsed_ms）—— 两者之差就是序列化 + 传输开销。

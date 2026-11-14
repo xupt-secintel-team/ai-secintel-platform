@@ -37,3 +37,16 @@ venv/
 # 打包产物：tools/build_installer.py 输出到 dist/
 dist/
 # 环境画像缓存：core/envprofile.py 落 data/env_profile.json（已随 data/ 排除）
+
+# 本地工具/临时目录
+.workbuddy/
+.slidep/
+.claude/
+# 第三方依赖包，用户自行pip安装，不入库
+_vendor_pkgs/
+# 备份/临时补丁目录
+_patch/
+.bat_bak/
+# 临时文件
+*.tmp
+*.bak

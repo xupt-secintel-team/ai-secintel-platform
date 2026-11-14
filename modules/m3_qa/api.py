@@ -792,6 +792,28 @@ def handle_agent_trace(req):
         return req.json({"error": f"trace 不可用: {str(e)[:120]}", "traces": []}, 500)
 
 
+def handle_cache_clear(req):
+    """POST /api/qa/cache/clear —— 清空问答结果缓存（改了链路/演示前刷新用）。"""
+    try:
+        from qa import clear_cache, cache_stats
+        before = cache_stats()
+        clear_cache()
+        return req.json({"ok": True, "cleared": before.get("size"), "after": cache_stats()})
+    except Exception as e:  # noqa: BLE001
+        return req.json({"ok": False, "error": str(e)[:200]}, 500)
+
+
+def handle_cache_stats(req):
+    """GET /api/qa/cache —— 缓存规模与 TTL（答辩可展示"同题秒回"的机制）。"""
+    try:
+        from qa import cache_stats, CACHE_VERSION
+        d = cache_stats()
+        d["cache_version"] = CACHE_VERSION
+        return req.json(d)
+    except Exception as e:  # noqa: BLE001
+        return req.json({"ok": False, "error": str(e)[:200]}, 500)
+
+
 def register(ctx):
     ctx.route("GET", "/api/chat", handle_chat_get)
     ctx.route("POST", "/api/chat", handle_chat_post)
@@ -802,6 +824,8 @@ def register(ctx):
     ctx.route("GET", "/api/qa/build_vector", handle_build_vector)
     ctx.route("POST", "/api/qa/build_vector", handle_build_vector)
     ctx.route("GET", "/api/qa/vector_probe", handle_vector_probe)
+    ctx.route("GET", "/api/qa/cache", handle_cache_stats)
+    ctx.route("POST", "/api/qa/cache/clear", handle_cache_clear)
     ctx.route("GET", "/api/hybrid_search", handle_hybrid_search)
     # 本地免费翻译（英文情报 → 中文）：不花 token、正文不外发、离线可用
     ctx.route("GET", "/api/qa/translate", handle_translate)
@@ -851,9 +875,55 @@ def _auto_sync_worker(hours: float, engine):
         _t.sleep(max(1.0, hours) * 3600)
 
 
+
+
+# ----------------------------------------------------------------------
+# 启动预热（2026-10-26）：向量库 214MB + 模型首次加载实测 6~10s，
+# 冷启动后的第一句问答会被它拖到 10s+（实测 17.7s / 18.9s）。
+# 启动后立刻在后台把向量库与两条检索引擎路径焐热，让"第一句"就是稳态耗时。
+# ----------------------------------------------------------------------
+PREWARM = {"done": False, "ms": None, "vector": None, "error": ""}
+
+
+def _prewarm_worker(core):
+    import urllib.parse
+    import urllib.request
+    t0 = time.time()
+    base = "http://127.0.0.1:%s" % (getattr(core, "port", 8848) or 8848)
+    # 等服务真正可连（start() 在 bind 之后调用，但 accept 线程可能还没起）
+    for _ in range(90):
+        try:
+            urllib.request.urlopen(base + "/api/health", timeout=2).read()
+            break
+        except Exception:  # noqa: BLE001
+            time.sleep(0.5)
+    try:
+        from qa.vector_store import vector_store
+        PREWARM["vector"] = vector_store.count()
+        vector_store.search("预热：vllm 远程代码执行", 3)
+    except Exception as e:  # noqa: BLE001
+        PREWARM["error"] = "vector: %s" % str(e)[:160]
+    for q in ("ollama", "vllm 高危漏洞", "prompt injection"):
+        try:
+            urllib.request.urlopen(
+                base + "/api/search?" + urllib.parse.urlencode({"q": q, "size": 3}),
+                timeout=90).read()
+        except Exception:  # noqa: BLE001
+            pass
+    PREWARM["done"] = True
+    PREWARM["ms"] = int((time.time() - t0) * 1000)
+    print("[m3_qa] 预热完成：向量库 %s 条，耗时 %d ms%s"
+          % (PREWARM["vector"], PREWARM["ms"],
+             ("（向量预热失败：%s）" % PREWARM["error"]) if PREWARM["error"] else ""),
+          flush=True)
+
+
 def start(core):
     """模块启动钩子：注册自动补建线程（关掉只需把周期设为 0）。"""
     global AUTO_SYNC_THREAD
+    # 预热与「自动补建」开关无关：即使关掉补建，第一句问答也不该卡 10s
+    threading.Thread(target=_prewarm_worker, args=(core,), daemon=True,
+                     name="qa-prewarm").start()
     cfg = (getattr(core, "config", None) or {}) or {}
     hours = float(cfg.get("vector_auto_sync_hours") or 6)
     if hours <= 0:

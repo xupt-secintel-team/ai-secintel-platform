@@ -44,22 +44,33 @@
      RU —— 实时增量同步（情报监测模块 UI）
      POST /api/refresh 触发 → 轮询 /api/refresh 进度 → 完成后热刷新
      ============================================================ */
-  const STAGE_CN = { init: '启动', kev: 'KEV 在野目录', nvd: 'NVD 增量', papers: 'arXiv 论文',
-    github: 'GitHub', csdn: 'CSDN 文章', enrich: '富化', save: '落盘', done: '完成' };
+  const STAGE_CN = { init: '启动', live: '博客/社区源', kev: 'KEV 在野目录', nvd: 'NVD 增量',
+    papers: 'arXiv 论文', github: 'GitHub', csdn: 'CSDN 文章', enrich: '富化', save: '落盘', done: '完成' };
   const RU = {
     timer: null, watch: null, sig: '',
     async status() { return (await fetch('/api/refresh')).json(); },
     render(st) {
       if (!st) return;
-      const btn = $('refbtn'), stat = $('refstat');
+      const btn = $('refbtn'), stat = $('refstat'), fs = $('forcesync');
       if (!btn) return;
       const L = window.__AISEC_LOAD;      // v10：外壳提供的加载态组件（任务条）
       btn.classList.toggle('run', !!st.running);
       btn.disabled = !!st.running;
+      if (fs) { fs.classList.toggle('run', !!st.running); fs.disabled = !!st.running; }
+      /* 按钮锁定的悬停提示：同步进行中说明"为什么锁、锁到什么时候"；
+         空闲时恢复成各自的功能说明。disabled 按钮仍会触发 hover，
+         title 提示在锁住时也能看到。 */
+      btn.title = '启动一次深度增量同步（全关键词 NVD / arXiv / GitHub / CSDN）';
+      if (fs) fs.title = '强制同步所有数据源（中英文全量：快车道博客/社区 + NVD/KEV/arXiv/GitHub/CSDN）';
       if (st.running) {
         const sc = STAGE_CN[st.stage] || st.stage || '同步';
-        stat.innerHTML = `<span class="rspin"></span>${esc(sc)} ${Math.round(st.pct || 0)}%`;
+        const pct = Math.round(st.pct || 0);
+        const lockWhy = `同步进行中（${sc} ${pct}%）—— ${st.detail || '后台正在拉取数据'}。`
+          + '为避免重复同步互相打架，同步期间按钮暂时锁定，本轮跑完自动恢复（顶栏可见进度）';
+        stat.innerHTML = `<span class="rspin"></span>${esc(sc)} ${pct}%`;
         stat.title = st.detail || '';
+        btn.title = lockWhy;
+        if (fs) fs.title = lockWhy;
         /* 同步进度是可量化的（后端给 pct + 阶段）→ 顶栏任务条走确定进度 */
         if (L) { L.Taskbar.show(); L.Taskbar.set(st.pct || 0, 100); }
         this.poll();
@@ -88,23 +99,43 @@
         }
       }, 1600);
     },
-    async trigger() {
-      if ($('refbtn').disabled) return;
+    async trigger(force) {
+      if ($('refbtn').disabled || (force && $('forcesync') && $('forcesync').disabled)) return;
+      const url = force ? '/api/force_sync' : '/api/refresh';
       try {
-        const r = await (await fetch('/api/refresh', { method: 'POST' })).json();
+        const resp = await fetch(url, { method: 'POST' });
+        if (resp.status === 409) {          // 已有同步在跑（启动补抓 / 定时 / 手动）→ 转入进度轮询
+          /* 409 响应体带当前进度状态：把"现在在同步什么、到哪一步了"一并告诉用户 */
+          const s = await resp.json().catch(() => null);
+          const cur = s && s.status || {};
+          const sc = STAGE_CN[cur.stage] || cur.stage || '';
+          toast(`已有同步在跑${sc ? `（${sc} ${Math.round(cur.pct || 0)}%：${cur.detail || '请稍候'}）` : '，请稍候'}——顶栏可见进度`, 5000);
+          this.poll();
+          return;
+        }
+        if (!resp.ok) {
+          /* 404 = 前端比后端新（force_sync 是新加的路由，旧进程里不存在）→ 引导重启服务 */
+          toast(force ? '全源同步接口不可用（HTTP ' + resp.status + '）—— 这是新加的后端接口，请重启服务后重试'
+                      : ('增量同步启动失败（HTTP ' + resp.status + '）'), 6000);
+          return;
+        }
+        const r = await resp.json();
         if (r.started) {
-          toast('已启动实时增量同步（8 源）…');
-          this.render(r.status || { running: true, stage: 'init', pct: 0 });
+          toast(force ? '已启动全源强制同步（中英全部数据源）…' : '已启动实时增量同步（8 源）…');
+          this.render(r.status || { running: true, stage: 'live', pct: 0 });
         } else if (r.running) {
           toast('同步进行中，请稍候');
           this.poll();
+        } else {
+          toast('同步接口响应异常（' + (r.error || '未知错误') + '）—— 请重启服务后重试', 6000);
         }
-      } catch (e) { toast('启动失败：' + e.message); }
+      } catch (e) { toast('启动失败：' + e.message, 5000); }
     },
     done(st) {
       if (st.error) { toast('同步失败：' + st.error, 5000); return; }
       const s = st.summary || {};
       const parts = [];
+      if (s.live_added) parts.push(`博客/社区 +${s.live_added}`);
       if (s.nvd_new) parts.push(`新漏洞 +${s.nvd_new}`);
       if (s.kev_new) parts.push(`在野利用 +${s.kev_new}`);
       if (s.papers_new) parts.push(`论文 +${s.papers_new}`);
@@ -467,8 +498,47 @@ AISEC.register({
   init() {
     const btn = document.getElementById('refbtn');
     if (btn) btn.onclick = () => RU.trigger();      // 顶栏「深度同步」
+    const fs = document.getElementById('forcesync');
+    if (fs) fs.onclick = () => RU.trigger(true);    // 检索区「全源同步」
     RU.init();
     LV.init();                                       // 30s 实时监测指示灯
+    this.initProxy();                                // 出网代理设置（检索区「代理」按钮）
+  },
+
+  /* 出网代理：读当前值 / 展开面板 / 保存（POST /api/config/proxy，实时生效） */
+  initProxy() {
+    const pset = document.getElementById('proxyset');
+    const panel = document.getElementById('proxypanel');
+    if (!pset || !panel) return;
+    const input = document.getElementById('proxyin');
+    const save = document.getElementById('proxysave');
+    const hint = document.getElementById('proxyhint');
+    const setHint = (t, ok) => { hint.textContent = t || ''; hint.style.color = ok ? 'var(--accent-2)' : 'var(--txt-4)'; };
+    pset.onclick = async () => {
+      const show = panel.style.display === 'none';
+      panel.style.display = show ? 'flex' : 'none';
+      if (!show) return;
+      try {
+        const r = await (await fetch('/api/config/proxy')).json();
+        input.value = r.proxy || '';
+        setHint(r.proxy ? `当前：${r.proxy}` : '未设置（将自动探测）', true);
+      } catch (e) { setHint('读取失败', false); }
+    };
+    save.onclick = async () => {
+      const val = input.value.trim();
+      try {
+        const r = await (await fetch('/api/config/proxy', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proxy: val })
+        })).json();
+        if (r.ok) {
+          setHint(val ? `已保存并生效：${r.proxy}` : '已清除，回到自动探测', true);
+          toast(val ? '代理已生效：' + r.proxy : '已清除代理，回到自动探测');
+        } else {
+          setHint('保存失败：' + (r.error || '未知'), false);
+        }
+      } catch (e) { setHint('保存失败：' + e.message, false); }
+    };
   },
 });
 })();

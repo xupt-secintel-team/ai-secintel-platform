@@ -99,8 +99,12 @@ def save_state(st):
     """原子写：进程被强杀时不会留下半截 JSON（window_hours / NVD 轮转游标会丢）。"""
     try:
         tmp = STATE + ".tmp"
+        # 紧凑写（与 corpus 一致）：history[*].summary.new_docs 是完整文档对象，
+        # indent=1 会让 15MB+ 的状态文件平白多出 30%~40% 的空白，拖慢每个
+        # json.load 读者（load_state / _read_intake / _peek_last_sync / qa coverage）。
+        # 状态文件由机器消费，不需要人类可读。
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(st, f, ensure_ascii=False, indent=1)
+            json.dump(st, f, ensure_ascii=False, separators=(",", ":"))
         os.replace(tmp, STATE)
     except Exception as _sw_e:  # noqa: BLE001
         _swallow("modules/m1_monitor/backend/monitor.py:97", _sw_e)
@@ -109,21 +113,81 @@ def save_state(st):
 # --------------------------------------------------------------------------
 # 各源增量
 # --------------------------------------------------------------------------
-def fetch_nvd_window(keyword, start_iso, end_iso, limit=500, tries=5, timeout=None):
+def fetch_nvd_window(keyword, start_iso, end_iso, limit=500, tries=5, timeout=None,
+                     start_index=0):
     """NVD 增量：keyword + lastMod 时间窗（新披露或有更新的 CVE）。
-    keyword 为空则表示不限关键词（快车道轮询整窗，再本地做 AI 过滤）。
+    keyword 为空则表示不限关键词（整窗拉取，再本地做关键词过滤）。
 
     tries / timeout 可按调用场景收紧：全量同步用默认的 5 次重试 + 长超时（退避
     8/16/24/32/40s，容忍 NVD 匿名限速）；30s 节拍的实时快车道则传 tries=1、
-    较短超时——被限速时本轮直接跳过，下一轮再试，绝不让单个源拖垮整轮节拍。"""
+    较短超时——被限速时本轮直接跳过，下一轮再试，绝不让单个源拖垮整轮节拍。
+
+    start_index：NVD 2.0 分页游标（resultsPerPage 上限 2000），整窗拉取时用。"""
     kw = f"&keywordSearch={urllib.parse.quote(keyword)}" if keyword else ""
     url = (f"https://services.nvd.nist.gov/rest/json/cves/2.0"
            f"?lastModStartDate={urllib.parse.quote(start_iso, safe='')}"
            f"&lastModEndDate={urllib.parse.quote(end_iso, safe='')}"
            f"{kw}"
-           f"&resultsPerPage={limit}&noRejected=")
+           f"&resultsPerPage={limit}&startIndex={int(start_index)}&noRejected=")
     # 增量窗口突发查询多，NVD 匿名限速严格 → 默认更多重试次数（退避 8/16/24/32/40s）
     return json.loads(F.http_get(url, tries=tries, timeout=timeout).decode("utf-8"))
+
+
+def _fetch_nvd_window_all(start_iso, end_iso, tries=3, timeout=20):
+    """整窗拉取时间窗内**全部** CVE（无 keyword），返回 {cid: cve} 映射。
+
+    为什么这样改（2026-10-18）：原来全量同步把 107 个关键词逐个发给 NVD，
+    每个还受匿名限速 5req/30s（NVD_SLEEP=6.5s）——107 × 6.5s ≈ 12 分钟起步，
+    无代理时每个关键词 45s 超时 × 5 次重试就是小时级。改为「整窗 1~2 次请求
+    拉回全部 + 本地关键词过滤」后，无论有没有代理都秒级完成。
+    分页上限 10 页（2 万条）防御性封顶，正常 5~7 天窗口远到不了。"""
+    out = {}
+    idx = 0
+    for _ in range(10):
+        d = fetch_nvd_window("", start_iso, end_iso, limit=2000,
+                             tries=tries, timeout=timeout, start_index=idx)
+        vs = d.get("vulnerabilities", [])
+        for v in vs:
+            c = v.get("cve", {})
+            cid = (c.get("id") or "").upper()
+            if cid:
+                out[cid] = c
+        total = int(d.get("totalResults") or 0)
+        idx += len(vs)
+        if idx >= total or not vs:
+            break
+    return out
+
+
+def _nvd_haystack(c):
+    """CVE 的本地可检索文本（英文描述 + 弱点描述 + 受影响 CPE 串），供关键词过滤。"""
+    parts = []
+    for d in c.get("descriptions", []):
+        if isinstance(d, dict) and d.get("lang") in (None, "", "en"):
+            parts.append(d.get("value") or "")
+    for w in c.get("weaknesses", []):
+        for wd in (w or {}).get("description", []):
+            if isinstance(wd, dict):
+                parts.append(wd.get("value") or "")
+    for conf in c.get("configurations", []):
+        for node in (conf or {}).get("nodes", []):
+            for cpe in (node or {}).get("cpeMatch", []):
+                parts.append((cpe or {}).get("criteria") or "")
+    return " ".join(parts).lower()
+
+
+def _nvd_matches(c, keywords):
+    """本地关键词过滤：与 NVD keywordSearch 近似（大小写不敏感子串匹配）。
+    无正文可匹配时「宁收勿漏」返回 True。keywords 需已是小写（见 _NVD_KW_LOWER）。"""
+    hay = _nvd_haystack(c)
+    if not hay:
+        return True
+    return any(k in hay for k in keywords)
+
+
+# 预小写一次：整窗拉回后要逐条 CVE × 107 关键词做子串匹配，
+# 每次现算 list(F.NVD_QUERIES) + k.lower() 会白做几十万次小写，无谓消耗。
+_NVD_KW_LOWER = [k.lower() for k in F.NVD_QUERIES]
 
 
 def gh_quota():
@@ -308,6 +372,35 @@ def _nvd_round_robin(n):
         return F.NVD_QUERIES[:n]
 
 
+def _mark_sources_ok(summary):
+    """深度同步成功后回写源健康账本（2026-10-26）。
+
+    快车道只覆盖 RSS/社区，NVD/KEV/arXiv 靠本函数所在的 6h 深同步。
+    不回写的话，看板会把它们显示成"熔断中"，与真实产出矛盾。
+    只标记**本轮确实成功**的源：被 skipped 记名的（限速/网络失败）不标记。
+    """
+    try:
+        import source_health as SH
+    except Exception:  # noqa: BLE001
+        return
+    skipped = summary.get("skipped") or []
+    names = []
+    if not any(str(s).startswith("NVD[") or str(s).startswith("NVD[整窗]") for s in skipped):
+        names.append("nvd")
+    if not any(str(s).startswith("KEV") for s in skipped):
+        names.append("kev")
+    arx_skipped = [str(s) for s in skipped if str(s).startswith("arXiv")]
+    if not arx_skipped:
+        names.append("arxiv")
+    if not names:
+        return
+    new_n = len(summary.get("new_docs") or [])
+    try:
+        SH.mark_success(names, items=new_n,
+                        note="6h 深度同步（monitor.refresh）")
+    except Exception as e:  # noqa: BLE001
+        print("[monitor] 源健康回写失败（不影响同步）: %s" % e)
+
 def refresh(progress=None, window_hours=None, skip_github=False, light=False):
     """增量刷新。progress(stage, detail, pct) 用于 UI 进度回报。
 
@@ -373,25 +466,36 @@ def refresh(progress=None, window_hours=None, skip_github=False, light=False):
 
     # ---------------- 2. NVD 增量（时间窗） ----------------
     cand = {}
-    # 轻量轮只查 1 个关键词（轮转）；全量轮走全部关键词 + 限速 sleep
-    keys = _nvd_round_robin(1) if light else list(F.NVD_QUERIES)
-    nq = len(keys)
-    for i, kw in enumerate(keys, 1):
-        cb("nvd", f"NVD 增量检索 [{i}/{nq}] {kw}", 5 + 45.0 * i / nq)
+    if light:
+        # 轻量轮：单关键词轮转（5 分钟节拍内只查 1 个，下一轮换下一个）
+        keys = _nvd_round_robin(1)
+        nq = len(keys)
+        for i, kw in enumerate(keys, 1):
+            cb("nvd", f"NVD 增量检索 [{i}/{nq}] {kw}", 5 + 45.0 * i / max(1, nq))
+            try:
+                d = fetch_nvd_window(kw, start_iso, end_iso, tries=2, timeout=12)
+                for v in d.get("vulnerabilities", []):
+                    c = v.get("cve", {})
+                    cid = (c.get("id") or "").upper()
+                    if cid and cid not in cand:
+                        cand[cid] = c
+            except Exception as e:  # noqa: BLE001
+                summary["skipped"].append(f"NVD[{kw}]: " + str(e)[:60])
+    else:
+        # 全量轮：整窗一次拉回（分页）+ 本地关键词过滤（2026-10-18 重构）。
+        # 原来 107 个关键词逐个发请求 × 匿名限速 6.5s = 12 分钟起步、无代理时
+        # 小时级；整窗 1~2 次请求秒级完成，无论有没有代理都快。过滤用
+        # _nvd_matches 近似 NVD keywordSearch（子串匹配），宁收勿漏。
+        cb("nvd", f"NVD 整窗拉取（近 {window_hours}h 全部 CVE，一次拉回后本地过滤）", 5)
         try:
-            # 轻量轮收紧：默认 5 次重试 × 45s 最坏 225s，会把 5 分钟节拍彻底打乱；
-            # 宁可本轮放弃（下一轮轮转会补上），也不要挂在那里。
-            d = (fetch_nvd_window(kw, start_iso, end_iso, tries=2, timeout=12) if light
-                 else fetch_nvd_window(kw, start_iso, end_iso))
-            for v in d.get("vulnerabilities", []):
-                c = v.get("cve", {})
-                cid = (c.get("id") or "").upper()
-                if cid and cid not in cand:
+            _window = _fetch_nvd_window_all(start_iso, end_iso)
+            for cid, c in _window.items():
+                if _nvd_matches(c, _NVD_KW_LOWER):
                     cand[cid] = c
+            cb("nvd", f"NVD 整窗完成：{len(_window)} 条 → 命中 {len(cand)} 条", 50)
         except Exception as e:  # noqa: BLE001
-            summary["skipped"].append(f"NVD[{kw}]: " + str(e)[:60])
-        if not light and i < nq:
-            time.sleep(F.NVD_SLEEP)
+            summary["skipped"].append("NVD[整窗]: " + str(e)[:80])
+            cb("nvd", f"NVD 整窗拉取失败（{str(e)[:40]}），本轮跳过", 50)
 
     # 时间窗内的 CVE 分两类：全新 → 走富化流水线；已有 → 刷新核心字段
     for cid, c in cand.items():
@@ -637,6 +741,7 @@ def refresh(progress=None, window_hours=None, skip_github=False, light=False):
     _changed = (bool(summary["new_ids"]) or bool(summary["updated_ids"])
                 or bool(summary["new_docs"]) or summary["kev_new"]
                 or summary["articles_updated"] or summary["repos_updated"])
+    _mark_sources_ok(summary)
     if light and not _changed:
         summary["saved"] = False
         st["last_sync"] = now_local_iso()

@@ -1,0 +1,1782 @@
+{
+  "tag": "base1026",
+  "base": "http://127.0.0.1:8848",
+  "at": "2026-10-26 22:41:11",
+  "meta": {
+    "tag": "base1026",
+    "documents": 117048,
+    "terms": 683239,
+    "records": 78989,
+    "papers": 470,
+    "archive_dir": "E:\\aisec-D_3\\aisec-D_2.0(1)\\智能体驱动的AI安全知识情报系统设计与实现+西安邮电大学+张洺豪\\aisec-D_2.0\\data\\ai_sec_raw",
+    "archive_gb": 0.0
+  },
+  "summary": {
+    "n": 40,
+    "recall": {
+      "@1": 85.0,
+      "@3": 90.0,
+      "@5": 92.5,
+      "@10": 92.5
+    },
+    "mrr": 0.881,
+    "lat": {
+      "p50": 1267.2,
+      "p95": 1813.0,
+      "max": 2151.2
+    }
+  },
+  "by_cat": {
+    "AI组件": {
+      "n": 12,
+      "recall": {
+        "@1": 100.0,
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "mrr": 1.0,
+      "lat": {
+        "p50": 1416.8,
+        "p95": 1810.7,
+        "max": 1977.0
+      }
+    },
+    "中文源": {
+      "n": 8,
+      "recall": {
+        "@1": 100.0,
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "mrr": 1.0,
+      "lat": {
+        "p50": 1010.5,
+        "p95": 1813.0,
+        "max": 1813.0
+      }
+    },
+    "在野利用": {
+      "n": 6,
+      "recall": {
+        "@1": 50.0,
+        "@3": 66.7,
+        "@5": 66.7,
+        "@10": 66.7
+      },
+      "mrr": 0.583,
+      "lat": {
+        "p50": 1674.4,
+        "p95": 2151.2,
+        "max": 2151.2
+      }
+    },
+    "约束式": {
+      "n": 6,
+      "recall": {
+        "@1": 100.0,
+        "@3": 100.0,
+        "@5": 100.0,
+        "@10": 100.0
+      },
+      "mrr": 1.0,
+      "lat": {
+        "p50": 205.8,
+        "p95": 217.0,
+        "max": 217.0
+      }
+    },
+    "语义改写": {
+      "n": 8,
+      "recall": {
+        "@1": 62.5,
+        "@3": 75.0,
+        "@5": 87.5,
+        "@10": 87.5
+      },
+      "mrr": 0.719,
+      "lat": {
+        "p50": 731.5,
+        "p95": 1651.8,
+        "max": 1651.8
+      }
+    }
+  },
+  "rows": [
+    {
+      "q": "vLLM 推理框架有哪些高危漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 97593,
+      "server_ms": 1955.4,
+      "wall_ms": 1977.0,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Gradio 的高危漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 88989,
+      "server_ms": 1287.7,
+      "wall_ms": 1307.5,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Langflow 平台的漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 88240,
+      "server_ms": 1197.4,
+      "wall_ms": 1222.3,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "ComfyUI 安全漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 88945,
+      "server_ms": 1216.1,
+      "wall_ms": 1250.5,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Jupyter 相关的高危漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 89342,
+      "server_ms": 1453.2,
+      "wall_ms": 1481.3,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Ray 分布式计算框架的漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 87045,
+      "server_ms": 1417.7,
+      "wall_ms": 1448.9,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Milvus 向量数据库的严重漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 91029,
+      "server_ms": 1795.7,
+      "wall_ms": 1810.7,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "LangChain 框架漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 91572,
+      "server_ms": 1469.1,
+      "wall_ms": 1509.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Hugging Face Transformers 的漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 87677,
+      "server_ms": 1328.0,
+      "wall_ms": 1350.9,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "PyTorch 的漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 85994,
+      "server_ms": 1315.2,
+      "wall_ms": 1335.0,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Open WebUI 的高危漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 83225,
+      "server_ms": 1385.9,
+      "wall_ms": 1413.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "NVIDIA Triton 推理服务器的漏洞",
+      "cat": "AI组件",
+      "rank": 1,
+      "hits": 10,
+      "total": 84341,
+      "server_ms": 1391.7,
+      "wall_ms": 1416.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "模型会不会被指令绕过、怎么防",
+      "cat": "语义改写",
+      "rank": 1,
+      "hits": 10,
+      "total": 24654,
+      "server_ms": 417.4,
+      "wall_ms": 441.1,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "推理框架被人从外部执行命令",
+      "cat": "语义改写",
+      "rank": 1,
+      "hits": 10,
+      "total": 39284,
+      "server_ms": 784.2,
+      "wall_ms": 802.4,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "训练框架反序列化导致的危险",
+      "cat": "语义改写",
+      "rank": 2,
+      "hits": 10,
+      "total": 90591,
+      "server_ms": 1635.9,
+      "wall_ms": 1651.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "AI 硬件/驱动层面的漏洞",
+      "cat": "语义改写",
+      "rank": 0,
+      "hits": 10,
+      "total": 96136,
+      "server_ms": 1355.2,
+      "wall_ms": 1379.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "容器里跑出来的逃逸技术",
+      "cat": "语义改写",
+      "rank": 1,
+      "hits": 10,
+      "total": 21884,
+      "server_ms": 401.6,
+      "wall_ms": 407.7,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "模型文件被人动了手脚怎么发现",
+      "cat": "语义改写",
+      "rank": 4,
+      "hits": 10,
+      "total": 41185,
+      "server_ms": 716.8,
+      "wall_ms": 731.5,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "智能体被诱导调用了危险工具",
+      "cat": "语义改写",
+      "rank": 1,
+      "hits": 10,
+      "total": 28573,
+      "server_ms": 422.3,
+      "wall_ms": 436.4,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "大模型输出被投毒污染",
+      "cat": "语义改写",
+      "rank": 1,
+      "hits": 10,
+      "total": 29485,
+      "server_ms": 585.0,
+      "wall_ms": 609.0,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "提示词注入的攻击原理与防御",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 54397,
+      "server_ms": 995.0,
+      "wall_ms": 1010.5,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "内网渗透与横向移动实战",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 14956,
+      "server_ms": 293.8,
+      "wall_ms": 313.9,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "AI 供应链投毒事件复盘",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 43345,
+      "server_ms": 814.2,
+      "wall_ms": 824.7,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "Kubernetes 未授权访问漏洞",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 94008,
+      "server_ms": 1795.1,
+      "wall_ms": 1813.0,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "如何用大模型做漏洞分析",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 92694,
+      "server_ms": 1658.5,
+      "wall_ms": 1691.5,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "数据安全法的合规要求",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 11689,
+      "server_ms": 113.0,
+      "wall_ms": 120.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "常见的 webshell 免杀手法",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 58501,
+      "server_ms": 1232.2,
+      "wall_ms": 1244.4,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "CTF 中常见的密码学攻击",
+      "cat": "中文源",
+      "rank": 1,
+      "hits": 10,
+      "total": 8292,
+      "server_ms": 125.9,
+      "wall_ms": 129.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "最近被在野利用的高危漏洞",
+      "cat": "在野利用",
+      "rank": 1,
+      "hits": 10,
+      "total": 88145,
+      "server_ms": 2130.0,
+      "wall_ms": 2151.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "已被利用的远程代码执行漏洞",
+      "cat": "在野利用",
+      "rank": 1,
+      "hits": 10,
+      "total": 88743,
+      "server_ms": 1704.5,
+      "wall_ms": 1719.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "CVSS 10 分的漏洞",
+      "cat": "在野利用",
+      "rank": 0,
+      "hits": 10,
+      "total": 81132,
+      "server_ms": 1249.9,
+      "wall_ms": 1269.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "正在被勒索软件利用的漏洞",
+      "cat": "在野利用",
+      "rank": 2,
+      "hits": 10,
+      "total": 87448,
+      "server_ms": 1686.0,
+      "wall_ms": 1704.7,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "影响面很大的网络设备漏洞",
+      "cat": "在野利用",
+      "rank": 0,
+      "hits": 10,
+      "total": 83360,
+      "server_ms": 1256.0,
+      "wall_ms": 1267.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "最近修补的在野利用漏洞",
+      "cat": "在野利用",
+      "rank": 1,
+      "hits": 10,
+      "total": 86375,
+      "server_ms": 1650.8,
+      "wall_ms": 1674.4,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "product:ollama cvss>=9",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 7,
+      "total": 7,
+      "server_ms": 214.6,
+      "wall_ms": 217.0,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "cwe:CWE-78 type:漏洞",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 10,
+      "total": 1158,
+      "server_ms": 193.8,
+      "wall_ms": 215.2,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "kev:yes severity:critical",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 10,
+      "total": 208,
+      "server_ms": 161.6,
+      "wall_ms": 190.7,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "cwe:CWE-502 year:>=2025",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 10,
+      "total": 1332,
+      "server_ms": 202.0,
+      "wall_ms": 205.8,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "product:milvus severity:CRITICAL",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 2,
+      "total": 2,
+      "server_ms": 202.3,
+      "wall_ms": 211.4,
+      "path": "engine",
+      "fusion": null
+    },
+    {
+      "q": "cwe:CWE-22 sort=trust",
+      "cat": "约束式",
+      "rank": 1,
+      "hits": 10,
+      "total": 50,
+      "server_ms": 5.7,
+      "wall_ms": 16.1,
+      "path": "engine",
+      "fusion": null
+    }
+  ],
+  "chat": [],
+  "path": "both",
+  "engine": {
+    "summary": {
+      "n": 40,
+      "recall": {
+        "@1": 85.0,
+        "@3": 90.0,
+        "@5": 92.5,
+        "@10": 92.5
+      },
+      "mrr": 0.881,
+      "lat": {
+        "p50": 1267.2,
+        "p95": 1813.0,
+        "max": 2151.2
+      }
+    },
+    "by_cat": {
+      "AI组件": {
+        "n": 12,
+        "recall": {
+          "@1": 100.0,
+          "@3": 100.0,
+          "@5": 100.0,
+          "@10": 100.0
+        },
+        "mrr": 1.0,
+        "lat": {
+          "p50": 1416.8,
+          "p95": 1810.7,
+          "max": 1977.0
+        }
+      },
+      "中文源": {
+        "n": 8,
+        "recall": {
+          "@1": 100.0,
+          "@3": 100.0,
+          "@5": 100.0,
+          "@10": 100.0
+        },
+        "mrr": 1.0,
+        "lat": {
+          "p50": 1010.5,
+          "p95": 1813.0,
+          "max": 1813.0
+        }
+      },
+      "在野利用": {
+        "n": 6,
+        "recall": {
+          "@1": 50.0,
+          "@3": 66.7,
+          "@5": 66.7,
+          "@10": 66.7
+        },
+        "mrr": 0.583,
+        "lat": {
+          "p50": 1674.4,
+          "p95": 2151.2,
+          "max": 2151.2
+        }
+      },
+      "约束式": {
+        "n": 6,
+        "recall": {
+          "@1": 100.0,
+          "@3": 100.0,
+          "@5": 100.0,
+          "@10": 100.0
+        },
+        "mrr": 1.0,
+        "lat": {
+          "p50": 205.8,
+          "p95": 217.0,
+          "max": 217.0
+        }
+      },
+      "语义改写": {
+        "n": 8,
+        "recall": {
+          "@1": 62.5,
+          "@3": 75.0,
+          "@5": 87.5,
+          "@10": 87.5
+        },
+        "mrr": 0.719,
+        "lat": {
+          "p50": 731.5,
+          "p95": 1651.8,
+          "max": 1651.8
+        }
+      }
+    },
+    "rows": [
+      {
+        "q": "vLLM 推理框架有哪些高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 97593,
+        "server_ms": 1955.4,
+        "wall_ms": 1977.0,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Gradio 的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 88989,
+        "server_ms": 1287.7,
+        "wall_ms": 1307.5,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Langflow 平台的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 88240,
+        "server_ms": 1197.4,
+        "wall_ms": 1222.3,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "ComfyUI 安全漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 88945,
+        "server_ms": 1216.1,
+        "wall_ms": 1250.5,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Jupyter 相关的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 89342,
+        "server_ms": 1453.2,
+        "wall_ms": 1481.3,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Ray 分布式计算框架的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 87045,
+        "server_ms": 1417.7,
+        "wall_ms": 1448.9,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Milvus 向量数据库的严重漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 91029,
+        "server_ms": 1795.7,
+        "wall_ms": 1810.7,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "LangChain 框架漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 91572,
+        "server_ms": 1469.1,
+        "wall_ms": 1509.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Hugging Face Transformers 的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 87677,
+        "server_ms": 1328.0,
+        "wall_ms": 1350.9,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "PyTorch 的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 85994,
+        "server_ms": 1315.2,
+        "wall_ms": 1335.0,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Open WebUI 的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 83225,
+        "server_ms": 1385.9,
+        "wall_ms": 1413.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "NVIDIA Triton 推理服务器的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": 84341,
+        "server_ms": 1391.7,
+        "wall_ms": 1416.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "模型会不会被指令绕过、怎么防",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 10,
+        "total": 24654,
+        "server_ms": 417.4,
+        "wall_ms": 441.1,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "推理框架被人从外部执行命令",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 10,
+        "total": 39284,
+        "server_ms": 784.2,
+        "wall_ms": 802.4,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "训练框架反序列化导致的危险",
+        "cat": "语义改写",
+        "rank": 2,
+        "hits": 10,
+        "total": 90591,
+        "server_ms": 1635.9,
+        "wall_ms": 1651.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "AI 硬件/驱动层面的漏洞",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 10,
+        "total": 96136,
+        "server_ms": 1355.2,
+        "wall_ms": 1379.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "容器里跑出来的逃逸技术",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 10,
+        "total": 21884,
+        "server_ms": 401.6,
+        "wall_ms": 407.7,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "模型文件被人动了手脚怎么发现",
+        "cat": "语义改写",
+        "rank": 4,
+        "hits": 10,
+        "total": 41185,
+        "server_ms": 716.8,
+        "wall_ms": 731.5,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "智能体被诱导调用了危险工具",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 10,
+        "total": 28573,
+        "server_ms": 422.3,
+        "wall_ms": 436.4,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "大模型输出被投毒污染",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 10,
+        "total": 29485,
+        "server_ms": 585.0,
+        "wall_ms": 609.0,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "提示词注入的攻击原理与防御",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 54397,
+        "server_ms": 995.0,
+        "wall_ms": 1010.5,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "内网渗透与横向移动实战",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 14956,
+        "server_ms": 293.8,
+        "wall_ms": 313.9,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "AI 供应链投毒事件复盘",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 43345,
+        "server_ms": 814.2,
+        "wall_ms": 824.7,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "Kubernetes 未授权访问漏洞",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 94008,
+        "server_ms": 1795.1,
+        "wall_ms": 1813.0,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "如何用大模型做漏洞分析",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 92694,
+        "server_ms": 1658.5,
+        "wall_ms": 1691.5,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "数据安全法的合规要求",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 11689,
+        "server_ms": 113.0,
+        "wall_ms": 120.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "常见的 webshell 免杀手法",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 58501,
+        "server_ms": 1232.2,
+        "wall_ms": 1244.4,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "CTF 中常见的密码学攻击",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": 8292,
+        "server_ms": 125.9,
+        "wall_ms": 129.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "最近被在野利用的高危漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": 88145,
+        "server_ms": 2130.0,
+        "wall_ms": 2151.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "已被利用的远程代码执行漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": 88743,
+        "server_ms": 1704.5,
+        "wall_ms": 1719.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "CVSS 10 分的漏洞",
+        "cat": "在野利用",
+        "rank": 0,
+        "hits": 10,
+        "total": 81132,
+        "server_ms": 1249.9,
+        "wall_ms": 1269.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "正在被勒索软件利用的漏洞",
+        "cat": "在野利用",
+        "rank": 2,
+        "hits": 10,
+        "total": 87448,
+        "server_ms": 1686.0,
+        "wall_ms": 1704.7,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "影响面很大的网络设备漏洞",
+        "cat": "在野利用",
+        "rank": 0,
+        "hits": 10,
+        "total": 83360,
+        "server_ms": 1256.0,
+        "wall_ms": 1267.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "最近修补的在野利用漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": 86375,
+        "server_ms": 1650.8,
+        "wall_ms": 1674.4,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "product:ollama cvss>=9",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 7,
+        "total": 7,
+        "server_ms": 214.6,
+        "wall_ms": 217.0,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "cwe:CWE-78 type:漏洞",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": 1158,
+        "server_ms": 193.8,
+        "wall_ms": 215.2,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "kev:yes severity:critical",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": 208,
+        "server_ms": 161.6,
+        "wall_ms": 190.7,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "cwe:CWE-502 year:>=2025",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": 1332,
+        "server_ms": 202.0,
+        "wall_ms": 205.8,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "product:milvus severity:CRITICAL",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 2,
+        "total": 2,
+        "server_ms": 202.3,
+        "wall_ms": 211.4,
+        "path": "engine",
+        "fusion": null
+      },
+      {
+        "q": "cwe:CWE-22 sort=trust",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": 50,
+        "server_ms": 5.7,
+        "wall_ms": 16.1,
+        "path": "engine",
+        "fusion": null
+      }
+    ]
+  },
+  "hybrid": {
+    "summary": {
+      "n": 40,
+      "recall": {
+        "@1": 80.0,
+        "@3": 80.0,
+        "@5": 80.0,
+        "@10": 80.0
+      },
+      "mrr": 0.8,
+      "lat": {
+        "p50": 1462.2,
+        "p95": 2222.0,
+        "max": 2636.5
+      }
+    },
+    "by_cat": {
+      "AI组件": {
+        "n": 12,
+        "recall": {
+          "@1": 100.0,
+          "@3": 100.0,
+          "@5": 100.0,
+          "@10": 100.0
+        },
+        "mrr": 1.0,
+        "lat": {
+          "p50": 1609.7,
+          "p95": 2226.7,
+          "max": 2636.5
+        }
+      },
+      "中文源": {
+        "n": 8,
+        "recall": {
+          "@1": 87.5,
+          "@3": 87.5,
+          "@5": 87.5,
+          "@10": 87.5
+        },
+        "mrr": 0.875,
+        "lat": {
+          "p50": 1211.7,
+          "p95": 1986.0,
+          "max": 1986.0
+        }
+      },
+      "在野利用": {
+        "n": 6,
+        "recall": {
+          "@1": 83.3,
+          "@3": 83.3,
+          "@5": 83.3,
+          "@10": 83.3
+        },
+        "mrr": 0.833,
+        "lat": {
+          "p50": 1847.2,
+          "p95": 2158.4,
+          "max": 2158.4
+        }
+      },
+      "约束式": {
+        "n": 6,
+        "recall": {
+          "@1": 100.0,
+          "@3": 100.0,
+          "@5": 100.0,
+          "@10": 100.0
+        },
+        "mrr": 1.0,
+        "lat": {
+          "p50": 262.5,
+          "p95": 339.1,
+          "max": 339.1
+        }
+      },
+      "语义改写": {
+        "n": 8,
+        "recall": {
+          "@1": 25.0,
+          "@3": 25.0,
+          "@5": 25.0,
+          "@10": 25.0
+        },
+        "mrr": 0.25,
+        "lat": {
+          "p50": 844.8,
+          "p95": 1956.0,
+          "max": 1956.0
+        }
+      }
+    },
+    "rows": [
+      {
+        "q": "vLLM 推理框架有哪些高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 2222.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 8,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "Gradio 的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1880.9,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 49,
+          "vector": 4,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "Langflow 平台的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1586.5,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 15,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "ComfyUI 安全漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1582.9,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 28,
+          "vector": 10,
+          "bm25+vector": 4
+        }
+      },
+      {
+        "q": "Jupyter 相关的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1609.7,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 49,
+          "vector": 14,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "Ray 分布式计算框架的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 2636.5,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 20,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "Milvus 向量数据库的严重漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 2226.7,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 16,
+          "vector": 4,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "LangChain 框架漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1714.6,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 25,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "Hugging Face Transformers 的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1597.1,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 43,
+          "vector": 23,
+          "bm25+vector": 6
+        }
+      },
+      {
+        "q": "PyTorch 的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1462.2,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 49,
+          "vector": 19,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "Open WebUI 的高危漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1533.1,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 47,
+          "vector": 15,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "NVIDIA Triton 推理服务器的漏洞",
+        "cat": "AI组件",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1545.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 1,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "模型会不会被指令绕过、怎么防",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 509.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "推理框架被人从外部执行命令",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 995.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "训练框架反序列化导致的危险",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1956.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "AI 硬件/驱动层面的漏洞",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1411.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "容器里跑出来的逃逸技术",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 1,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 573.7,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "模型文件被人动了手脚怎么发现",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 844.8,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "智能体被诱导调用了危险工具",
+        "cat": "语义改写",
+        "rank": 1,
+        "hits": 3,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 609.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 3,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "大模型输出被投毒污染",
+        "cat": "语义改写",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 753.4,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "提示词注入的攻击原理与防御",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1211.7,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 20,
+          "bm25+vector": 5
+        }
+      },
+      {
+        "q": "内网渗透与横向移动实战",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 1,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 397.5,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "AI 供应链投毒事件复盘",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 9,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1050.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 9
+        }
+      },
+      {
+        "q": "Kubernetes 未授权访问漏洞",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1986.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 48,
+          "vector": 20,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "如何用大模型做漏洞分析",
+        "cat": "中文源",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1771.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "数据安全法的合规要求",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 1,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 313.8,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "常见的 webshell 免杀手法",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1550.5,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 15,
+          "vector": 4,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "CTF 中常见的密码学攻击",
+        "cat": "中文源",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 323.9,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 49,
+          "vector": 7,
+          "bm25+vector": 1
+        }
+      },
+      {
+        "q": "最近被在野利用的高危漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 2158.4,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "已被利用的远程代码执行漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1945.6,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "CVSS 10 分的漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 3,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1437.3,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 3,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "正在被勒索软件利用的漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1847.2,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "影响面很大的网络设备漏洞",
+        "cat": "在野利用",
+        "rank": 0,
+        "hits": 0,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 1441.2,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 0,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "最近修补的在野利用漏洞",
+        "cat": "在野利用",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 2115.4,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "product:ollama cvss>=9",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 7,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 244.9,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 7,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "cwe:CWE-78 type:漏洞",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 339.1,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "kev:yes severity:critical",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 273.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "cwe:CWE-502 year:>=2025",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 288.0,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "product:milvus severity:CRITICAL",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 2,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 262.5,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 2,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      },
+      {
+        "q": "cwe:CWE-22 sort=trust",
+        "cat": "约束式",
+        "rank": 1,
+        "hits": 10,
+        "total": null,
+        "server_ms": null,
+        "wall_ms": 78.1,
+        "path": "hybrid",
+        "fusion": {
+          "bm25": 50,
+          "vector": 0,
+          "bm25+vector": 0
+        }
+      }
+    ]
+  }
+}

@@ -1377,24 +1377,70 @@ def _persist_cn(records, verbose=True):
     return total
 
 
+_FEED_IDS = None
+_FEED_LOCK = threading.Lock()
+
+
+def _feed_ids():
+    """实时流里已存在的 id 集合（首次调用时扫一遍，之后增量维护）。
+
+    2026-10-26 修：append_feed 原本**无条件追加**，同一篇博客在两轮里被
+    不同源标签各推一次就出现重复行（实测 5,486 行里 624 行重复 id）。
+    重复行让"实时流条数"这类页面对不上数，也会让日报重复计数。
+    """
+    global _FEED_IDS
+    if _FEED_IDS is not None:
+        return _FEED_IDS
+    ids = set()
+    try:
+        with open(FEED_FP, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rid = json.loads(line).get("id")
+                except Exception:  # noqa: BLE001
+                    continue
+                if rid:
+                    ids.add(rid)
+    except OSError:
+        pass
+    _FEED_IDS = ids
+    return ids
+
+
 def append_feed(records):
     """把记录追加进实时流 live_feed.jsonl（与快车道同一落盘通道）。
-    服务重启时由 _live_replay 回放这些记录 → 用户投稿的文章重启不丢。"""
+    服务重启时由 _live_replay 回放这些记录 → 用户投稿的文章重启不丢。
+    按 id 去重：已存在的不再写（实测历史重复 624 行，见 _feed_ids 注释）。"""
     records = [r for r in (records or []) if isinstance(r, dict)]
     if not records:
         return 0
     ts = time.strftime("%Y-%m-%dT%H:%M:%S")
     n = 0
-    try:
-        with open(FEED_FP, "a", encoding="utf-8") as f:
-            for r in records:
-                if "fetched_at" not in r:
-                    r = dict(r)
-                    r["fetched_at"] = ts
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-                n += 1
-    except OSError as e:  # noqa: BLE001
-        log("  append_feed 失败（不影响即时收录）:", str(e)[:80])
+    with _FEED_LOCK:
+        seen = _feed_ids()
+        fresh = []
+        for r in records:
+            rid = r.get("id")
+            if rid and rid in seen:
+                continue
+            if rid:
+                seen.add(rid)
+            if "fetched_at" not in r:
+                r = dict(r)
+                r["fetched_at"] = ts
+            fresh.append(r)
+        if not fresh:
+            return 0
+        try:
+            with open(FEED_FP, "a", encoding="utf-8") as f:
+                for r in fresh:
+                    f.write(json.dumps(r, ensure_ascii=False) + "\n")
+                    n += 1
+        except OSError as e:  # noqa: BLE001
+            log("  append_feed 失败（不影响即时收录）:", str(e)[:80])
     return n
 
 

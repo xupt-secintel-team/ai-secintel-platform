@@ -2283,6 +2283,21 @@ kbd{box-shadow:var(--sh-1)}
 }
 .sbrecent .rq:hover{color:var(--txt);border-color:var(--line-3);background:var(--surface-3)}
 
+/* M3c：出网代理设置条（检索区「代理」按钮展开） */
+.proxypanel{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-top:9px;padding:9px 12px;border-radius:var(--rad);
+  border:1px solid var(--line-2);background:var(--surface-2);
+}
+.proxypanel .pp-label{font-size:var(--fs-xs);color:var(--txt-3);white-space:nowrap}
+.proxypanel input{
+  flex:1;min-width:180px;background:var(--surface-1);border:1px solid var(--line);
+  border-radius:8px;padding:6px 10px;color:var(--txt);font-size:var(--fs-xs);
+  font-family:var(--mono);outline:0;
+}
+.proxypanel input:focus{border-color:var(--accent-line)}
+.proxypanel .pp-hint{font-size:var(--fs-micro);color:var(--txt-4)}
+
 /* M4：检查器拖拽调宽 —— 左缘一条 6px 手柄，双击复位 */
 .insp-grip{
   position:absolute;left:-3px;top:0;bottom:0;width:6px;z-index:5;cursor:col-resize;
